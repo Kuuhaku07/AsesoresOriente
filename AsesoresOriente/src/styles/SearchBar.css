@@ -1,0 +1,51 @@
+.search-bar {
+    display: flex;
+    flex-wrap: wrap; /* Allow items to wrap into multiple rows */
+    justify-content: space-between; /* Space items evenly */
+    background-color: #007bff; /* Blue background color */
+    padding: 20px; /* Add padding for better appearance */
+    border-radius: 5px; /* Rounded corners */
+}
+
+.search-bar input,
+.search-bar select {
+    width: 24%; /* Set width to allow smaller size for the select elements */
+
+    padding: 10px; /* Add padding for better appearance */
+    margin: 5px 0; /* Add margin between elements */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 16px; /* Font size */
+}
+
+.search-bar button {
+    width: 100%; /* Full width for the button */
+    padding: 10px; /* Add padding for the button */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    background-color: #024fa1; /* Darker button color */
+    color: white; /* Text color */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-weight: bold; 
+
+}
+
+.search-bar button:hover {
+    background-color: #022c5c; /* Darker button color on hover */
+}
+
+
+.search-bar button {
+    padding: 10px 20px; /* Add padding for the button */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    background-color: #007bff; /* Button color */
+    color: white; /* Text color */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+.search-bar button:hover {
+    background-color: #0056b3; /* Darker button color on hover */
+}

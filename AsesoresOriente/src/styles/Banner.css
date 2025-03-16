@@ -1,0 +1,38 @@
+.banner {
+    position: relative;
+    width: 100%;
+    height: 700px; /* Adjust height as needed */
+    overflow: hidden;
+}
+
+.banner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensure the image covers the area */
+}
+
+.arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.left-arrow {
+    left: 10px; /* Position left arrow */
+}
+
+.right-arrow {
+    right: 10px; /* Position right arrow */
+}
+
+.info-box {
+    position: absolute;
+    bottom: 20px; /* Position the info box */
+    right: 20px; /* Adjust as needed */
+    background-color: rgba(21, 25, 44, 0.671); /* Semi-transparent background */
+    color: white;
+    font-size: 15px;
+    padding: 10px;
+    border-radius: 5px;
+}
