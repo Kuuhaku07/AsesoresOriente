@@ -1,0 +1,36 @@
+:root {
+    /* Colores */
+    --color-primary: #2aaec9;
+    --color-primary-light: rgba(42, 174, 201, 0.3);
+    --color-background: #f0f0f0;
+    --color-text: #333333;
+    --color-text-light: #666666;
+    --color-white: #ffffff;
+    --color-gray-light: rgba(248, 249, 250, 0.8);
+
+    /* Tipografía */
+    --font-family-primary: Arial, sans-serif;
+    --font-size-small: 14px;
+    --font-size-normal: 16px;
+    --font-size-large: 20px;
+    --font-size-xlarge: 24px;
+    --font-weight-normal: 400;
+    --font-weight-bold: 700;
+
+    /* Espaciado */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+
+    /* Bordes */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --border-width: 4px;
+
+    /* Z-index */
+    --z-index-menu: 10;
+    --z-index-modal: 100;
+} 

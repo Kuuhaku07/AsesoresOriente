@@ -1,14 +1,20 @@
 .banner {
     position: relative;
     width: 100%;
-    height: 700px; /* Adjust height as needed */
+    height: 600px;
     overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .banner-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Ensure the image covers the area */
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.banner:hover .banner-image {
+    transform: scale(1.05);
 }
 
 .arrow {
@@ -16,23 +22,62 @@
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
+    background-color: var(--color-white);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: var(--z-index-menu);
+}
+
+.arrow:hover {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    transform: translateY(-50%) scale(1.1);
 }
 
 .left-arrow {
-    left: 10px; /* Position left arrow */
+    left: var(--spacing-lg);
 }
 
 .right-arrow {
-    right: 10px; /* Position right arrow */
+    right: var(--spacing-lg);
 }
 
 .info-box {
     position: absolute;
-    bottom: 20px; /* Position the info box */
-    right: 20px; /* Adjust as needed */
-    background-color: rgba(21, 25, 44, 0.671); /* Semi-transparent background */
-    color: white;
-    font-size: 15px;
-    padding: 10px;
-    border-radius: 5px;
+    bottom: var(--spacing-xl);
+    right: var(--spacing-xl);
+    background-color: rgba(21, 25, 44, 0.85);
+    color: var(--color-white);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius-md);
+    max-width: 400px;
+    backdrop-filter: blur(5px);
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideUp 0.5s ease forwards;
+}
+
+.info-box h2 {
+    font-size: var(--font-size-xlarge);
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-primary);
+}
+
+.info-box p {
+    font-size: var(--font-size-normal);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-md);
+}
+
+@keyframes slideUp {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }

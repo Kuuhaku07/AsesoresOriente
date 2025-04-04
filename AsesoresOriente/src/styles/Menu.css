@@ -3,9 +3,9 @@
     justify-content: space-between;
     align-items: center;
     padding: 0; /* Remove padding to adapt to elements */
-    background-color: rgba(248, 249, 250, 0.8); /* Light background color with transparency */
-    border-bottom: 4px solid #2aaec9; /* Blue line at the bottom */
-    z-index: 10; /* Ensure menu is above other elements */
+    background-color: var(--color-gray-light);
+    border-bottom: var(--border-width) solid var(--color-primary);
+    z-index: var(--z-index-menu);
 
     position: fixed; /* Fix the position of the menu */
     width: 100%; /* Make the menu full width */
@@ -14,28 +14,28 @@
 .logo img {
     width: 100px; /* Set logo size to 100px */
     height: auto; /* Maintain aspect ratio */
-    margin-left: 15px; /* Add left margin to the logo */
+    margin-left: var(--spacing-md); /* Add left margin to the logo */
 
 }
 
 .logo {
-    font-size: 24px;
-    font-weight: bold;
+    font-size: var(--font-size-xlarge);
+    font-weight: var(--font-weight-bold);
 }
 
 .menu-buttons button {
-    margin: 0 10px; /* Add horizontal margin */
-    padding: 10px 15px;
+    margin: 0 var(--spacing-sm); /* Add horizontal margin */
+    padding: var(--spacing-sm) var(--spacing-md);
     border: none;
     background-color: transparent; /* Set button background to transparent */
-    color: black; /* Change button text color to black */
+    color: var(--color-text); /* Change button text color to black */
     cursor: pointer;
-    border-radius: 5px;
-    font-size: 20px; /* Increase font size */
-    font-weight: bold;
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-large); /* Increase font size */
+    font-weight: var(--font-weight-bold);
 
 }
 
 .menu-buttons button:hover {
-    background-color: rgba(173, 216, 230, 0.3); /* Light blue semi-transparent on hover */
+    background-color: var(--color-primary-light); /* Light blue semi-transparent on hover */
 }
