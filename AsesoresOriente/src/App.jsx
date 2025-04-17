@@ -1,9 +1,7 @@
 import React from 'react'; 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Import routing components
 import './styles/index.css';
-import { Menu } from './components/Menu';
-import Banner from './components/Banner';
-import SearchBar from './components/SearchBar'; // Import the SearchBar component
+
 import Home from './pages/Home'; // Import Home page
 import About from './pages/About'; // Import About page
 import Login from './pages/Login'; // Import Login page
