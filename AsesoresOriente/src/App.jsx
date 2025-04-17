@@ -1,21 +1,33 @@
-import React from 'react';
+import React from 'react'; 
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Import routing components
 import './styles/index.css';
 import { Menu } from './components/Menu';
 import Banner from './components/Banner';
 import SearchBar from './components/SearchBar'; // Import the SearchBar component
-
+import Home from './pages/Home'; // Import Home page
+import About from './pages/About'; // Import About page
+import Login from './pages/Login'; // Import Login page
+import Perfil from './pages/Perfil'; // Import Perfil page
+import Buscar from './pages/Buscar'; // Import Buscar page
+import Detalle from './pages/Detalle'; // Import Detalle page
+import Panel from './pages/Panel'; // Import Panel page
+import Gestion from './pages/Gestion'; // Import Gestion page
 
 export function App(){
     return (
-        
-        <div>
-            <Menu />
-            <Banner />
-            <SearchBar /> {/* Add the SearchBar component below the Banner */}
-
-
-        </div>
-             
-
+        <Router>
+            <div>
+                <Routes>
+                    <Route path="/" element={<Home />} /> {/* Home route */}
+                    <Route path="/about" element={<About />} /> {/* About route */}
+                    <Route path="/login" element={<Login />} /> {/* Login route */}
+                    <Route path="/perfil" element={<Perfil />} /> {/* Perfil route */}
+                    <Route path="/buscar" element={<Buscar />} /> {/* Buscar route */}
+                    <Route path="/detalle" element={<Detalle />} /> {/* Detalle route */}
+                    <Route path="/panel" element={<Panel />} /> {/* Panel route */}
+                    <Route path="/gestion" element={<Gestion />} /> {/* Gestion route */}
+                </Routes>
+            </div>
+        </Router>
     )
 }

@@ -11,3 +11,31 @@ body {
 .menu {
     color: #333; /* Dark text color for visibility */
 }
+
+/* Base styles */
+.button {
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-normal);
+    transition: all 0.3s ease;
+}
+
+.input {
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-text-light);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-normal);
+}
+
+/* Utility classes */
+.margin-xl {
+    margin: var(--spacing-xl);
+}
+
+.margin-lg {
+    margin: var(--spacing-lg);
+}
+
+.padding-lg {
+    padding: var(--spacing-lg);
+}
