@@ -13,36 +13,37 @@ const PropertyCard = ({ property }) => {
         <h3 className="property-title">{property.name}</h3>
       </div>
       
-      <div className="property-image-container">
-        <img 
-          src={property.imageUrl || '/img/default-property.jpg'} 
-          alt={property.name}
-          className="property-image"
-          onError={(e) => {
-            e.target.src = '/img/default-property.jpg';
-          }}
-        />
+      <div className="property-image-frame">
+        <div className="property-image-container">
+          <img 
+            src={property.imageUrl || '/img/default-property.jpg'} 
+            alt={property.name}
+            className="property-image"
+            onError={(e) => {
+              e.target.src = '/img/default-property.jpg';
+            }}
+          />
+        </div>
       </div>
       
       <div className="property-details">
         <div className="property-location">
           <span className="location-text">{property.location}</span>
-          {property.size && <span className="size-text">{property.size} m²</span>}
         </div>
         
-        <div className="property-features">
-          {property.rooms && (
+        <div className="property-metrics">
+          <span className="size-badge">{property.size} m²</span>
+          <div className="features">
             <span className="feature">
               <span className="feature-icon">🛏️</span>
               {property.rooms} hab.
             </span>
-          )}
-          {property.bathrooms && (
+            <span className="feature-separator">🌟</span>
             <span className="feature">
               <span className="feature-icon">🚿</span>
               {property.bathrooms} baños
             </span>
-          )}
+          </div>
         </div>
         
         <div className="property-footer">

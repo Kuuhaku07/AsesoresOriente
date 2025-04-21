@@ -10,6 +10,7 @@ import Buscar from './pages/Buscar'; // Import Buscar page
 import Detalle from './pages/Detalle'; // Import Detalle page
 import Panel from './pages/Panel'; // Import Panel page
 import Gestion from './pages/Gestion'; // Import Gestion page
+import Dashboard from './pages/Dashboard';
 
 export function App(){
     return (
@@ -24,6 +25,7 @@ export function App(){
                     <Route path="/detalle" element={<Detalle />} /> {/* Detalle route */}
                     <Route path="/panel" element={<Panel />} /> {/* Panel route */}
                     <Route path="/gestion" element={<Gestion />} /> {/* Gestion route */}
+                    <Route path="/dashboard" element={<Dashboard />} /> {/* Gestion route */}
                 </Routes>
             </div>
         </Router>
