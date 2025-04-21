@@ -39,3 +39,9 @@
 .menu-buttons button:hover {
     background-color: var(--color-primary-light); /* Light blue semi-transparent on hover */
 }
+
+.user-greeting {
+    margin: 0 15px;
+    color: #333;
+    font-weight: 500;
+  }

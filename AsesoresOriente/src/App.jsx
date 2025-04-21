@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Import routing components
 import './styles/index.css';
 
+import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home'; // Import Home page
 import About from './pages/About'; // Import About page
 import Login from './pages/Login'; // Import Login page
@@ -15,19 +16,21 @@ import Dashboard from './pages/Dashboard';
 export function App(){
     return (
         <Router>
-            <div>
-                <Routes>
-                    <Route path="/" element={<Home />} /> {/* Home route */}
-                    <Route path="/about" element={<About />} /> {/* About route */}
-                    <Route path="/login" element={<Login />} /> {/* Login route */}
-                    <Route path="/perfil" element={<Perfil />} /> {/* Perfil route */}
-                    <Route path="/buscar" element={<Buscar />} /> {/* Buscar route */}
-                    <Route path="/detalle" element={<Detalle />} /> {/* Detalle route */}
-                    <Route path="/panel" element={<Panel />} /> {/* Panel route */}
-                    <Route path="/gestion" element={<Gestion />} /> {/* Gestion route */}
-                    <Route path="/dashboard" element={<Dashboard />} /> {/* Gestion route */}
-                </Routes>
-            </div>
+            <AuthProvider>
+                <div>
+                    <Routes>
+                        <Route path="/" element={<Home />} /> {/* Home route */}
+                        <Route path="/about" element={<About />} /> {/* About route */}
+                        <Route path="/login" element={<Login />} /> {/* Login route */}
+                        <Route path="/perfil" element={<Perfil />} /> {/* Perfil route */}
+                        <Route path="/buscar" element={<Buscar />} /> {/* Buscar route */}
+                        <Route path="/detalle" element={<Detalle />} /> {/* Detalle route */}
+                        <Route path="/panel" element={<Panel />} /> {/* Panel route */}
+                        <Route path="/gestion" element={<Gestion />} /> {/* Gestion route */}
+                        <Route path="/dashboard" element={<Dashboard />} /> {/* Gestion route */}
+                    </Routes>
+                </div>
+            </AuthProvider>
         </Router>
     )
 }

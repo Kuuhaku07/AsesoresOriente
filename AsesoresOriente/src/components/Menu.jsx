@@ -1,19 +1,30 @@
+// src/components/Menu.jsx
 import React from 'react';
-import Logo from '../assets/Logo.png'; // Import the logo
-import { Link } from 'react-router-dom'; // Import Link from react-router-dom
-import '../styles/Menu.css'; 
+import Logo from '../assets/Logo.png';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import '../styles/Menu.css';
 
 export function Menu() {
-    return (
-        <nav className="menu">
-            <div className="logo">
-            <Link to="/"><img src={Logo} alt="Logo" /></Link> {/* Display the logo */}
-            </div>
-            <div className="menu-buttons">
-                <Link to="/"><button>Inicio</button></Link>
-                <Link to="/about"><button>Sobre Nosotros</button></Link>
-                <Link to="/login"><button>Iniciar Sesion</button></Link> {/* Link to Login page */}
-            </div>
-        </nav>
-    );
+  const { user, logout } = useAuth();
+
+  return (
+    <nav className="menu">
+      <div className="logo">
+        <Link to="/"><img src={Logo} alt="Logo" /></Link>
+      </div>
+      <div className="menu-buttons">
+        <Link to="/"><button>Inicio</button></Link>
+        <Link to="/about"><button>Sobre Nosotros</button></Link>
+        {user ? (
+          <>
+            <span className="user-greeting">Hola, {user.name}</span>
+            <button onClick={logout}>Cerrar Sesión</button>
+          </>
+        ) : (
+          <Link to="/login"><button>Iniciar Sesión</button></Link>
+        )}
+      </div>
+    </nav>
+  );
 }

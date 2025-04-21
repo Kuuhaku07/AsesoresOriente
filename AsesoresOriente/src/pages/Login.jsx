@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import '../styles/Login.css';
 import Logo from '../assets/Logo.png';
 
 const Login = () => {
+  const { login } = useAuth();
   const [credentials, setCredentials] = useState({
     email: '',
     password: ''
@@ -25,10 +27,16 @@ const Login = () => {
     setIsLoading(true);
     setError('');
     
-    // Simulación de autenticación (luego se conectará a tu backend)
+    // Simulación de autenticación
     setTimeout(() => {
       if (credentials.email === 'asesor@ejemplo.com' && credentials.password === 'password123') {
-        navigate('/dashboard');
+        login({
+          id: 1,
+          name: 'Asesor Ejemplo',
+          email: credentials.email,
+          role: 'asesor',
+          avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
+        });
       } else {
         setError('Credenciales incorrectas. Por favor intenta nuevamente.');
       }
