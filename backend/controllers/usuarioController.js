@@ -26,6 +26,7 @@ export const createUsuario = async (req, res) => {
     const newUsuario = await usuarioService.createUsuario(req.body);
     res.status(201).json(newUsuario);
   } catch (error) {
+    console.error('Error creating usuario:', error);
     res.status(500).json({ error: 'Failed to create usuario' });
   }
 };

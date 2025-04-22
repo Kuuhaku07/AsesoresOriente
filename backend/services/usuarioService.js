@@ -1,7 +1,12 @@
 import pool from '../db.js';
 
 export const getAllUsuarios = async () => {
-  const result = await pool.query('SELECT * FROM "Usuario"');
+  const result = await pool.query(
+    `SELECT u.id as usuario_id, u."Correo", u."Rol", u."id_asesor",
+            a."Nombre", a."Apellido", a."Cedula", a."Telefono", a."Pfp"
+     FROM "Usuario" u
+     JOIN "Asesor" a ON u."id_asesor" = a."id"`
+  );
   return result.rows;
 };
 
@@ -13,7 +18,7 @@ export const getUsuarioById = async (id) => {
 export const createUsuario = async (usuario) => {
   const { Correo, Contraseña, id_asesor, Rol } = usuario;
   const result = await pool.query(
-    'INSERT INTO "Usuario" (Correo, Contraseña, id_asesor, Rol) VALUES ($1, $2, $3, $4) RETURNING *',
+    'INSERT INTO "Usuario" ("Correo", "Contraseña", "id_asesor", "Rol") VALUES ($1, $2, $3, $4) RETURNING *',
     [Correo, Contraseña, id_asesor, Rol]
   );
   return result.rows[0];
@@ -22,7 +27,7 @@ export const createUsuario = async (usuario) => {
 export const updateUsuario = async (id, usuario) => {
   const { Correo, Contraseña, id_asesor, Rol } = usuario;
   const result = await pool.query(
-    'UPDATE "Usuario" SET Correo = $1, Contraseña = $2, id_asesor = $3, Rol = $4 WHERE id = $5 RETURNING *',
+    'UPDATE "Usuario" SET "Correo" = $1, "Contraseña" = $2, "id_asesor" = $3, "Rol" = $4 WHERE id = $5 RETURNING *',
     [Correo, Contraseña, id_asesor, Rol, id]
   );
   return result.rows[0];

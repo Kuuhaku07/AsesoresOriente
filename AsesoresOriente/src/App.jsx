@@ -12,6 +12,7 @@ import Detalle from './pages/Detalle'; // Import Detalle page
 import Panel from './pages/Panel'; // Import Panel page
 import Gestion from './pages/Gestion'; // Import Gestion page
 import Dashboard from './pages/Dashboard';
+import Register from './pages/Register';
 
 export function App(){
     return (
@@ -28,6 +29,7 @@ export function App(){
                         <Route path="/panel" element={<Panel />} /> {/* Panel route */}
                         <Route path="/gestion" element={<Gestion />} /> {/* Gestion route */}
                         <Route path="/dashboard" element={<Dashboard />} /> {/* Gestion route */}
+                        <Route path="/register" element={<Register />} /> {/* Register route */}
                     </Routes>
                 </div>
             </AuthProvider>

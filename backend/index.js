@@ -13,12 +13,15 @@ app.get('/', (req, res) => {
   res.json({ message: 'Backend API is running' });
 });
 
-// Use sample routes for CRUD example
+// Use sample routes for CRUD 
 import sampleRoutes from './routes/sampleRoutes.js';
 import usuarioRoutes from './routes/usuarioRoutes.js';
+import asesorRoutes from './routes/asesorRoutes.js';
+
 
 app.use('/api/sample', sampleRoutes);
 app.use('/api/usuario', usuarioRoutes);
+app.use('/api/asesor', asesorRoutes);
 
 // Example route to test PostgreSQL connection
 app.get('/test-db', async (req, res) => {
