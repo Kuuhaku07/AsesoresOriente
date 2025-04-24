@@ -1,4 +1,8 @@
 import pool from '../db.js';
+import bcrypt from 'bcrypt';
+
+const SALT_ROUNDS = 10;
+
 
 export const getAllUsuarios = async () => {
   const result = await pool.query(
@@ -17,18 +21,23 @@ export const getUsuarioById = async (id) => {
 
 export const createUsuario = async (usuario) => {
   const { Correo, Contraseña, id_asesor, Rol } = usuario;
+  const hashedPassword = await bcrypt.hash(Contraseña, SALT_ROUNDS);
   const result = await pool.query(
     'INSERT INTO "Usuario" ("Correo", "Contraseña", "id_asesor", "Rol") VALUES ($1, $2, $3, $4) RETURNING *',
-    [Correo, Contraseña, id_asesor, Rol]
+    [Correo, hashedPassword, id_asesor, Rol]
   );
   return result.rows[0];
 };
 
 export const updateUsuario = async (id, usuario) => {
   const { Correo, Contraseña, id_asesor, Rol } = usuario;
+  let hashedPassword = Contraseña;
+  if (Contraseña) {
+    hashedPassword = await bcrypt.hash(Contraseña, SALT_ROUNDS);
+  }
   const result = await pool.query(
     'UPDATE "Usuario" SET "Correo" = $1, "Contraseña" = $2, "id_asesor" = $3, "Rol" = $4 WHERE id = $5 RETURNING *',
-    [Correo, Contraseña, id_asesor, Rol, id]
+    [Correo, hashedPassword, id_asesor, Rol, id]
   );
   return result.rows[0];
 };
