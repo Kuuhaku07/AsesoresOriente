@@ -1,4 +1,9 @@
 import * as usuarioService from '../services/usuarioService.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
+
+const JWT_SECRET = 'your_jwt_secret_here'; // Replace with a secure secret or use env variable
 
 export const getAllUsuarios = async (req, res) => {
   try {
@@ -52,5 +57,33 @@ export const deleteUsuario = async (req, res) => {
     res.json({ message: 'Usuario deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete usuario' });
+  }
+};
+
+export const login = async (req, res) => {
+  const { Correo, Contraseña } = req.body;
+  try {
+    const usuario = await usuarioService.getUsuarioWithAsesorByCorreo(Correo);
+    if (!usuario) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    // Fetch full user with password hash for password comparison
+    const usuarioFull = await usuarioService.getUsuarioByCorreo(Correo);
+    const passwordMatch = await bcrypt.compare(Contraseña, usuarioFull.Contraseña);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    const tokenPayload = {
+      id: usuario.id,
+      email: usuario.Correo,
+      role: usuario.Rol,
+      name: `${usuario.Nombre} ${usuario.Apellido}`,
+      avatar: usuario.Pfp
+    };
+    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

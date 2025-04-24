@@ -1,41 +1,46 @@
-// src/context/AuthContext.js
-import React, { createContext, useState, useContext } from 'react';
+// src/context/AuthContext.jsx
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const navigate = useNavigate();
 
-  const login = (userData) => {
+  const login = (token, userData) => {
+    setToken(token);
     setUser(userData);
-    // Guardar también en sessionStorage para persistencia en refrescos
-    sessionStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(userData));
     navigate('/dashboard');
   };
 
   const logout = () => {
     setUser(null);
-    sessionStorage.removeItem('user');
+    setToken(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     navigate('/login');
   };
 
-  // Verificar si hay usuario al cargar la app
-  React.useEffect(() => {
-    const storedUser = sessionStorage.getItem('user');
-    if (storedUser) {
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    if (storedToken && storedUser) {
+      setToken(storedToken);
       setUser(JSON.parse(storedUser));
     }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
+export function useAuth() {
   return useContext(AuthContext);
-};
+}

@@ -22,26 +22,46 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    
-    // Simulación de autenticación
-    setTimeout(() => {
-      if (credentials.email === 'asesor@ejemplo.com' && credentials.password === 'password123') {
-        login({
-          id: 1,
-          name: 'Asesor Ejemplo',
-          email: credentials.email,
-          role: 'asesor',
-          avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
-        });
-      } else {
-        setError('Credenciales incorrectas. Por favor intenta nuevamente.');
+
+    try {
+      const response = await fetch('/api/usuario/login', {  // Corrected URL
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          Correo: credentials.email,
+          Contraseña: credentials.password
+        })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || 'Error en la autenticación');
+        setIsLoading(false);
+        return;
       }
+
+      const data = await response.json();
+      const token = data.token;
+
+      // Decode token payload to get user info
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      const userData = JSON.parse(jsonPayload);
+
+      login(token, userData);
+    } catch (err) {
+      setError('Error de red. Intenta nuevamente.');
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -52,9 +72,9 @@ const Login = () => {
           <h2>Iniciar Sesión</h2>
           <p>Acceso exclusivo para asesores registrados</p>
         </div>
-        
+
         {error && <div className="login-error">{error}</div>}
-        
+
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
             <label htmlFor="email">Correo Electrónico</label>
@@ -68,7 +88,7 @@ const Login = () => {
               placeholder="tu@correo.com"
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="password">Contraseña</label>
             <input
@@ -81,7 +101,7 @@ const Login = () => {
               placeholder="••••••••"
             />
           </div>
-          
+
           <button 
             type="submit" 
             className="login-button"
@@ -90,7 +110,7 @@ const Login = () => {
             {isLoading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
-        
+
         <div className="login-footer">
           <p>¿Problemas para acceder? Contacta al administrador</p>
         </div>

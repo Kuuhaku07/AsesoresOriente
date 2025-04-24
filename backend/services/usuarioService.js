@@ -14,6 +14,23 @@ export const getAllUsuarios = async () => {
   return result.rows;
 };
 
+export const getUsuarioWithAsesorByCorreo = async (Correo) => {
+  const result = await pool.query(
+    `SELECT u.id, u."Correo", u."Rol", a."Nombre", a."Apellido", a."Pfp"
+     FROM "Usuario" u
+     JOIN "Asesor" a ON u."id_asesor" = a."id"
+     WHERE u."Correo" = $1`,
+    [Correo]
+  );
+  return result.rows[0];
+};
+
+
+export const getUsuarioByCorreo = async (Correo) => {
+  const result = await pool.query('SELECT * FROM "Usuario" WHERE "Correo" = $1', [Correo]);
+  return result.rows[0];
+};
+
 export const getUsuarioById = async (id) => {
   const result = await pool.query('SELECT * FROM "Usuario" WHERE id = $1', [id]);
   return result.rows[0];
