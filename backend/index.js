@@ -1,10 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import pool from './db.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
 
 app.use(cors());
 app.use(express.json());
@@ -17,7 +19,6 @@ app.get('/', (req, res) => {
 import sampleRoutes from './routes/sampleRoutes.js';
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import asesorRoutes from './routes/asesorRoutes.js';
-
 
 app.use('/api/sample', sampleRoutes);
 app.use('/api/usuario', usuarioRoutes);

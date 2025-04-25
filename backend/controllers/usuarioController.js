@@ -3,8 +3,14 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 
-const JWT_SECRET = 'your_jwt_secret_here'; // Replace with a secure secret or use env variable
 
+
+
+
+/**
+ * Obtiene todos los usuarios de la base de datos.
+ * Responde con un arreglo de usuarios en formato JSON.
+ */
 export const getAllUsuarios = async (req, res) => {
   try {
     const usuarios = await usuarioService.getAllUsuarios();
@@ -14,6 +20,10 @@ export const getAllUsuarios = async (req, res) => {
   }
 };
 
+/**
+ * Obtiene un usuario por su ID.
+ * Si no se encuentra, responde con error 404.
+ */
 export const getUsuarioById = async (req, res) => {
   try {
     const usuario = await usuarioService.getUsuarioById(req.params.id);
@@ -26,6 +36,10 @@ export const getUsuarioById = async (req, res) => {
   }
 };
 
+/**
+ * Crea un nuevo usuario con los datos recibidos en el cuerpo de la petición.
+ * Responde con el usuario creado.
+ */
 export const createUsuario = async (req, res) => {
   try {
     const newUsuario = await usuarioService.createUsuario(req.body);
@@ -36,6 +50,10 @@ export const createUsuario = async (req, res) => {
   }
 };
 
+/**
+ * Actualiza un usuario existente identificado por ID con los datos recibidos.
+ * Si el usuario no existe, responde con error 404.
+ */
 export const updateUsuario = async (req, res) => {
   try {
     const updatedUsuario = await usuarioService.updateUsuario(req.params.id, req.body);
@@ -48,6 +66,10 @@ export const updateUsuario = async (req, res) => {
   }
 };
 
+/**
+ * Elimina un usuario identificado por ID.
+ * Si el usuario no existe, responde con error 404.
+ */
 export const deleteUsuario = async (req, res) => {
   try {
     const deleted = await usuarioService.deleteUsuario(req.params.id);
@@ -60,6 +82,10 @@ export const deleteUsuario = async (req, res) => {
   }
 };
 
+/**
+ * Función para autenticar un usuario y generar un token JWT.
+ * Verifica las credenciales y, si son correctas, devuelve un token firmado con la clave secreta.
+ */
 export const login = async (req, res) => {
   const { Correo, Contraseña } = req.body;
   try {
@@ -80,7 +106,7 @@ export const login = async (req, res) => {
       name: `${usuario.Nombre} ${usuario.Apellido}`,
       avatar: usuario.Pfp
     };
-    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
   } catch (error) {
     console.error('Login error:', error);
