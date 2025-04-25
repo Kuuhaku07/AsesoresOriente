@@ -70,7 +70,7 @@ const Login = () => {
         <div className="login-header">
           <img src={Logo} alt="Logo" className="login-logo" />
           <h2>Iniciar Sesión</h2>
-          <p>Acceso exclusivo para asesores registrados</p>
+          <p>Acceso exclusivo para los Agentes Asociados</p>
         </div>
 
         {error && <div className="login-error">{error}</div>}
