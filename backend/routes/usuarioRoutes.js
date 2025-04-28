@@ -1,8 +1,37 @@
 import express from 'express';
 import { body } from 'express-validator';
+import multer from 'multer';
+import path from 'path';
 import { getAllUsuarios, getUsuarioById, createUsuario, updateUsuario, deleteUsuario, login } from '../controllers/usuarioController.js';
 import { validateRequest } from '../middlewares/validationMiddleware.js';
 import { loginRateLimiter } from '../middlewares/rateLimitMiddleware.js';
+
+
+/**
+ * Configuración de multer para subir archivos de imagen
+ */
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/profile_pictures/');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    const filetypes = /jpeg|jpg|png/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error('Solo se permiten imágenes JPEG y PNG'));
+  }
+});
 
 /**
  * Rutas para la gestión de usuarios.
@@ -12,6 +41,9 @@ const router = express.Router();
 
 router.get('/', getAllUsuarios);
 router.get('/:id', getUsuarioById);
+
+
+
 
 /**
  * Ruta para crear un nuevo usuario.
@@ -37,6 +69,7 @@ router.post(
  */
 router.put(
   '/:id',
+  upload.single('pfp'), // Middleware para subir archivo con campo 'pfp'
   [
     body('Correo').optional().isEmail().withMessage('Correo debe ser un email valido'),
     body('Contraseña').optional().isLength({ min: 6 }).withMessage('Contraseña debe tener al menos 6 caracteres'),

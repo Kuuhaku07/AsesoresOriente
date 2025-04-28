@@ -1,5 +1,10 @@
 import * as asesorService from '../services/asesorService.js';
 
+
+/**
+ * Crea un nuevo asesor con los datos recibidos en el cuerpo de la petición.
+ * Responde con el asesor creado.
+ */
 export const createAsesor = async (req, res) => {
   try {
     const newAsesor = await asesorService.createAsesor(req.body);
@@ -10,6 +15,11 @@ export const createAsesor = async (req, res) => {
   }
 };
 
+
+/**
+ * Actualiza un asesor existente identificado por ID con los datos recibidos.
+ * Si el asesor no existe, responde con error 404.
+ */
 export const updateAsesor = async (req, res) => {
   try {
     const updatedAsesor = await asesorService.updateAsesor(req.params.id, req.body);

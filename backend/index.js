@@ -2,14 +2,27 @@ import express from 'express';
 import cors from 'cors';
 import pool from './db.js';
 import dotenv from 'dotenv';
+import path from 'path';
+import url from 'url';
 
 dotenv.config();
+
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+
+// Middleware temporal para loguear peticiones a /uploads
+app.use('/uploads', (req, res, next) => {
+  console.log(`Petición a /uploads: ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// Serve static files from uploads folder using __dirname
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/', (req, res) => {
   res.json({ message: 'Backend API is running' });

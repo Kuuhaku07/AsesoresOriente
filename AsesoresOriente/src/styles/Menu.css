@@ -15,7 +15,6 @@
     width: 100px; /* Set logo size to 100px */
     height: auto; /* Maintain aspect ratio */
     margin-left: var(--spacing-md); /* Add left margin to the logo */
-
 }
 
 .logo {
@@ -23,7 +22,14 @@
     font-weight: var(--font-weight-bold);
 }
 
-.menu-buttons button {
+.menu-buttons {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.menu-buttons button,
+.menu-buttons .dropbtn {
     margin: 0 var(--spacing-sm); /* Add horizontal margin */
     padding: var(--spacing-sm) var(--spacing-md);
     border: none;
@@ -33,15 +39,80 @@
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-large); /* Increase font size */
     font-weight: var(--font-weight-bold);
-
+    transition: background-color 0.3s ease;
 }
 
-.menu-buttons button:hover {
+.menu-buttons button:hover,
+.menu-buttons .dropbtn:hover {
     background-color: var(--color-primary-light); /* Light blue semi-transparent on hover */
+}
+
+/* Dropdown container */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown content - hidden by default */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: rgba(34, 34, 34, 0.95); /* More opaque background */
+    min-width: 180px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
+    z-index: 1000;
+    border-radius: var(--border-radius-sm);
+    top: 100%;
+    left: 0;
+}
+
+/* Show dropdown content when visible */
+.dropdown-content.show,
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Dropdown links */
+.dropdown-content a,
+.dropdown-content button.logout-btn {
+    color: #eee; /* More legible text color */
+    padding: var(--spacing-md);
+    text-decoration: none;
+    display: block;
+    background-color: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-size: var(--font-size-medium);
+    font-weight: var(--font-weight-regular);
+}
+
+/* Hover effect for dropdown items */
+.dropdown-content a:hover,
+.dropdown-content button.logout-btn:hover {
+    background-color: var(--color-primary);
+    color: var(--color-text);
+}
+
+/* Profile picture in menu */
+.profile-pic {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+/* Profile dropdown button */
+.profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .user-greeting {
     margin: 0 15px;
     color: #333;
     font-weight: 500;
-  }
+}

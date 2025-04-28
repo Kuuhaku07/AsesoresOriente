@@ -1,11 +1,8 @@
 import * as usuarioService from '../services/usuarioService.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-
-
-
-
-
+import path from 'path';
+import fs from 'fs';
 
 /**
  * Obtiene todos los usuarios de la base de datos.
@@ -53,15 +50,24 @@ export const createUsuario = async (req, res) => {
 /**
  * Actualiza un usuario existente identificado por ID con los datos recibidos.
  * Si el usuario no existe, responde con error 404.
+ * Maneja la actualización de la foto de perfil si se sube un archivo.
  */
 export const updateUsuario = async (req, res) => {
   try {
-    const updatedUsuario = await usuarioService.updateUsuario(req.params.id, req.body);
+    const usuarioData = { ...req.body };
+
+    // Si se subió un archivo, agregar la ruta/nombre al objeto usuarioData
+    if (req.file) {
+      usuarioData.Pfp = req.file.filename;
+    }
+
+    const updatedUsuario = await usuarioService.updateUsuario(req.params.id, usuarioData);
     if (!updatedUsuario) {
       return res.status(404).json({ error: 'Usuario not found' });
     }
     res.json(updatedUsuario);
   } catch (error) {
+    console.error('Error updating usuario:', error);
     res.status(500).json({ error: 'Failed to update usuario' });
   }
 };
@@ -104,7 +110,7 @@ export const login = async (req, res) => {
       email: usuario.Correo,
       role: usuario.Rol,
       name: `${usuario.Nombre} ${usuario.Apellido}`,
-      avatar: usuario.Pfp
+      pfp: usuario.Pfp
     };
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
