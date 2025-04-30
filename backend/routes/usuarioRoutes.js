@@ -2,9 +2,10 @@ import express from 'express';
 import { body } from 'express-validator';
 import multer from 'multer';
 import path from 'path';
-import { getAllUsuarios, getUsuarioById, createUsuario, updateUsuario, deleteUsuario, login } from '../controllers/usuarioController.js';
+import { getAllUsuarios, getUsuarioById, createUsuario, updateUsuario, deleteUsuario, login, getCurrentUser } from '../controllers/usuarioController.js';
 import { validateRequest } from '../middlewares/validationMiddleware.js';
 import { loginRateLimiter } from '../middlewares/rateLimitMiddleware.js';
+import { authenticateToken } from '../middlewares/authMiddleware.js';
 
 
 /**
@@ -39,10 +40,11 @@ const upload = multer({
  */
 const router = express.Router();
 
+// New route to get current user info
+router.get('/me', authenticateToken, getCurrentUser);
+
 router.get('/', getAllUsuarios);
 router.get('/:id', getUsuarioById);
-
-
 
 
 /**
@@ -100,5 +102,6 @@ router.post(
   validateRequest,
   login
 );
+
 
 export default router;

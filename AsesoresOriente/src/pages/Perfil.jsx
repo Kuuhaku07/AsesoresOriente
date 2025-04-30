@@ -12,6 +12,11 @@ const Perfil = () => {
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
 
+  // Show loading or null while user is being initialized
+  if (user === null) {
+    return null; // or a loading spinner
+  }
+
   // Redirigir a home si no hay usuario logueado
   if (!user) {
     return <Navigate to="/" />;

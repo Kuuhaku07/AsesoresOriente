@@ -119,3 +119,24 @@ export const login = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+/**
+ * Obtiene el usuario actual basado en el token JWT.
+ */
+export const getCurrentUser = async (req, res) => {
+  try {
+    if (!req.userId) {
+      console.error('No userId found in request');
+      return res.status(400).json({ error: 'User ID missing in request' });
+    }
+    const usuario = await usuarioService.getUsuarioWithAsesorById(req.userId);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario not found' });
+    }
+    // console.log('User data returned by getCurrentUser:', usuario);
+    res.json(usuario);
+  } catch (error) {
+    // console.error('Error fetching current user:', error);
+    res.status(500).json({ error: 'Failed to fetch current user' });
+  }
+};

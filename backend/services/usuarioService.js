@@ -44,8 +44,29 @@ export const getUsuarioByCorreo = async (Correo) => {
  * Obtiene un usuario por su ID.
  */
 export const getUsuarioById = async (id) => {
-  const result = await pool.query('SELECT * FROM "Usuario" WHERE id = $1', [id]);
-  return result.rows[0];
+  try {
+    const result = await pool.query('SELECT * FROM "Usuario" WHERE id = $1', [id]);
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error in getUsuarioById:', error);
+    throw error;
+  }
+};
+
+export const getUsuarioWithAsesorById = async (id) => {
+  try {
+    const result = await pool.query(
+      `SELECT u.id, u."Correo", u."Rol", a."Nombre", a."Apellido", a."Pfp"
+       FROM "Usuario" u
+       JOIN "Asesor" a ON u."id_asesor" = a."id"
+       WHERE u.id = $1`,
+      [id]
+    );
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error in getUsuarioWithAsesorById:', error);
+    throw error;
+  }
 };
 
 /**
@@ -68,12 +89,19 @@ export const createUsuario = async (usuario) => {
  * Maneja actualizaciones parciales sin sobrescribir con valores nulos.
  * Retorna el usuario actualizado junto con la información del asesor (incluyendo Pfp).
  */
+import fs from 'fs';
+import path from 'path';
+
 export const updateUsuario = async (id, usuario) => {
   // Obtener usuario actual para valores por defecto
   const currentUsuario = await getUsuarioById(id);
   if (!currentUsuario) {
     return null;
   }
+
+  // Obtener el Pfp antiguo del asesor
+  const asesorResult = await pool.query('SELECT "Pfp" FROM "Asesor" WHERE id = $1', [currentUsuario.id_asesor]);
+  const oldPfp = asesorResult.rows[0]?.Pfp;
 
   const Correo = usuario.Correo ?? currentUsuario.Correo;
   const id_asesor = usuario.id_asesor ?? currentUsuario.id_asesor;
@@ -96,6 +124,19 @@ export const updateUsuario = async (id, usuario) => {
       'UPDATE "Asesor" SET "Pfp" = $1 WHERE id = $2',
       [usuario.Pfp, id_asesor]
     );
+
+    // Borrar archivo antiguo si existe y es diferente al nuevo
+    if (oldPfp && oldPfp !== usuario.Pfp) {
+      const uploadsDir = path.join(process.cwd(), 'uploads', 'profile_pictures');
+      const oldPfpPath = path.join(uploadsDir, oldPfp);
+      fs.unlink(oldPfpPath, (err) => {
+        if (err) {
+          console.error('Error deleting old profile picture:', err);
+        } else {
+          console.log('Old profile picture deleted:', oldPfpPath);
+        }
+      });
+    }
   }
 
   // Retornar usuario actualizado con info de asesor incluyendo Pfp

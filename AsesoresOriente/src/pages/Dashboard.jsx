@@ -8,6 +8,11 @@ import '../styles/Dashboard.css';
 const Dashboard = () => {
   const { user } = useAuth();
 
+  // Show loading or null while user is being initialized
+  if (user === null) {
+    return null; // or a loading spinner
+  }
+
   // Redirect to home if user is not logged in
   if (!user) {
     return <Navigate to="/" />;
@@ -28,8 +33,7 @@ const Dashboard = () => {
               <div className="user-avatar-fallback">{user.name.charAt(0)}</div>
             )}
             <h2>Bienvenido, {user.name}</h2>
-            <p>Rol: {user.role}</p>
-            <p>Email: {user.email}</p>
+
           </section>
 
           {/* Placeholder for additional dashboard content */}

@@ -15,11 +15,13 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+/*
 // Middleware temporal para loguear peticiones a /uploads
 app.use('/uploads', (req, res, next) => {
   console.log(`Petición a /uploads: ${req.method} ${req.originalUrl}`);
   next();
 });
+*/
 
 // Serve static files from uploads folder using __dirname
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -50,4 +52,10 @@ app.get('/test-db', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+});
+
+// Global error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
 });
