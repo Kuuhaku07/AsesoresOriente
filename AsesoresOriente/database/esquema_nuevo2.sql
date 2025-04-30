@@ -1,4 +1,4 @@
--- Tablas básicas de configuración
+-- Primero las tablas que no tienen dependencias
 CREATE TABLE "TipoInmueble" (
     "id" SERIAL PRIMARY KEY,
     "nombre" VARCHAR(50) NOT NULL UNIQUE,
@@ -45,7 +45,7 @@ CREATE TABLE "Zona" (
     CONSTRAINT uq_zona_ciudad UNIQUE (ciudad_id, nombre)
 );
 
--- Tablas de personas y empresas
+-- Tablas de empresas
 CREATE TABLE "Empresa" (
     "id" SERIAL PRIMARY KEY,
     "rif" VARCHAR(20) NOT NULL UNIQUE,
@@ -56,21 +56,31 @@ CREATE TABLE "Empresa" (
     "fecha_registro" DATE DEFAULT CURRENT_DATE
 );
 
-CREATE TABLE "Propietario" (
+-- Tablas de propietarios
+CREATE TABLE "PropietarioPersona" (
     "id" SERIAL PRIMARY KEY,
-    "tipo" VARCHAR(10) NOT NULL CHECK (tipo IN ('PERSONA', 'EMPRESA')),
-    "nombre_completo" VARCHAR(200) NOT NULL,
-    "documento_identidad" VARCHAR(20) NOT NULL,
+    "nombre" VARCHAR(100) NOT NULL,
+    "apellido" VARCHAR(100) NOT NULL,
+    "documento_identidad" VARCHAR(20) NOT NULL UNIQUE,
     "telefono" VARCHAR(20) NOT NULL,
     "correo" VARCHAR(100) NULL CHECK (correo ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$'),
     "direccion" TEXT NULL,
-    "empresa_id" INTEGER NULL REFERENCES "Empresa"("id"),
+    "fecha_nacimiento" DATE NULL,
+    "estado_civil_id" INTEGER NULL REFERENCES "EstadoCivil"("id"),
     "fecha_registro" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "notas" TEXT NULL,
-    CONSTRAINT uq_documento_propietario UNIQUE (tipo, documento_identidad)
+    "notas" TEXT NULL
 );
 
--- Tablas de asesores y usuarios
+CREATE TABLE "PropietarioEmpresa" (
+    "id" SERIAL PRIMARY KEY,
+    "empresa_id" INTEGER NOT NULL UNIQUE REFERENCES "Empresa"("id"),
+    "representante_legal" VARCHAR(200) NULL,
+    "documento_representante" VARCHAR(20) NULL,
+    "fecha_registro" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "notas" TEXT NULL
+);
+
+-- Tablas de asesores
 CREATE TABLE "Asesor" (
     "id" SERIAL PRIMARY KEY,
     "cedula" VARCHAR(20) NOT NULL UNIQUE,
@@ -122,7 +132,7 @@ CREATE TABLE "Usuario" (
     "fecha_actualizacion" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tablas de características de inmuebles
+-- Tablas de características
 CREATE TABLE "TipoCaracteristica" (
     "id" SERIAL PRIMARY KEY,
     "nombre" VARCHAR(50) NOT NULL UNIQUE,
@@ -138,39 +148,27 @@ CREATE TABLE "Caracteristica" (
     CONSTRAINT uq_caracteristica UNIQUE (tipo_id, nombre)
 );
 
--- Tablas de documentos
+-- Tabla de documentos (sin referencias a Inmueble todavía)
 CREATE TABLE "TipoDocumento" (
     "id" SERIAL PRIMARY KEY,
     "nombre" VARCHAR(50) NOT NULL UNIQUE,
     "descripcion" TEXT NULL,
-    "requerido" BOOLEAN NOT NULL DEFAULT FALSE
+    "requerido" BOOLEAN NOT NULL DEFAULT FALSE,
+    "aplica_inmueble" BOOLEAN NOT NULL DEFAULT TRUE,
+    "aplica_propietario" BOOLEAN NOT NULL DEFAULT TRUE
 );
 
-CREATE TABLE "Documento" (
-    "id" SERIAL PRIMARY KEY,
-    "tipo_id" INTEGER NOT NULL REFERENCES "TipoDocumento"("id"),
-    "nombre_archivo" VARCHAR(255) NOT NULL,
-    "ruta" VARCHAR(255) NOT NULL,
-    "tamano" INTEGER NOT NULL CHECK (tamano > 0),
-    "fecha_subida" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "valido" BOOLEAN NOT NULL DEFAULT FALSE,
-    "observaciones" TEXT NULL,
-    "fecha_vencimiento" DATE NULL
-);
-
--- Tablas principales de inmuebles
+-- Ahora creamos la tabla Inmueble que es central
 CREATE TABLE "Inmueble" (
     "id" SERIAL PRIMARY KEY,
     "codigo" VARCHAR(20) NOT NULL UNIQUE,
     "titulo" VARCHAR(100) NOT NULL,
     "descripcion" TEXT NOT NULL,
     "tipo_inmueble_id" INTEGER NOT NULL REFERENCES "TipoInmueble"("id"),
-    "tipo_negocio_id" INTEGER NOT NULL REFERENCES "TipoNegocio"("id"),
     "estado_id" INTEGER NOT NULL REFERENCES "EstadoInmueble"("id"),
     "asesor_id" INTEGER NOT NULL REFERENCES "Asesor"("id"),
-    "propietario_id" INTEGER NOT NULL REFERENCES "Propietario"("id"),
-    "precio" DECIMAL(15,2) NOT NULL CHECK (precio > 0),
-    "moneda" VARCHAR(3) NOT NULL DEFAULT 'USD' CHECK (moneda IN ('USD', 'EUR', 'VES')),
+    "propietario_persona_id" INTEGER NULL REFERENCES "PropietarioPersona"("id"),
+    "propietario_empresa_id" INTEGER NULL REFERENCES "PropietarioEmpresa"("id"),
     "area_construida" DECIMAL(10,2) NOT NULL CHECK (area_construida > 0),
     "area_terreno" DECIMAL(10,2) NOT NULL CHECK (area_terreno > 0),
     "habitaciones" INTEGER NOT NULL DEFAULT 0 CHECK (habitaciones >= 0),
@@ -183,7 +181,47 @@ CREATE TABLE "Inmueble" (
     "visible" BOOLEAN NOT NULL DEFAULT TRUE,
     "fecha_creacion" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "fecha_actualizacion" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "fecha_publicacion" TIMESTAMP NULL
+    "fecha_publicacion" TIMESTAMP NULL,
+    CONSTRAINT chk_propietario_tipo CHECK (
+        (propietario_persona_id IS NOT NULL AND propietario_empresa_id IS NULL) OR
+        (propietario_persona_id IS NULL AND propietario_empresa_id IS NOT NULL)
+    )
+);
+
+-- Ahora podemos crear la tabla Documento que referencia a Inmueble
+CREATE TABLE "Documento" (
+    "id" SERIAL PRIMARY KEY,
+    "tipo_id" INTEGER NOT NULL REFERENCES "TipoDocumento"("id"),
+    "nombre_archivo" VARCHAR(255) NOT NULL,
+    "ruta" VARCHAR(255) NOT NULL,
+    "tamano" INTEGER NOT NULL CHECK (tamano > 0),
+    "subido_por" INTEGER NOT NULL REFERENCES "Usuario"("id"),
+    "fecha_subida" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "valido" BOOLEAN NOT NULL DEFAULT FALSE,
+    "validado_por" INTEGER NULL REFERENCES "Usuario"("id"),
+    "fecha_validacion" TIMESTAMP NULL,
+    "observaciones" TEXT NULL,
+    "fecha_vencimiento" DATE NULL,
+    "inmueble_id" INTEGER NULL REFERENCES "Inmueble"("id") ON DELETE CASCADE,
+    "propietario_persona_id" INTEGER NULL REFERENCES "PropietarioPersona"("id") ON DELETE CASCADE,
+    "propietario_empresa_id" INTEGER NULL REFERENCES "PropietarioEmpresa"("id") ON DELETE CASCADE,
+    CONSTRAINT chk_documento_referencia CHECK (
+        (inmueble_id IS NOT NULL AND propietario_persona_id IS NULL AND propietario_empresa_id IS NULL) OR
+        (inmueble_id IS NULL AND propietario_persona_id IS NOT NULL AND propietario_empresa_id IS NULL) OR
+        (inmueble_id IS NULL AND propietario_persona_id IS NULL AND propietario_empresa_id IS NOT NULL)
+    )
+);
+
+-- Tablas relacionadas con Inmueble
+CREATE TABLE "InmuebleTipoNegocio" (
+    "inmueble_id" INTEGER NOT NULL REFERENCES "Inmueble"("id") ON DELETE CASCADE,
+    "tipo_negocio_id" INTEGER NOT NULL REFERENCES "TipoNegocio"("id"),
+    "precio" DECIMAL(15,2) NOT NULL CHECK (precio > 0),
+    "moneda" VARCHAR(3) NOT NULL DEFAULT 'USD' CHECK (moneda IN ('USD', 'EUR', 'BS')),
+    "disponible" BOOLEAN NOT NULL DEFAULT TRUE,
+    "comision" DECIMAL(5,2) NULL CHECK (comision BETWEEN 0 AND 100),
+    "fecha_actualizacion" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ("inmueble_id", "tipo_negocio_id")
 );
 
 CREATE TABLE "UbicacionInmueble" (
@@ -191,7 +229,7 @@ CREATE TABLE "UbicacionInmueble" (
     "zona_id" INTEGER NOT NULL REFERENCES "Zona"("id"),
     "direccion_exacta" TEXT NOT NULL,
     "referencia" TEXT NULL,
-    "coordenadas" VARCHAR(100) NULL, -- Formato: 'lat,long'
+    "coordenadas" VARCHAR(100) NULL,
     "mapa_url" VARCHAR(255) NULL
 );
 
@@ -203,14 +241,6 @@ CREATE TABLE "InmuebleCaracteristica" (
     PRIMARY KEY ("inmueble_id", "caracteristica_id")
 );
 
-CREATE TABLE "InmuebleDocumento" (
-    "inmueble_id" INTEGER NOT NULL REFERENCES "Inmueble"("id") ON DELETE CASCADE,
-    "documento_id" INTEGER NOT NULL REFERENCES "Documento"("id") ON DELETE CASCADE,
-    "fecha_asociacion" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "es_principal" BOOLEAN NOT NULL DEFAULT FALSE,
-    PRIMARY KEY ("inmueble_id", "documento_id")
-);
-
 CREATE TABLE "ImagenInmueble" (
     "id" SERIAL PRIMARY KEY,
     "inmueble_id" INTEGER NOT NULL REFERENCES "Inmueble"("id") ON DELETE CASCADE,
@@ -219,10 +249,11 @@ CREATE TABLE "ImagenInmueble" (
     "titulo" VARCHAR(100) NULL,
     "descripcion" TEXT NULL,
     "fecha_subida" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "es_portada" BOOLEAN NOT NULL DEFAULT FALSE
+    "es_portada" BOOLEAN NOT NULL DEFAULT FALSE,
+    "subido_por" INTEGER NOT NULL REFERENCES "Usuario"("id")
 );
 
--- Tablas de seguimiento y ventas
+-- Tablas de seguimiento
 CREATE TABLE "SeguimientoInmueble" (
     "id" SERIAL PRIMARY KEY,
     "inmueble_id" INTEGER NOT NULL REFERENCES "Inmueble"("id") ON DELETE CASCADE,
@@ -248,19 +279,37 @@ CREATE TABLE "Visita" (
     "fecha_registro" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Índices para mejorar el rendimiento
+CREATE TABLE "HistorialInmueble" (
+    "id" SERIAL PRIMARY KEY,
+    "inmueble_id" INTEGER NOT NULL REFERENCES "Inmueble"("id") ON DELETE CASCADE,
+    "usuario_id" INTEGER NOT NULL REFERENCES "Usuario"("id"),
+    "campo_modificado" VARCHAR(50) NOT NULL,
+    "valor_anterior" TEXT NULL,
+    "valor_nuevo" TEXT NULL,
+    "fecha_cambio" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "motivo" TEXT NULL
+);
+
+-- Índices
 CREATE INDEX idx_inmueble_asesor ON "Inmueble"("asesor_id");
-CREATE INDEX idx_inmueble_propietario ON "Inmueble"("propietario_id");
+CREATE INDEX idx_inmueble_propietario_persona ON "Inmueble"("propietario_persona_id");
+CREATE INDEX idx_inmueble_propietario_empresa ON "Inmueble"("propietario_empresa_id");
 CREATE INDEX idx_inmueble_tipo ON "Inmueble"("tipo_inmueble_id");
-CREATE INDEX idx_inmueble_negocio ON "Inmueble"("tipo_negocio_id");
 CREATE INDEX idx_inmueble_estado ON "Inmueble"("estado_id");
-CREATE INDEX idx_inmueble_precio ON "Inmueble"("precio");
 CREATE INDEX idx_inmueble_ubicacion ON "UbicacionInmueble"("zona_id");
 CREATE INDEX idx_imagen_inmueble ON "ImagenInmueble"("inmueble_id");
 CREATE INDEX idx_seguimiento_inmueble ON "SeguimientoInmueble"("inmueble_id");
 CREATE INDEX idx_visita_inmueble ON "Visita"("inmueble_id");
+CREATE INDEX idx_documento_inmueble ON "Documento"("inmueble_id");
+CREATE INDEX idx_documento_propietario_persona ON "Documento"("propietario_persona_id");
+CREATE INDEX idx_documento_propietario_empresa ON "Documento"("propietario_empresa_id");
+CREATE INDEX idx_documento_tipo ON "Documento"("tipo_id");
+CREATE INDEX idx_documento_valido ON "Documento"("valido");
+CREATE INDEX idx_inmueble_fechas ON "Inmueble"("fecha_creacion", "fecha_publicacion");
+CREATE INDEX idx_inmueble_negocio ON "InmuebleTipoNegocio"("tipo_negocio_id");
+CREATE INDEX idx_inmueble_precio ON "InmuebleTipoNegocio"("precio");
 
--- Datos básicos iniciales
+-- Datos iniciales
 INSERT INTO "EstadoInmueble" ("nombre", "color") VALUES 
 ('DISPONIBLE', '#4CAF50'),
 ('RESERVADO', '#FFC107'),
@@ -277,7 +326,7 @@ INSERT INTO "Rol" ("nombre", "nivel_acceso") VALUES
 ('GERENTE', 80),
 ('ASESOR', 40);
 
--- Función para actualizar fechas de modificación
+-- Funciones y triggers
 CREATE OR REPLACE FUNCTION update_modified_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -286,11 +335,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Triggers para actualización automática
 CREATE TRIGGER update_inmueble_modtime
 BEFORE UPDATE ON "Inmueble"
 FOR EACH ROW EXECUTE FUNCTION update_modified_column();
 
 CREATE TRIGGER update_usuario_modtime
 BEFORE UPDATE ON "Usuario"
+FOR EACH ROW EXECUTE FUNCTION update_modified_column();
+
+CREATE TRIGGER update_inmueble_negocio_modtime
+BEFORE UPDATE ON "InmuebleTipoNegocio"
 FOR EACH ROW EXECUTE FUNCTION update_modified_column();
