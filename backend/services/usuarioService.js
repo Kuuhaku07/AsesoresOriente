@@ -1,33 +1,57 @@
 import pool from '../db.js';
 import bcrypt from 'bcrypt';
+import fs from 'fs';
+import path from 'path';
 
 const SALT_ROUNDS = 10;
 
 /**
- * Obtiene todos los usuarios junto con información del asesor asociado.
- * Realiza una consulta JOIN entre las tablas Usuario y Asesor.
+ * Obtiene todos los usuarios junto con información del asesor asociado y rol.
+ * Realiza una consulta JOIN entre las tablas Usuario, Asesor y Rol.
  */
 export const getAllUsuarios = async () => {
   const result = await pool.query(
-    `SELECT u.id as usuario_id, u."Correo", u."Rol", u."id_asesor",
-            a."Nombre", a."Apellido", a."Cedula", a."Telefono", a."Pfp"
+    `SELECT u.id as usuario_id, u.correo as "Correo", u.nombre_usuario as "NombreUsuario", r.nombre as "Rol", u.asesor_id,
+            a.nombre as "Nombre", a.apellido as "Apellido", a.cedula as "Cedula", a.telefono as "Telefono", a.foto_perfil as "Pfp"
      FROM "Usuario" u
-     JOIN "Asesor" a ON u."id_asesor" = a."id"`
+     JOIN "Asesor" a ON u.asesor_id = a.id
+     JOIN "Rol" r ON u.rol_id = r.id`
   );
   return result.rows;
 };
 
 /**
- * Obtiene un usuario junto con información del asesor por correo electrónico.
+ * Obtiene un usuario junto con información del asesor y rol por correo electrónico.
  * Realiza una consulta JOIN filtrando por el correo del usuario.
  */
-export const getUsuarioWithAsesorByCorreo = async (Correo) => {
+export const getUsuarioWithAsesorByCorreo = async (correo) => {
   const result = await pool.query(
-    `SELECT u.id, u."Correo", u."Rol", a."Nombre", a."Apellido", a."Pfp"
+    `SELECT u.id, u.correo as "Correo", u.nombre_usuario as "NombreUsuario", r.nombre as "Rol", a.nombre as "Nombre", a.apellido as "Apellido", a.foto_perfil as "Pfp"
      FROM "Usuario" u
-     JOIN "Asesor" a ON u."id_asesor" = a."id"
-     WHERE u."Correo" = $1`,
-    [Correo]
+     JOIN "Asesor" a ON u.asesor_id = a.id
+     JOIN "Rol" r ON u.rol_id = r.id
+     WHERE u.correo = $1`,
+    [correo]
+  );
+  return result.rows[0];
+};
+
+export const getUsuarioWithAsesorByIdentifier = async (identifier) => {
+  const result = await pool.query(
+    `SELECT u.id, u.correo as "Correo", u.nombre_usuario as "NombreUsuario", r.nombre as "Rol", a.nombre as "Nombre", a.apellido as "Apellido", a.foto_perfil as "Pfp"
+     FROM "Usuario" u
+     JOIN "Asesor" a ON u.asesor_id = a.id
+     JOIN "Rol" r ON u.rol_id = r.id
+     WHERE u.correo = $1 OR u.nombre_usuario = $1`,
+    [identifier]
+  );
+  return result.rows[0];
+};
+
+export const getUsuarioByIdentifier = async (identifier) => {
+  const result = await pool.query(
+    'SELECT * FROM "Usuario" WHERE correo = $1 OR nombre_usuario = $1',
+    [identifier]
   );
   return result.rows[0];
 };
@@ -35,8 +59,8 @@ export const getUsuarioWithAsesorByCorreo = async (Correo) => {
 /**
  * Obtiene un usuario por correo electrónico.
  */
-export const getUsuarioByCorreo = async (Correo) => {
-  const result = await pool.query('SELECT * FROM "Usuario" WHERE "Correo" = $1', [Correo]);
+export const getUsuarioByCorreo = async (correo) => {
+  const result = await pool.query('SELECT * FROM "Usuario" WHERE correo = $1', [correo]);
   return result.rows[0];
 };
 
@@ -53,12 +77,16 @@ export const getUsuarioById = async (id) => {
   }
 };
 
+/**
+ * Obtiene un usuario junto con información del asesor y rol por ID.
+ */
 export const getUsuarioWithAsesorById = async (id) => {
   try {
     const result = await pool.query(
-      `SELECT u.id, u."Correo", u."Rol", a."Nombre", a."Apellido", a."Pfp"
+      `SELECT u.id, u.correo as "Correo", u.nombre_usuario as "NombreUsuario", r.nombre as "Rol", a.nombre as "Nombre", a.apellido as "Apellido", a.foto_perfil as "Pfp"
        FROM "Usuario" u
-       JOIN "Asesor" a ON u."id_asesor" = a."id"
+       JOIN "Asesor" a ON u.asesor_id = a.id
+       JOIN "Rol" r ON u.rol_id = r.id
        WHERE u.id = $1`,
       [id]
     );
@@ -74,11 +102,11 @@ export const getUsuarioWithAsesorById = async (id) => {
  * Hashea la contraseña antes de almacenarla en la base de datos.
  */
 export const createUsuario = async (usuario) => {
-  const { Correo, Contraseña, id_asesor, Rol } = usuario;
-  const hashedPassword = await bcrypt.hash(Contraseña, SALT_ROUNDS);
+  const { correo, contrasena, asesor_id, rol_id, nombre_usuario } = usuario;
+  const hashedPassword = await bcrypt.hash(contrasena, SALT_ROUNDS);
   const result = await pool.query(
-    'INSERT INTO "Usuario" ("Correo", "Contraseña", "id_asesor", "Rol") VALUES ($1, $2, $3, $4) RETURNING *',
-    [Correo, hashedPassword, id_asesor, Rol]
+    'INSERT INTO "Usuario" (correo, contrasena_hash, asesor_id, rol_id, nombre_usuario) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+    [correo, hashedPassword, asesor_id, rol_id, nombre_usuario]
   );
   return result.rows[0];
 };
@@ -87,11 +115,8 @@ export const createUsuario = async (usuario) => {
  * Actualiza un usuario existente y su foto de perfil en la tabla Asesor.
  * Si se proporciona una nueva contraseña, la hashea antes de actualizar.
  * Maneja actualizaciones parciales sin sobrescribir con valores nulos.
- * Retorna el usuario actualizado junto con la información del asesor (incluyendo Pfp).
+ * Retorna el usuario actualizado junto con la información del asesor (incluyendo foto de perfil).
  */
-import fs from 'fs';
-import path from 'path';
-
 export const updateUsuario = async (id, usuario) => {
   // Obtener usuario actual para valores por defecto
   const currentUsuario = await getUsuarioById(id);
@@ -99,34 +124,34 @@ export const updateUsuario = async (id, usuario) => {
     return null;
   }
 
-  // Obtener el Pfp antiguo del asesor
-  const asesorResult = await pool.query('SELECT "Pfp" FROM "Asesor" WHERE id = $1', [currentUsuario.id_asesor]);
-  const oldPfp = asesorResult.rows[0]?.Pfp;
+  // Obtener el foto_perfil antiguo del asesor
+  const asesorResult = await pool.query('SELECT foto_perfil FROM "Asesor" WHERE id = $1', [currentUsuario.asesor_id]);
+  const oldPfp = asesorResult.rows[0]?.foto_perfil;
 
-  const Correo = usuario.Correo ?? currentUsuario.Correo;
-  const id_asesor = usuario.id_asesor ?? currentUsuario.id_asesor;
-  const Rol = usuario.Rol ?? currentUsuario.Rol;
+  const correo = usuario.correo ?? currentUsuario.correo;
+  const asesor_id = usuario.asesor_id ?? currentUsuario.asesor_id;
+  const rol_id = usuario.rol_id ?? currentUsuario.rol_id;
 
-  let hashedPassword = currentUsuario.Contraseña;
-  if (usuario.Contraseña) {
-    hashedPassword = await bcrypt.hash(usuario.Contraseña, SALT_ROUNDS);
+  let hashedPassword = currentUsuario.contrasena_hash;
+  if (usuario.contrasena) {
+    hashedPassword = await bcrypt.hash(usuario.contrasena, SALT_ROUNDS);
   }
 
   // Actualizar usuario
   await pool.query(
-    'UPDATE "Usuario" SET "Correo" = $1, "Contraseña" = $2, "id_asesor" = $3, "Rol" = $4 WHERE id = $5',
-    [Correo, hashedPassword, id_asesor, Rol, id]
+    'UPDATE "Usuario" SET correo = $1, contrasena_hash = $2, asesor_id = $3, rol_id = $4 WHERE id = $5',
+    [correo, hashedPassword, asesor_id, rol_id, id]
   );
 
-  // Actualizar foto de perfil en tabla Asesor si se proporciona Pfp
-  if (usuario.Pfp && id_asesor) {
+  // Actualizar foto de perfil en tabla Asesor si se proporciona foto_perfil
+  if (usuario.foto_perfil && asesor_id) {
     await pool.query(
-      'UPDATE "Asesor" SET "Pfp" = $1 WHERE id = $2',
-      [usuario.Pfp, id_asesor]
+      'UPDATE "Asesor" SET foto_perfil = $1 WHERE id = $2',
+      [usuario.foto_perfil, asesor_id]
     );
 
     // Borrar archivo antiguo si existe y es diferente al nuevo
-    if (oldPfp && oldPfp !== usuario.Pfp) {
+    if (oldPfp && oldPfp !== usuario.foto_perfil) {
       const uploadsDir = path.join(process.cwd(), 'uploads', 'profile_pictures');
       const oldPfpPath = path.join(uploadsDir, oldPfp);
       fs.unlink(oldPfpPath, (err) => {
@@ -139,12 +164,13 @@ export const updateUsuario = async (id, usuario) => {
     }
   }
 
-  // Retornar usuario actualizado con info de asesor incluyendo Pfp
+  // Retornar usuario actualizado con info de asesor incluyendo foto_perfil
   const result = await pool.query(
-    `SELECT u.id, u."Correo", u."Rol", u."id_asesor",
-            a."Nombre", a."Apellido", a."Cedula", a."Telefono", a."Pfp"
+    `SELECT u.id, u.correo, r.nombre as rol, u.asesor_id,
+            a.nombre, a.apellido, a.cedula, a.telefono, a.foto_perfil as pfp
      FROM "Usuario" u
-     JOIN "Asesor" a ON u."id_asesor" = a."id"
+     JOIN "Asesor" a ON u.asesor_id = a.id
+     JOIN "Rol" r ON u.rol_id = r.id
      WHERE u.id = $1`,
     [id]
   );

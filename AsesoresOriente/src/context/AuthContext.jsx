@@ -7,23 +7,8 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
-  const login = (token, userData) => {
-    setToken(token);
-    setUser(userData);
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    navigate('/dashboard');
-  };
-
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
 
   // Fetch fresh user data from backend using token
   const fetchUserData = async (token) => {
@@ -41,6 +26,7 @@ export const AuthProvider = ({ children }) => {
       const normalizedUser = {
         id: data.id,
         name: data.Nombre || data.name || '',
+        username: data.NombreUsuario || data.nombre_usuario || '',
         email: data.Correo || data.email || '',
         role: data.Rol || data.role || '',
         pfp: data.Pfp || data.pfp || '',
@@ -51,7 +37,25 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Error fetching user data:', error);
       logout();
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const login = (token, userData) => {
+    setToken(token);
+    localStorage.setItem('token', token);
+    // Instead of setting user directly, fetch fresh user data
+    fetchUserData(token);
+    navigate('/dashboard');
+  };
+
+  const logout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
   useEffect(() => {
@@ -60,6 +64,8 @@ export const AuthProvider = ({ children }) => {
     if (storedToken) {
       setToken(storedToken);
       fetchUserData(storedToken);
+    } else {
+      setLoading(false);
     }
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -67,7 +73,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, token, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, token, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

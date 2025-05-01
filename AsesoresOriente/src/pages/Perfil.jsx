@@ -46,6 +46,21 @@ const Perfil = () => {
       formData.append('pfp', selectedFile);
     }
 
+    // Append asesor_id and rol_id from user context
+    formData.append('id_asesor', user.id_asesor);
+    // Assuming role names map to rol_id as in backend
+    const roleMap = {
+      'Asesor': 1,
+      'Gerente': 2,
+      'Administrador': 3
+    };
+    formData.append('Rol', roleMap[user.role] || user.role);
+
+    // Rename 'name' field to 'NombreUsuario' expected by backend
+    const nameInput = formData.get('name');
+    formData.delete('name');
+    formData.append('NombreUsuario', nameInput);
+
     try {
       const response = await fetch(`/api/usuario/${user.id}`, {
         method: 'PUT',
@@ -58,7 +73,7 @@ const Perfil = () => {
       // Actualizar el contexto de usuario con los nuevos datos
       setUser({
         ...user,
-        name: updatedUser.Nombre || user.name,
+        name: updatedUser.NombreUsuario || user.name,
         email: updatedUser.Correo || user.email,
         pfp: updatedUser.Pfp || user.pfp,
       });
@@ -112,7 +127,7 @@ const Perfil = () => {
                 <h2>Editar Perfil</h2>
                 <form onSubmit={handleEditSubmit}>
                   <label>
-                    Nombre:
+                    Nombre de Usuario:
                     <input type="text" defaultValue={user.name} name="name" />
                   </label>
                   {/* Email no editable, se muestra solo */}

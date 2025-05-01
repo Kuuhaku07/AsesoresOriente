@@ -10,6 +10,7 @@ const Register = () => {
     Telefono: '',
     Pfp: '',
     Correo: '',
+    NombreUsuario: '',
     Contraseña: '',
     Rol: '',
   });
@@ -46,8 +47,16 @@ const Register = () => {
   };
 
   const loadUsuario = (usuario) => {
+    const roleMapDbToSelect = {
+      'ADMINISTRADOR': 'Administrador',
+      'GERENTE': 'Gerente',
+      'ASESOR': 'Asesor',
+      'Administrador': 'Administrador',
+      'Gerente': 'Gerente',
+      'Asesor': 'Asesor'
+    };
     setSelectedUsuarioId(usuario.usuario_id);
-    setSelectedAsesorId(usuario.id_asesor);
+    setSelectedAsesorId(usuario.asesor_id);
     setFormData({
       Nombre: usuario.Nombre || '',
       Apellido: usuario.Apellido || '',
@@ -55,8 +64,9 @@ const Register = () => {
       Telefono: usuario.Telefono || '',
       Pfp: usuario.Pfp || '',
       Correo: usuario.Correo || '',
+      NombreUsuario: usuario.NombreUsuario || '',
       Contraseña: '', // Do not load password for security reasons
-      Rol: usuario.Rol || '',
+      Rol: roleMapDbToSelect[usuario.rol] || roleMapDbToSelect[usuario.Rol] || roleMapDbToSelect[usuario.rol_id] || '',
     });
     setSuccess('');
     setError('');
@@ -72,6 +82,7 @@ const Register = () => {
       Telefono: '',
       Pfp: '',
       Correo: '',
+      NombreUsuario: '',
       Contraseña: '',
       Rol: '',
     });
@@ -83,6 +94,11 @@ const Register = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    const roleMapSelectToDb = {
+      'Administrador': 'ADMINISTRADOR',
+      'Gerente': 'GERENTE',
+      'Asesor': 'ASESOR'
+    };
     try {
       if (selectedUsuarioId && selectedAsesorId) {
         // Update flow
@@ -97,6 +113,7 @@ const Register = () => {
             Apellido: formData.Apellido,
             Cedula: formData.Cedula || null,
             Telefono: formData.Telefono || null,
+            Correo: formData.Correo || null,
             Pfp: formData.Pfp || null,
           }),
         });
@@ -114,9 +131,10 @@ const Register = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            NombreUsuario: formData.NombreUsuario,
             Correo: formData.Correo,
             Contraseña: formData.Contraseña,
-            Rol: formData.Rol,
+            Rol: roleMapSelectToDb[formData.Rol] || formData.Rol,
             id_asesor: selectedAsesorId,
           }),
         });
@@ -141,6 +159,7 @@ const Register = () => {
             Apellido: formData.Apellido,
             Cedula: formData.Cedula || null,
             Telefono: formData.Telefono || null,
+            Correo: formData.Correo || null,
             Pfp: formData.Pfp || null,
           }),
         });
@@ -160,9 +179,10 @@ const Register = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            NombreUsuario: formData.NombreUsuario,
             Correo: formData.Correo,
             Contraseña: formData.Contraseña,
-            Rol: formData.Rol,
+            Rol: roleMapSelectToDb[formData.Rol] || formData.Rol,
             id_asesor: asesorData.id,
           }),
         });
@@ -247,6 +267,16 @@ const Register = () => {
             autoComplete="off"
           />
 
+          <label htmlFor="NombreUsuario">Nombre de Usuario:</label>
+          <input
+            type="text"
+            id="NombreUsuario"
+            name="NombreUsuario"
+            value={formData.NombreUsuario}
+            onChange={handleChange}
+            required
+            autoComplete="off"
+          />
           <label htmlFor="Correo">Correo:</label>
           <input
             type="email"
@@ -281,6 +311,7 @@ const Register = () => {
             <option value="">Select role</option>
             <option value="Asesor">Asesor</option>
             <option value="Gerente">Gerente</option>
+            <option value="Administrador">Administrador</option>
           </select>
 
           <button type="submit">{selectedUsuarioId ? 'Update' : 'Register'}</button>

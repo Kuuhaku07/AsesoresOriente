@@ -90,14 +90,14 @@ router.delete('/:id', deleteUsuario);
 /**
  * Ruta para login de usuario.
  * Aplica limitación de intentos para prevenir fuerza bruta.
- * Valida que el correo sea un email válido y la contraseña no esté vacía.
+ * Valida que el identificador no esté vacío y la contraseña no esté vacía.
  */
 router.post(
   '/login',
   loginRateLimiter,
   [
-    body('Correo').isEmail().withMessage('Correo debe ser un email valido'),
-    body('Contraseña').notEmpty().withMessage('Contraseña es requerido')
+    body('identifier').notEmpty().withMessage('Identificador es requerido'),
+    body('Contraseña').notEmpty().withMessage('Contraseña es requerida')
   ],
   validateRequest,
   login

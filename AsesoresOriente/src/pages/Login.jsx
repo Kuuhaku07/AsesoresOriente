@@ -7,8 +7,8 @@ import Logo from '../assets/Logo.png';
 const Login = () => {
   const { login } = useAuth();
   const [credentials, setCredentials] = useState({
-    email: '',
-    password: ''
+    identifier: '',
+    Contraseña: ''
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -28,14 +28,14 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch('/api/usuario/login', {  // Corrected URL
+      const response = await fetch('/api/usuario/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          Correo: credentials.email,
-          Contraseña: credentials.password
+          identifier: credentials.identifier,
+          Contraseña: credentials.Contraseña
         })
       });
 
@@ -77,25 +77,25 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-            <label htmlFor="email">Correo Electrónico</label>
+            <label htmlFor="identifier">Usuario o Correo Electrónico</label>
             <input
-              type="email"
-              id="email"
-              name="email"
-              value={credentials.email}
+              type="text"
+              id="identifier"
+              name="identifier"
+              value={credentials.identifier}
               onChange={handleChange}
               required
-              placeholder="tu@correo.com"
+              placeholder="usuario o correo"
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
+            <label htmlFor="Contraseña">Contraseña</label>
             <input
               type="password"
-              id="password"
-              name="password"
-              value={credentials.password}
+              id="Contraseña"
+              name="Contraseña"
+              value={credentials.Contraseña}
               onChange={handleChange}
               required
               placeholder="••••••••"
