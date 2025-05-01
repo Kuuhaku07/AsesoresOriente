@@ -73,7 +73,7 @@ router.put(
   '/:id',
   upload.single('pfp'), // Middleware para subir archivo con campo 'pfp'
   [
-    body('Correo').optional().isEmail().withMessage('Correo debe ser un email valido'),
+    body('Correo').optional({ nullable: true }).isEmail().withMessage('Correo debe ser un email valido'),
     body('Contraseña').optional().isLength({ min: 6 }).withMessage('Contraseña debe tener al menos 6 caracteres'),
     body('id_asesor').optional().isInt().withMessage('id_asesor debe ser un entero'),
     body('Rol').optional().notEmpty().withMessage('Rol es requerido')

@@ -83,7 +83,8 @@ export const getUsuarioById = async (id) => {
 export const getUsuarioWithAsesorById = async (id) => {
   try {
     const result = await pool.query(
-      `SELECT u.id, u.correo as "Correo", u.nombre_usuario as "NombreUsuario", r.nombre as "Rol", a.nombre as "Nombre", a.apellido as "Apellido", a.foto_perfil as "Pfp"
+      `SELECT u.id, u.correo as "Correo", u.nombre_usuario as "NombreUsuario", r.nombre as "Rol", u.asesor_id,
+              a.nombre as "Nombre", a.apellido as "Apellido", a.foto_perfil as "Pfp"
        FROM "Usuario" u
        JOIN "Asesor" a ON u.asesor_id = a.id
        JOIN "Rol" r ON u.rol_id = r.id
@@ -131,16 +132,17 @@ export const updateUsuario = async (id, usuario) => {
   const correo = usuario.correo ?? currentUsuario.correo;
   const asesor_id = usuario.asesor_id ?? currentUsuario.asesor_id;
   const rol_id = usuario.rol_id ?? currentUsuario.rol_id;
+  const nombre_usuario = usuario.nombre_usuario ?? currentUsuario.nombre_usuario;
 
   let hashedPassword = currentUsuario.contrasena_hash;
   if (usuario.contrasena) {
     hashedPassword = await bcrypt.hash(usuario.contrasena, SALT_ROUNDS);
   }
 
-  // Actualizar usuario
+  // Actualizar usuario incluyendo nombre_usuario
   await pool.query(
-    'UPDATE "Usuario" SET correo = $1, contrasena_hash = $2, asesor_id = $3, rol_id = $4 WHERE id = $5',
-    [correo, hashedPassword, asesor_id, rol_id, id]
+    'UPDATE "Usuario" SET correo = $1, contrasena_hash = $2, asesor_id = $3, rol_id = $4, nombre_usuario = $5 WHERE id = $6',
+    [correo, hashedPassword, asesor_id, rol_id, nombre_usuario, id]
   );
 
   // Actualizar foto de perfil en tabla Asesor si se proporciona foto_perfil

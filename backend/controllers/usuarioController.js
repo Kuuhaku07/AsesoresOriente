@@ -80,6 +80,7 @@ export const updateUsuario = async (req, res) => {
       contrasena: req.body.Contraseña,
       asesor_id: req.body.id_asesor,
       rol_id: rol_id,
+      nombre_usuario: req.body.NombreUsuario,
       foto_perfil: req.file ? req.file.filename : undefined
     };
 

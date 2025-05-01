@@ -1,4 +1,3 @@
-// src/context/AuthContext.jsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,11 +10,16 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   // Fetch fresh user data from backend using token
-  const fetchUserData = async (token) => {
+  const fetchUserData = async (tokenParam) => {
+    const usedToken = tokenParam || token;
+    if (!usedToken) {
+      setLoading(false);
+      return;
+    }
     try {
       const response = await fetch('http://localhost:5000/api/usuario/me', {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${usedToken}`,
         },
       });
       if (!response.ok) {
@@ -42,11 +46,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = (token, userData) => {
-    setToken(token);
-    localStorage.setItem('token', token);
+  const login = (tokenParam, userData) => {
+    setToken(tokenParam);
+    localStorage.setItem('token', tokenParam);
     // Instead of setting user directly, fetch fresh user data
-    fetchUserData(token);
+    fetchUserData(tokenParam);
     navigate('/dashboard');
   };
 
@@ -73,7 +77,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, setUser, token, login, logout, loading, fetchUserData }}>
       {children}
     </AuthContext.Provider>
   );

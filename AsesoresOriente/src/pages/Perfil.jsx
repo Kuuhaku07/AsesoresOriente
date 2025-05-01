@@ -5,7 +5,7 @@ import { Navigate } from 'react-router-dom';
 import '../styles/Perfil.css';
 
 const Perfil = () => {
-  const { user, setUser } = useAuth();
+  const { user, fetchUserData, token } = useAuth();
 
   // Estados para controlar la visibilidad de los modales
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -21,10 +21,6 @@ const Perfil = () => {
   if (!user) {
     return <Navigate to="/" />;
   }
-
-  // Debug: Log profile picture URL and user object
-  console.log('User profile picture URL:', user.pfp);
-  console.log('User object:', user);
 
   // Funciones para abrir y cerrar modales
   const openEditModal = () => setIsEditModalOpen(true);
@@ -46,8 +42,11 @@ const Perfil = () => {
       formData.append('pfp', selectedFile);
     }
 
-    // Append asesor_id and rol_id from user context
-    formData.append('id_asesor', user.id_asesor);
+    // Append asesor_id only if valid integer
+    if (user.id_asesor && Number.isInteger(user.id_asesor)) {
+      formData.append('id_asesor', user.id_asesor);
+    }
+
     // Assuming role names map to rol_id as in backend
     const roleMap = {
       'Asesor': 1,
@@ -67,16 +66,12 @@ const Perfil = () => {
         body: formData,
       });
       if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Validation errors:', errorData.errors);
         throw new Error('Error al actualizar el perfil');
       }
-      const updatedUser = await response.json();
-      // Actualizar el contexto de usuario con los nuevos datos
-      setUser({
-        ...user,
-        name: updatedUser.NombreUsuario || user.name,
-        email: updatedUser.Correo || user.email,
-        pfp: updatedUser.Pfp || user.pfp,
-      });
+      // After successful update, refresh user context from backend
+      await fetchUserData(token);
       alert('Perfil actualizado correctamente');
       closeEditModal();
     } catch (error) {
@@ -128,7 +123,7 @@ const Perfil = () => {
                 <form onSubmit={handleEditSubmit}>
                   <label>
                     Nombre de Usuario:
-                    <input type="text" defaultValue={user.name} name="name" />
+                    <input type="text" defaultValue={user.username} name="name" />
                   </label>
                   {/* Email no editable, se muestra solo */}
                   <label>
