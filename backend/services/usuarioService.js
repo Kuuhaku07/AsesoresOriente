@@ -187,3 +187,36 @@ export const deleteUsuario = async (id) => {
   const result = await pool.query('DELETE FROM "Usuario" WHERE id = $1', [id]);
   return result.rowCount > 0;
 };
+
+/**
+ * Crea un refresh token en la base de datos.
+ */
+export const createRefreshToken = async (token, usuario_id, expiresAt) => {
+  const result = await pool.query(
+    'INSERT INTO "RefreshToken" (token, usuario_id, expires_at) VALUES ($1, $2, $3) RETURNING *',
+    [token, usuario_id, expiresAt]
+  );
+  return result.rows[0];
+};
+
+/**
+ * Obtiene un refresh token de la base de datos.
+ */
+export const getRefreshToken = async (token) => {
+  const result = await pool.query(
+    'SELECT * FROM "RefreshToken" WHERE token = $1',
+    [token]
+  );
+  return result.rows[0];
+};
+
+/**
+ * Elimina un refresh token de la base de datos.
+ */
+export const deleteRefreshToken = async (token) => {
+  const result = await pool.query(
+    'DELETE FROM "RefreshToken" WHERE token = $1',
+    [token]
+  );
+  return result.rowCount > 0;
+};

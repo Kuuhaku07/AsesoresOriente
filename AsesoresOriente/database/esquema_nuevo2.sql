@@ -290,6 +290,20 @@ CREATE TABLE "HistorialInmueble" (
     "motivo" TEXT NULL
 );
 
+-- Nueva tabla para almacenar tokens de actualización (refresh tokens)
+CREATE TABLE "RefreshToken" (
+    "id" SERIAL PRIMARY KEY,
+    "token" VARCHAR(512) NOT NULL UNIQUE,
+    "usuario_id" INTEGER NOT NULL,
+    "expires_at" TIMESTAMP NOT NULL,
+    "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_usuario
+      FOREIGN KEY("usuario_id") 
+      REFERENCES "Usuario"("id")
+      ON DELETE CASCADE
+);
+
+
 -- Índices
 CREATE INDEX idx_inmueble_asesor ON "Inmueble"("asesor_id");
 CREATE INDEX idx_inmueble_propietario_persona ON "Inmueble"("propietario_persona_id");
@@ -308,6 +322,7 @@ CREATE INDEX idx_documento_valido ON "Documento"("valido");
 CREATE INDEX idx_inmueble_fechas ON "Inmueble"("fecha_creacion", "fecha_publicacion");
 CREATE INDEX idx_inmueble_negocio ON "InmuebleTipoNegocio"("tipo_negocio_id");
 CREATE INDEX idx_inmueble_precio ON "InmuebleTipoNegocio"("precio");
+CREATE INDEX idx_refresh_token_token ON "RefreshToken" ("token");
 
 -- Datos iniciales
 INSERT INTO "EstadoInmueble" ("nombre", "color") VALUES 

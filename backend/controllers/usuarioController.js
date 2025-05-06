@@ -2,6 +2,10 @@ import * as usuarioService from '../services/usuarioService.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
+//const ACCESS_TOKEN_EXPIRATION = '1m'; // Reduced to 1 minute for testing
+const ACCESS_TOKEN_EXPIRATION = '1h'; // Restored to 1 hour for production
+const REFRESH_TOKEN_EXPIRATION_DAYS = 7;
+
 /**
  * Obtiene todos los usuarios de la base de datos.
  * Responde con un arreglo de usuarios en formato JSON.
@@ -9,8 +13,6 @@ import jwt from 'jsonwebtoken';
 export const getAllUsuarios = async (req, res) => {
   try {
     const usuarios = await usuarioService.getAllUsuarios();
-    // Map roles to role names or ids as per new schema if needed
-    // Assuming usuarioService.getAllUsuarios returns role info correctly
     res.json(usuarios);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch usuarios' });
@@ -39,14 +41,13 @@ export const getUsuarioById = async (req, res) => {
  */
 export const createUsuario = async (req, res) => {
   try {
-    // Map role names to rol_id integers
     const roleMap = {
-      'Asesor': 1,
-      'Gerente': 2
+      'ADMINISTRADOR': 1,
+      'GERENTE': 2,
+      'ASESOR': 3
     };
-    const rol_id = roleMap[req.body.Rol] || null;
+    const rol_id = roleMap[req.body.Rol.toUpperCase()] || null;
 
-    // Map incoming body keys to new schema keys
     const usuarioData = {
       correo: req.body.Correo,
       contrasena: req.body.Contraseña,
@@ -70,10 +71,11 @@ export const createUsuario = async (req, res) => {
 export const updateUsuario = async (req, res) => {
   try {
     const roleMap = {
-      'Asesor': 1,
-      'Gerente': 2
+      'ADMINISTRADOR': 1,
+      'GERENTE': 2,
+      'ASESOR': 3
     };
-    const rol_id = roleMap[req.body.Rol] || null;
+    const rol_id = req.body.Rol ? roleMap[req.body.Rol.toUpperCase()] : null;
 
     const usuarioData = {
       correo: req.body.Correo,
@@ -118,12 +120,10 @@ export const deleteUsuario = async (req, res) => {
 export const login = async (req, res) => {
   const { identifier, Contraseña } = req.body;
   try {
-    // Try to get user by correo or nombre_usuario
     const usuario = await usuarioService.getUsuarioWithAsesorByIdentifier(identifier);
     if (!usuario) {
       return res.status(401).json({ error: 'Invalid username/email or password' });
     }
-    // Fetch full user with password hash for password comparison
     const usuarioFull = await usuarioService.getUsuarioByIdentifier(identifier);
     const passwordMatch = await bcrypt.compare(Contraseña, usuarioFull.contrasena_hash);
     if (!passwordMatch) {
@@ -136,8 +136,15 @@ export const login = async (req, res) => {
       name: `${usuario.nombre} ${usuario.apellido}`,
       pfp: usuario.pfp
     };
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRATION });
+
+    // Create refresh token
+    const refreshToken = jwt.sign(tokenPayload, process.env.JWT_REFRESH_SECRET, { expiresIn: `${REFRESH_TOKEN_EXPIRATION_DAYS}d` });
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRATION_DAYS);
+    await usuarioService.createRefreshToken(refreshToken, usuario.id, expiresAt);
+
+    res.json({ token, refreshToken });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -160,5 +167,53 @@ export const getCurrentUser = async (req, res) => {
     res.json(usuario);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch current user' });
+  }
+};
+
+/**
+ * Función para cerrar sesión y eliminar el refresh token.
+ */
+export const logout = async (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+    return res.status(400).json({ error: 'Refresh token is required' });
+  }
+  try {
+    const deleted = await usuarioService.deleteRefreshToken(refreshToken);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Refresh token not found' });
+    }
+    res.json({ message: 'Logout successful' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+/**
+ * Función para refrescar el token de acceso usando el refresh token.
+ */
+export const refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+    return res.status(400).json({ error: 'Refresh token is required' });
+  }
+  try {
+    const storedToken = await usuarioService.getRefreshToken(refreshToken);
+    if (!storedToken) {
+      return res.status(403).json({ error: 'Invalid refresh token' });
+    }
+    jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ error: 'Invalid or expired refresh token' });
+      }
+      const tokenPayload = { id: decoded.id };
+      const newAccessToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '1h' });
+      // Removed console log for new access token creation to clean logs
+      res.json({ token: newAccessToken });
+    });
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

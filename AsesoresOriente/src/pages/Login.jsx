@@ -48,6 +48,7 @@ const Login = () => {
 
       const data = await response.json();
       const token = data.token;
+      const refreshToken = data.refreshToken;
 
       // Decode token payload to get user info
       const base64Url = token.split('.')[1];
@@ -57,7 +58,7 @@ const Login = () => {
       }).join(''));
       const userData = JSON.parse(jsonPayload);
 
-      login(token, userData);
+      login(token, refreshToken);
     } catch (err) {
       setError('Error de red. Intenta nuevamente.');
       setIsLoading(false);

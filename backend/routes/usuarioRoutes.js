@@ -2,7 +2,7 @@ import express from 'express';
 import { body } from 'express-validator';
 import multer from 'multer';
 import path from 'path';
-import { getAllUsuarios, getUsuarioById, createUsuario, updateUsuario, deleteUsuario, login, getCurrentUser } from '../controllers/usuarioController.js';
+import { getAllUsuarios, getUsuarioById, createUsuario, updateUsuario, deleteUsuario, login, getCurrentUser, logout, refreshToken } from '../controllers/usuarioController.js';
 import { validateRequest } from '../middlewares/validationMiddleware.js';
 import { loginRateLimiter } from '../middlewares/rateLimitMiddleware.js';
 import { authenticateToken } from '../middlewares/authMiddleware.js';
@@ -102,6 +102,25 @@ router.post(
   validateRequest,
   login
 );
+
+router.post(
+  '/logout',
+  [
+    body('refreshToken').notEmpty().withMessage('Refresh token es requerido')
+  ],
+  validateRequest,
+  logout
+);
+
+router.post(
+  '/refresh-token',
+  [
+    body('refreshToken').notEmpty().withMessage('Refresh token es requerido')
+  ],
+  validateRequest,
+  refreshToken
+);
+
 
 
 export default router;
