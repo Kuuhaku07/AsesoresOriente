@@ -1,18 +1,26 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ToastMessage from '../components/ToastMessage.jsx';
+import { validateData } from '../utils/validationUtils.js';
 import '../styles/Login.css';
 import Logo from '../assets/Logo.png';
 
 const Login = () => {
   const { login } = useAuth();
   const [credentials, setCredentials] = useState({
-    identifier: '',
+    identificador: '',
     Contraseña: ''
   });
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState([]);
+  const [serverError, setServerError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  const rules = {
+    identificador: { required: true },
+    Contraseña: { required: true, min: 6 },
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,12 +28,23 @@ const Login = () => {
       ...prev,
       [name]: value
     }));
+    setErrors([]);
+    setServerError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validar datos localmente
+    const validationErrors = validateData(credentials, rules);
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     setIsLoading(true);
-    setError('');
+    setErrors([]);
+    setServerError('');
 
     try {
       const response = await fetch('/api/usuario/login', {
@@ -34,14 +53,18 @@ const Login = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          identifier: credentials.identifier,
+          identifier: credentials.identificador,
           Contraseña: credentials.Contraseña
         })
       });
 
       if (!response.ok) {
         const data = await response.json();
-        setError(data.error || 'Error en la autenticación');
+        let errorMsg = data.error || 'Error en la autenticación';
+        if (errorMsg === 'Invalid username/email or password') {
+          errorMsg = 'Usuario o contraseña inválidos';
+        }
+        setServerError(errorMsg);
         setIsLoading(false);
         return;
       }
@@ -59,8 +82,10 @@ const Login = () => {
       const userData = JSON.parse(jsonPayload);
 
       login(token, refreshToken);
+      // Optionally navigate after login
+      // navigate('/dashboard');
     } catch (err) {
-      setError('Error de red. Intenta nuevamente.');
+      setServerError('Error de red. Intenta nuevamente.');
       setIsLoading(false);
     }
   };
@@ -74,16 +99,23 @@ const Login = () => {
           <p>Acceso exclusivo para los Agentes Asociados</p>
         </div>
 
-        {error && <div className="login-error">{error}</div>}
+        {/* Mostrar errores de validación */}
+        {errors.length > 0 &&
+          errors.map((error, index) => (
+            <ToastMessage key={index} message={error} type="error" />
+          ))}
 
-        <form onSubmit={handleSubmit} className="login-form">
+        {/* Mostrar error del servidor */}
+        {serverError && <ToastMessage message={serverError} type="error" />}
+
+        <form onSubmit={handleSubmit} className="login-form" noValidate>
           <div className="form-group">
-            <label htmlFor="identifier">Usuario o Correo Electrónico</label>
+            <label htmlFor="identificador">Usuario o Correo Electrónico</label>
             <input
               type="text"
-              id="identifier"
-              name="identifier"
-              value={credentials.identifier}
+              id="identificador"
+              name="identificador"
+              value={credentials.identificador}
               onChange={handleChange}
               required
               placeholder="usuario o correo"
