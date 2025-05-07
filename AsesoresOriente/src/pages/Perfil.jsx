@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Menu } from '../components/Menu';
+import ToastMessage from '../components/ToastMessage.jsx';
+import { validateData } from '../utils/validationUtils.js';
 import { Navigate } from 'react-router-dom';
 import '../styles/Perfil.css';
 
@@ -11,6 +13,11 @@ const Perfil = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+
+  // Estados para validaciones y mensajes
+  const [errors, setErrors] = useState([]);
+  const [serverError, setServerError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Show loading or null while user is being initialized
   if (user === null) {
@@ -23,7 +30,12 @@ const Perfil = () => {
   }
 
   // Funciones para abrir y cerrar modales
-  const openEditModal = () => setIsEditModalOpen(true);
+  const openEditModal = () => {
+    setErrors([]);
+    setServerError('');
+    setSuccessMessage('');
+    setIsEditModalOpen(true);
+  };
   const closeEditModal = () => setIsEditModalOpen(false);
 
   const openChangePasswordModal = () => setIsChangePasswordModalOpen(true);
@@ -34,10 +46,31 @@ const Perfil = () => {
     setSelectedFile(e.target.files[0]);
   };
 
+  // Reglas de validación para edición de perfil
+  const validationRules = {
+    name: { required: true, min: 3 },
+  };
+
   // Manejar envío del formulario de edición de perfil (sin email)
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
+    setErrors([]);
+    setServerError('');
+    setSuccessMessage('');
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    // Validar datos localmente
+    const formValues = {
+      name: formData.get('name'),
+    };
+    const validationErrors = validateData(formValues, validationRules);
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     if (selectedFile) {
       formData.append('pfp', selectedFile);
     }
@@ -67,15 +100,21 @@ const Perfil = () => {
       });
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Validation errors:', errorData.errors);
-        throw new Error('Error al actualizar el perfil');
+        if (errorData.errors) {
+          setErrors(errorData.errors);
+        } else if (errorData.error) {
+          setServerError(errorData.error);
+        } else {
+          setServerError('Error al actualizar el perfil');
+        }
+        return;
       }
       // After successful update, refresh user context from backend
       await fetchUserData(token);
-      alert('Perfil actualizado correctamente');
+      setSuccessMessage('Perfil actualizado correctamente');
       closeEditModal();
     } catch (error) {
-      alert(error.message);
+      setServerError('Error al actualizar el perfil');
     }
   };
 
@@ -87,7 +126,7 @@ const Perfil = () => {
     const confirmPassword = e.target.confirmPassword.value;
 
     if (newPassword !== confirmPassword) {
-      alert('La nueva contraseña y la confirmación no coinciden.');
+      setErrors(['La nueva contraseña y la confirmación no coinciden.']);
       return;
     }
 
@@ -114,6 +153,18 @@ const Perfil = () => {
               Editar Perfil
             </button>
           </section>
+
+          {/* Mostrar errores de validación */}
+          {errors.length > 0 &&
+            errors.map((error, index) => (
+              <ToastMessage key={index} message={error} type="error" />
+            ))}
+
+          {/* Mostrar error del servidor */}
+          {serverError && <ToastMessage message={serverError} type="error" />}
+
+          {/* Mostrar mensaje de éxito */}
+          {successMessage && <ToastMessage message={successMessage} type="success" />}
 
           {/* Modal para editar perfil (sin email) */}
           {isEditModalOpen && (

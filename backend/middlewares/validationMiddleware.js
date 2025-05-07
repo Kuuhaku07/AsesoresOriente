@@ -1,16 +1,21 @@
 import { validationResult } from 'express-validator';
 
-
-/**
- * Middleware para validar los resultados de las validaciones definidas en las rutas.
- * Si existen errores de validación, responde con estado 400 y los errores en formato JSON.
- * Si no hay errores, continúa con el siguiente middleware o controlador.
- */
-
 export const validateRequest = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
+  }
+  next();
+};
+
+// Middleware para manejar errores de multer, especialmente el filtro de archivos
+export const multerErrorHandler = (err, req, res, next) => {
+  if (err) {
+    if (err.message === 'Solo se permiten imágenes JPEG y PNG') {
+      return res.status(400).json({ error: err.message });
+    }
+    // Otros errores de multer pueden manejarse aquí
+    return res.status(500).json({ error: 'Error interno del servidor' });
   }
   next();
 };

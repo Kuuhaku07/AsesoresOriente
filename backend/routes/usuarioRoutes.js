@@ -3,10 +3,9 @@ import { body } from 'express-validator';
 import multer from 'multer';
 import path from 'path';
 import { getAllUsuarios, getUsuarioById, createUsuario, updateUsuario, deleteUsuario, login, getCurrentUser, logout, refreshToken } from '../controllers/usuarioController.js';
-import { validateRequest } from '../middlewares/validationMiddleware.js';
+import { validateRequest, multerErrorHandler } from '../middlewares/validationMiddleware.js';
 import { loginRateLimiter } from '../middlewares/rateLimitMiddleware.js';
 import { authenticateToken } from '../middlewares/authMiddleware.js';
-
 
 /**
  * Configuración de multer para subir archivos de imagen
@@ -46,7 +45,6 @@ router.get('/me', authenticateToken, getCurrentUser);
 router.get('/', getAllUsuarios);
 router.get('/:id', getUsuarioById);
 
-
 /**
  * Ruta para crear un nuevo usuario.
  * Valida que el correo sea un email válido,
@@ -68,10 +66,12 @@ router.post(
 /**
  * Ruta para actualizar un usuario existente.
  * Valida los campos opcionales con las mismas reglas que la creación.
+ * Usa multer para subir archivo con campo 'pfp' y maneja errores de multer.
  */
 router.put(
   '/:id',
   upload.single('pfp'), // Middleware para subir archivo con campo 'pfp'
+  multerErrorHandler,   // Middleware para manejar errores de multer
   [
     body('Correo').optional({ nullable: true }).isEmail().withMessage('Correo debe ser un email valido'),
     body('Contraseña').optional().isLength({ min: 6 }).withMessage('Contraseña debe tener al menos 6 caracteres'),
@@ -120,7 +120,5 @@ router.post(
   validateRequest,
   refreshToken
 );
-
-
 
 export default router;
