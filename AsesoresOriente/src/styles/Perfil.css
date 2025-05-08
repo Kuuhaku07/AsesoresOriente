@@ -6,14 +6,14 @@
     min-height: 100vh;
     padding-top: 90px; /* Padding to avoid fixed menu overlap */
     background-color: #fafafa;
-    }
-    
-    .perfil-content {
+}
+
+.perfil-content {
     padding: 20px;
-    }
-    
-    /* Profile header: name, role, edit button */
-    .profile-header {
+}
+
+/* Profile header: name, role, edit button */
+.profile-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -23,33 +23,33 @@
     padding: 20px;
     border-radius: var(--border-radius-md);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    .profile-header-info {
+}
+
+.profile-header-info {
     flex-grow: 1;
-    }
-    
-    .profile-header-info h2 {
+}
+
+.profile-header-info h2 {
     margin: 0 0 5px 0;
     font-size: 1.8rem;
-    }
-    
-    .profile-role {
+}
+
+.profile-role {
     font-size: 1.1rem;
     color: var(--color-primary);
     font-weight: 600;
-    }
-    
-    /* User avatar larger and circular */
-    .user-avatar {
+}
+
+/* User avatar larger and circular */
+.user-avatar {
     width: 100px;
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    }
-    
-    /* Edit profile button styling */
-    .edit-profile-btn {
+}
+
+/* Edit profile button styling */
+.edit-profile-btn {
     padding: 10px 25px;
     background-color: var(--color-primary);
     color: white;
@@ -60,55 +60,85 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
     white-space: nowrap;
-    }
-    
-    .edit-profile-btn:hover {
+}
+
+.edit-profile-btn:hover {
     background-color: var(--color-primary-dark);
-    }
-    
-    /* Container for profile sections with grid areas */
-    .profile-sections {
+}
+
+/* Container for profile sections with grid areas */
+.profile-sections {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: auto auto;
+    grid-template-rows: 1fr auto;
     grid-template-areas:
     "personal redes"
     "properties properties";
     gap: 20px;
-    }
-    
-    /* Card style for each section */
-    .profile-card {
+}
+
+.profile-card.personal-info {
+    /* Remove fixed height to allow dynamic sizing */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-card.social-networks {
+    /* Match height dynamically to personal-info */
+    overflow-y: auto; /* Enable vertical scroll if content exceeds max height */
+    padding-right: 10px; /* Padding to avoid scrollbar overlap */
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    height: auto;
+}
+
+.profile-card.social-networks {
+    height: 300px; /* Match height of personal-info */
+    overflow-y: auto; /* Enable vertical scroll */
+    padding-right: 10px; /* Padding to avoid scrollbar overlap */
+}
+
+/* Card style for each section */
+.profile-card {
     background-color: white;
     border-radius: var(--border-radius-md);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     padding: 20px;
-    }
-    
-    /* Section headers */
-    .profile-card h3 {
+}
+
+/* Redes y Contactos card with scroll */
+.profile-card.social-networks {
+    max-height: 300px; /* Set a max height for the container */
+    overflow-y: auto; /* Enable vertical scroll if content exceeds max height */
+    padding-right: 10px; /* Optional: add some padding to avoid scrollbar overlap */
+}
+
+/* Section headers */
+.profile-card h3 {
     margin-top: 0;
     margin-bottom: 15px;
     font-size: 1.3rem;
     border-bottom: 1px solid #ddd;
     padding-bottom: 8px;
-    }
-    
-    /* List style for profile info */
-    .profile-info-list {
+}
+
+/* List style for profile info */
+.profile-info-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    }
-    
-    .profile-info-list li {
+}
+
+.profile-info-list li {
     margin-bottom: 12px;
     font-size: 1rem;
     color: #333;
-    }
-    
-    /* Modal styles */
-    .modal-overlay {
+}
+
+/* Modal styles */
+.modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -119,9 +149,9 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    }
-    
-    .modal-content {
+}
+
+.modal-content {
     background-color: white;
     padding: 30px;
     border-radius: var(--border-radius-md);
@@ -131,29 +161,29 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.25);
     overflow-y: auto;
     transition: box-shadow 0.3s ease;
-    }
-    
-    .modal-content:hover {
+}
+
+.modal-content:hover {
     box-shadow: 0 6px 20px rgba(0,0,0,0.35);
-    }
-    
-    /* Two-column form layout inside modal */
-    .modal-content form {
+}
+
+/* Two-column form layout inside modal */
+.modal-content form {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px 30px;
-    }
-    
-    /* Make labels span full width */
-    .modal-content form label {
+}
+
+/* Make labels span full width */
+.modal-content form label {
     display: flex;
     flex-direction: column;
     font-weight: 600;
-    }
-    
-    /* Inputs and selects full width */
-    .modal-content form input,
-    .modal-content form select {
+}
+
+/* Inputs and selects full width */
+.modal-content form input,
+.modal-content form select {
     width: 100%;
     padding: 8px 10px;
     margin-top: 5px;
@@ -161,24 +191,24 @@
     border-radius: var(--border-radius-sm);
     font-size: 1rem;
     transition: border-color 0.3s ease;
-    }
-    
-    .modal-content form input:focus,
-    .modal-content form select:focus {
+}
+
+.modal-content form input:focus,
+.modal-content form select:focus {
     border-color: var(--color-primary);
     outline: none;
-    }
-    
-    /* Modal buttons container spans full width and placed below form */
-    .modal-buttons {
+}
+
+/* Modal buttons container spans full width and placed below form */
+.modal-buttons {
     grid-column: 1 / -1;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
     margin-top: 20px;
-    }
-    
-    .modal-buttons button {
+}
+
+.modal-buttons button {
     padding: 10px 20px;
     font-size: 1rem;
     border-radius: var(--border-radius-sm);
@@ -186,28 +216,28 @@
     cursor: pointer;
     font-weight: 600;
     transition: background-color 0.3s ease;
-    }
-    
-    .modal-buttons button[type="submit"] {
+}
+
+.modal-buttons button[type="submit"] {
     background-color: var(--color-primary);
     color: white;
-    }
-    
-    .modal-buttons button[type="submit"]:hover {
+}
+
+.modal-buttons button[type="submit"]:hover {
     background-color: var(--color-primary-dark);
-    }
-    
-    .modal-buttons button[type="button"] {
+}
+
+.modal-buttons button[type="button"] {
     background-color: #ccc;
     color: #333;
-    }
-    
-    .modal-buttons button[type="button"]:hover {
+}
+
+.modal-buttons button[type="button"]:hover {
     background-color: #bbb;
-    }
-    
-    /* Change password button inside modal spans full width and placed below inputs */
-    .change-password-btn {
+}
+
+/* Change password button inside modal spans full width and placed below inputs */
+.change-password-btn {
     grid-column: 1 / -1;
     margin-top: 15px;
     padding: 12px;
@@ -219,8 +249,8 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
     text-align: center;
-    }
-    
-    .change-password-btn:hover {
+}
+
+.change-password-btn:hover {
     background-color: var(--color-primary-dark);
-    }
+}

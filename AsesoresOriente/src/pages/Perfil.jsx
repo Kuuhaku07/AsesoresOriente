@@ -6,6 +6,10 @@ import { validateData } from '../utils/validationUtils.js';
 import { Navigate, useParams } from 'react-router-dom';
 import PageTitle from '../components/PageTitle';
 import '../styles/Perfil.css';
+import HorizontalInfoCard from '../components/HorizontalInfoCard';
+
+// Import icons from react-icons
+import { FaPhone, FaEnvelope, FaFacebook, FaTwitter } from 'react-icons/fa';
 
 const Perfil = () => {
   const { user: loggedUser, fetchUserData, token } = useAuth();
@@ -267,27 +271,52 @@ const Perfil = () => {
             )}
           </section>
           <section className="profile-sections">
-            <div className="profile-card personal-info">
-              <h3>Datos Personales</h3>
-              <ul className="profile-info-list">
-                <li><strong>Email:</strong> {user.Correo}</li>
-                <li><strong>Teléfono:</strong> {user.Telefono}</li>
-                {user.Cedula && <li><strong>Cédula:</strong> {user.Cedula}</li>}
-                {user.FechaNacimiento && <li><strong>Fecha de Nacimiento:</strong> {new Date(user.FechaNacimiento).toLocaleDateString()}</li>}
-                <li><strong>Especialidad:</strong> {user.Especialidad ? user.Especialidad : 'No especificado'}</li>
-                {user.Direccion && <li><strong>Dirección:</strong> {user.Direccion}</li>}
-                <li><strong>Estado:</strong> {user.Activo ? 'Activo' : 'Inactivo'}</li>
-                <li><strong>Fecha de Ingreso:</strong> {user.FechaIngreso ? new Date(user.FechaIngreso).toLocaleDateString() : 'No especificado'}</li>
-                <li><strong>Nombre de Usuario:</strong> {user.NombreUsuario}</li>
-                <li><strong>Último Login:</strong> {user.UltimoLogin ? new Date(user.UltimoLogin).toLocaleString() : 'Nunca'}</li>
-                <li><strong>Fecha de Creación:</strong> {user.FechaCreacion ? new Date(user.FechaCreacion).toLocaleDateString() : 'No especificado'}</li>
-              </ul>
-            </div>
+              <div className="profile-card personal-info">
+                <h3>Datos Personales</h3>
+                <ul className="profile-info-list">
+                  {user.Cedula && <li><strong>Cédula:</strong> {user.Cedula}</li>}
+                  {user.FechaNacimiento && <li><strong>Fecha de Nacimiento:</strong> {new Date(user.FechaNacimiento).toLocaleDateString()}</li>}
+                  <li><strong>Especialidad:</strong> {user.Especialidad ? user.Especialidad : 'No especificado'}</li>
+                  {user.Direccion && <li><strong>Dirección:</strong> {user.Direccion}</li>}
+                  <li><strong>Estado:</strong> {user.Activo ? 'Activo' : 'Inactivo'}</li>
+                  <li><strong>Fecha de Ingreso:</strong> {user.FechaIngreso ? new Date(user.FechaIngreso).toLocaleDateString() : 'No especificado'}</li>
+                  <li><strong>Nombre de Usuario:</strong> {user.NombreUsuario}</li>
+                  <li><strong>Último Login:</strong> {user.UltimoLogin ? new Date(user.UltimoLogin).toLocaleString() : 'Nunca'}</li>
+                  <li><strong>Fecha de Creación:</strong> {user.FechaCreacion ? new Date(user.FechaCreacion).toLocaleDateString() : 'No especificado'}</li>
+                </ul>
+              </div>
 
-            <div className="profile-card social-networks">
-              <h3>Redes</h3>
-              <p>Esta sección será implementada próximamente.</p>
-            </div>
+              <div className="profile-card social-networks">
+                <h3>Redes y Contactos</h3>
+                <HorizontalInfoCard
+                  icon={<FaPhone />}
+                  title="Teléfono"
+                  content={user.Telefono}
+                  color="#007bff"
+                />
+                <HorizontalInfoCard
+                  icon={<FaEnvelope />}
+                  title="Correo Electrónico"
+                  content={user.Correo}
+                  color="#28a745"
+                />
+                {/* Placeholder for social networks */}
+                <HorizontalInfoCard
+                  icon={<FaFacebook />}
+                  title="Facebook"
+                  content="facebook.com/usuario"
+                  link="https://facebook.com/usuario"
+                  color="#3b5998"
+                />
+                <HorizontalInfoCard
+                  icon={<FaTwitter />}
+                  title="Twitter"
+                  content="@usuario"
+                  link="https://twitter.com/usuario"
+                  color="#1da1f2"
+                />
+                
+              </div>
 
             <div className="profile-card properties-in-charge">
               <h3>Inmuebles a cargo</h3>
