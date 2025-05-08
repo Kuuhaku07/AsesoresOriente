@@ -271,7 +271,8 @@ const Perfil = () => {
             )}
           </section>
           <section className="profile-sections">
-              <div className="profile-card personal-info">
+            <div style={{ height: '400px', width: '100%', display: 'flex', gap: '20px' }}>
+              <div className="profile-card personal-info" style={{ flex: 1, overflowY: 'auto', height: '100%' }}>
                 <h3>Datos Personales</h3>
                 <ul className="profile-info-list">
                   {user.Cedula && <li><strong>Cédula:</strong> {user.Cedula}</li>}
@@ -286,7 +287,7 @@ const Perfil = () => {
                 </ul>
               </div>
 
-              <div className="profile-card social-networks">
+              <div className="profile-card social-networks" style={{ flex: 1, overflowY: 'auto', height: '100%' }}>
                 <h3>Redes y Contactos</h3>
                 <HorizontalInfoCard
                   icon={<FaPhone />}
@@ -315,10 +316,10 @@ const Perfil = () => {
                   link="https://twitter.com/usuario"
                   color="#1da1f2"
                 />
-                
               </div>
+            </div>
 
-            <div className="profile-card properties-in-charge">
+            <div className="profile-card properties-in-charge" style={{ width: '100%' }}>
               <h3>Inmuebles a cargo</h3>
               <p>Esta sección será implementada próximamente.</p>
             </div>

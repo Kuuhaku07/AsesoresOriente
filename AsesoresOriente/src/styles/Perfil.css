@@ -66,38 +66,26 @@
     background-color: var(--color-primary-dark);
 }
 
-/* Container for profile sections with grid areas */
+/* Container for profile sections */
 .profile-sections {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: 1fr auto;
-    grid-template-areas:
-    "personal redes"
-    "properties properties";
+    display: flex;
+    flex-direction: column;
     gap: 20px;
 }
 
-.profile-card.personal-info {
-    /* Remove fixed height to allow dynamic sizing */
-    overflow: hidden;
+/* Container for Datos Personales and Redes y Contactos */
+.profile-top-container {
     display: flex;
-    flex-direction: column;
+    gap: 20px;
+    height: 400px; /* fixed height */
+    width: 100%;
 }
 
+.profile-card.personal-info,
 .profile-card.social-networks {
-    /* Match height dynamically to personal-info */
-    overflow-y: auto; /* Enable vertical scroll if content exceeds max height */
-    padding-right: 10px; /* Padding to avoid scrollbar overlap */
-    display: flex;
-    flex-direction: column;
-    max-height: 100%;
-    height: auto;
-}
-
-.profile-card.social-networks {
-    height: 300px; /* Match height of personal-info */
-    overflow-y: auto; /* Enable vertical scroll */
-    padding-right: 10px; /* Padding to avoid scrollbar overlap */
+    flex: 1;
+    overflow-y: auto;
+    height: 100%;
 }
 
 /* Card style for each section */
@@ -108,22 +96,18 @@
     padding: 20px;
 }
 
-/* Redes y Contactos card with scroll */
-.profile-card.social-networks {
-    max-height: 300px; /* Set a max height for the container */
-    overflow-y: auto; /* Enable vertical scroll if content exceeds max height */
-    padding-right: 10px; /* Optional: add some padding to avoid scrollbar overlap */
-}
-
 /* Section headers */
 .profile-card h3 {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 10;
     margin-top: 0;
     margin-bottom: 15px;
     font-size: 1.3rem;
     border-bottom: 1px solid #ddd;
-    padding-bottom: 8px;
+    padding: 10px 0 8px 0;
 }
-
 /* List style for profile info */
 .profile-info-list {
     list-style: none;
@@ -135,6 +119,11 @@
     margin-bottom: 12px;
     font-size: 1rem;
     color: #333;
+}
+
+/* Properties in charge section takes full width and expands */
+.profile-card.properties-in-charge {
+    width: 100%;
 }
 
 /* Modal styles */
