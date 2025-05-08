@@ -217,3 +217,45 @@ export const refreshToken = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+/**
+ * Obtiene el perfil completo del usuario basado en el token JWT.
+ */
+export const getFullUsuarioProfile = async (req, res) => {
+  try {
+    if (!req.userId) {
+      return res.status(400).json({ error: 'User ID missing in request' });
+    }
+    const usuario = await usuarioService.getFullUsuarioProfileById(req.userId);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario not found' });
+    }
+    res.json(usuario);
+  } catch (error) {
+    console.error('Error fetching full usuario profile:', error);
+    res.status(500).json({ error: 'Failed to fetch full usuario profile' });
+  }
+};
+
+/**
+ * Cambia la contraseña del usuario autenticado.
+ */
+export const changePassword = async (req, res) => {
+  try {
+    if (!req.userId) {
+      return res.status(400).json({ error: 'User ID missing in request' });
+    }
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current and new passwords are required' });
+    }
+    await usuarioService.changeUsuarioPassword(req.userId, currentPassword, newPassword);
+    res.json({ message: 'Contraseña cambiada correctamente' });
+  } catch (error) {
+    console.error('Error changing password:', error);
+    if (error.message === 'Contraseña actual incorrecta') {
+      return res.status(400).json({ error: error.message });
+    }
+    res.status(500).json({ error: 'Failed to change password' });
+  }
+};

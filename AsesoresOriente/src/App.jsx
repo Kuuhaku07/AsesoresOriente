@@ -23,7 +23,8 @@ export function App(){
                         <Route path="/" element={<Home />} /> {/* Home route */}
                         <Route path="/about" element={<About />} /> {/* About route */}
                         <Route path="/login" element={<Login />} /> {/* Login route */}
-                        <Route path="/perfil" element={<Perfil />} /> {/* Perfil route */}
+                        <Route path="/perfil" element={<Perfil />} /> {/* Perfil route without id */}
+                        <Route path="/perfil/:id" element={<Perfil />} /> {/* Perfil route with id */}
                         <Route path="/buscar" element={<Buscar />} /> {/* Buscar route */}
                         <Route path="/detalle" element={<Detalle />} /> {/* Detalle route */}
                         <Route path="/panel" element={<Panel />} /> {/* Panel route */}

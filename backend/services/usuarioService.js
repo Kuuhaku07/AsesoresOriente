@@ -220,3 +220,57 @@ export const deleteRefreshToken = async (token) => {
   );
   return result.rowCount > 0;
 };
+
+/**
+ * Obtiene el perfil completo del usuario con todos los datos necesarios para la vista de perfil.
+ * Incluye datos de Usuario, Asesor y Rol.
+ */
+export const getFullUsuarioProfileById = async (id) => {
+  try {
+    const result = await pool.query(
+      `SELECT u.id, u.correo as "Correo", u.nombre_usuario as "NombreUsuario", u.activo as "Activo", u.ultimo_login as "UltimoLogin", u.fecha_creacion as "FechaCreacion",
+              r.nombre as "Rol", u.asesor_id,
+              a.nombre as "Nombre", a.apellido as "Apellido", a.cedula as "Cedula", a.telefono as "Telefono", a.foto_perfil as "Pfp",
+              a.fecha_ingreso as "FechaIngreso", a.fecha_nacimiento as "FechaNacimiento", a.comision_base as "ComisionBase", a.especialidad as "Especialidad",
+              a.direccion as "Direccion", a.fecha_creacion as "FechaCreacionAsesor"
+       FROM "Usuario" u
+       JOIN "Asesor" a ON u.asesor_id = a.id
+       JOIN "Rol" r ON u.rol_id = r.id
+       WHERE u.id = $1`,
+      [id]
+    );
+    const user = result.rows[0];
+    if (user) {
+      // Remove sensitive fields
+      delete user.contrasena_hash;
+    }
+    return user;
+  } catch (error) {
+    console.error('Error in getFullUsuarioProfileById:', error);
+    throw error;
+  }
+};
+
+/**
+ * Cambia la contraseña de un usuario.
+ * Verifica la contraseña actual antes de actualizar.
+ */
+export const changeUsuarioPassword = async (id, currentPassword, newPassword) => {
+  try {
+    const usuario = await pool.query('SELECT contrasena_hash FROM "Usuario" WHERE id = $1', [id]);
+    if (usuario.rowCount === 0) {
+      throw new Error('Usuario no encontrado');
+    }
+    const hashedPassword = usuario.rows[0].contrasena_hash;
+    const passwordMatch = await bcrypt.compare(currentPassword, hashedPassword);
+    if (!passwordMatch) {
+      throw new Error('Contraseña actual incorrecta');
+    }
+    const newHashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await pool.query('UPDATE "Usuario" SET contrasena_hash = $1 WHERE id = $2', [newHashedPassword, id]);
+    return true;
+  } catch (error) {
+    console.error('Error in changeUsuarioPassword:', error);
+    throw error;
+  }
+};

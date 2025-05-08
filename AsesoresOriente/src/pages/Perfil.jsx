@@ -1,34 +1,90 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Menu } from '../components/Menu';
 import ToastMessage from '../components/ToastMessage.jsx';
 import { validateData } from '../utils/validationUtils.js';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import PageTitle from '../components/PageTitle';
 import '../styles/Perfil.css';
 
 const Perfil = () => {
-  const { user, fetchUserData, token } = useAuth();
+  const { user: loggedUser, fetchUserData, token } = useAuth();
+  const { id } = useParams();
+
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Estados para controlar la visibilidad de los modales
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [showCurrentPasswordInput, setShowCurrentPasswordInput] = useState(false);
+  const [originalSensitiveValues, setOriginalSensitiveValues] = useState({
+    NombreUsuario: '',
+    Correo: '',
+    Cedula: ''
+  });
 
   // Estados para validaciones y mensajes
   const [errors, setErrors] = useState([]);
   const [serverError, setServerError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Show loading or null while user is being initialized
-  if (user === null) {
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        let response;
+        if (id && loggedUser && id === String(loggedUser.id)) {
+          // Viewing own profile by id param, fetch full profile
+          response = await fetch('/api/usuario/profile', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        } else if (id) {
+          // Viewing other user's profile by id param
+          response = await fetch(`/api/usuario/${id}`);
+        } else if (loggedUser && loggedUser.id) {
+          // Viewing own profile without id param
+          response = await fetch('/api/usuario/profile', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        } else {
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        if (!response.ok) {
+          setServerError('Error al obtener datos del usuario');
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        const data = await response.json();
+        console.log('Fetched user data:', data);
+        setUser(data);
+        setLoading(false);
+      } catch (error) {
+        setServerError('Error al obtener datos del usuario');
+        setUser(null);
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [id, loggedUser, token]);
+
+  // Show loading or null while user is being initialized or fetched
+  if (loading) {
     return null; // or a loading spinner
   }
 
-  // Redirigir a home si no hay usuario logueado
+  // If no user data and no id param, redirect to home
   if (!user) {
     return <Navigate to="/" />;
   }
+
+  // Determine if viewing own profile
+  const isOwnProfile = loggedUser && user && loggedUser.id === user.id;
 
   // Funciones para abrir y cerrar modales
   const openEditModal = () => {
@@ -36,6 +92,12 @@ const Perfil = () => {
     setServerError('');
     setSuccessMessage('');
     setIsEditModalOpen(true);
+    setShowCurrentPasswordInput(false);
+    setOriginalSensitiveValues({
+      NombreUsuario: user.NombreUsuario || '',
+      Correo: user.Correo || '',
+      Cedula: user.Cedula || ''
+    });
   };
   const closeEditModal = () => setIsEditModalOpen(false);
 
@@ -162,32 +224,34 @@ const Perfil = () => {
         <div className="perfil-content">
           {/* Sección de información del usuario */}
           <section className="profile-header">
-            {user.pfp ? (
-              <img src={`uploads/profile_pictures/${user.pfp}`} alt={user.name} className="user-avatar" />
+            {user.Pfp ? (
+              <img src={`/uploads/profile_pictures/${user.Pfp}`} alt={user.Nombre} className="user-avatar" />
             ) : null}
             <div className="profile-header-info">
-              <h2>{user.name} {user.lastname ? user.lastname : ''}</h2>
-              <p className="profile-role">Rol: {user.role}</p>
+              <h2>{user.Nombre} {user.Apellido ? user.Apellido : ''}</h2>
+              <p className="profile-role">Rol: {user.Rol}</p>
             </div>
-            <button className="edit-profile-btn" onClick={openEditModal}>
-              Editar Perfil
-            </button>
+            {isOwnProfile && (
+              <button className="edit-profile-btn" onClick={openEditModal}>
+                Editar Perfil
+              </button>
+            )}
           </section>
           <section className="profile-sections">
             <div className="profile-card personal-info">
               <h3>Datos Personales</h3>
               <ul className="profile-info-list">
-                <li><strong>Email:</strong> {user.email}</li>
-                <li><strong>Teléfono:</strong> {user.telefono}</li>
-                <li><strong>Cédula:</strong> {user.cedula}</li>
-                <li><strong>Fecha de Nacimiento:</strong> {user.fecha_nacimiento ? new Date(user.fecha_nacimiento).toLocaleDateString() : 'No especificado'}</li>
-                <li><strong>Especialidad:</strong> {user.especialidad ? user.especialidad : 'No especificado'}</li>
-                <li><strong>Dirección:</strong> {user.direccion ? user.direccion : 'No especificado'}</li>
-                <li><strong>Estado:</strong> {user.activo ? 'Activo' : 'Inactivo'}</li>
-                <li><strong>Fecha de Ingreso:</strong> {user.fecha_ingreso ? new Date(user.fecha_ingreso).toLocaleDateString() : 'No especificado'}</li>
-                <li><strong>Nombre de Usuario:</strong> {user.username}</li>
-                <li><strong>Último Login:</strong> {user.ultimo_login ? new Date(user.ultimo_login).toLocaleString() : 'Nunca'}</li>
-                <li><strong>Fecha de Creación:</strong> {user.fecha_creacion ? new Date(user.fecha_creacion).toLocaleDateString() : 'No especificado'}</li>
+                <li><strong>Email:</strong> {user.Correo}</li>
+                <li><strong>Teléfono:</strong> {user.Telefono}</li>
+                <li><strong>Cédula:</strong> {user.Cedula}</li>
+                <li><strong>Fecha de Nacimiento:</strong> {user.FechaNacimiento ? new Date(user.FechaNacimiento).toLocaleDateString() : 'No especificado'}</li>
+                <li><strong>Especialidad:</strong> {user.Especialidad ? user.Especialidad : 'No especificado'}</li>
+                <li><strong>Dirección:</strong> {user.Direccion ? user.Direccion : 'No especificado'}</li>
+                <li><strong>Estado:</strong> {user.Activo ? 'Activo' : 'Inactivo'}</li>
+                <li><strong>Fecha de Ingreso:</strong> {user.FechaIngreso ? new Date(user.FechaIngreso).toLocaleDateString() : 'No especificado'}</li>
+                <li><strong>Nombre de Usuario:</strong> {user.NombreUsuario}</li>
+                <li><strong>Último Login:</strong> {user.UltimoLogin ? new Date(user.UltimoLogin).toLocaleString() : 'Nunca'}</li>
+                <li><strong>Fecha de Creación:</strong> {user.FechaCreacion ? new Date(user.FechaCreacion).toLocaleDateString() : 'No especificado'}</li>
               </ul>
             </div>
 
@@ -215,50 +279,78 @@ const Perfil = () => {
           {successMessage && <ToastMessage message={successMessage} type="success" />}
 
           {/* Modal para editar perfil (sin email) */}
-          {isEditModalOpen && (
+          {isOwnProfile && isEditModalOpen && (
             <div className="modal-overlay" onClick={closeEditModal}>
               <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <h2>Editar Perfil</h2>
                 <form onSubmit={handleEditSubmit}>
                   <label>
                     Nombre de Usuario:
-                    <input type="text" defaultValue={user.username} name="name" />
+                  <input
+                    type="text"
+                    defaultValue={user.NombreUsuario}
+                    name="name"
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      setShowCurrentPasswordInput(
+                        newValue !== originalSensitiveValues.NombreUsuario ||
+                        document.getElementsByName('correo')[0].value !== originalSensitiveValues.Correo ||
+                        document.getElementsByName('cedula')[0].value !== originalSensitiveValues.Cedula
+                      );
+                    }}
+                  />
                   </label>
                   <label>
                     Teléfono:
-                    <input type="text" defaultValue={user.telefono} name="telefono" />
+                    <input type="text" defaultValue={user.Telefono} name="telefono" />
                   </label>
                   <label>
                     Correo Electrónico:
-                    <input type="email" defaultValue={user.email} name="correo" />
+                    <input
+                      type="email"
+                      defaultValue={user.Correo}
+                      name="correo"
+                      onChange={() => setShowCurrentPasswordInput(true)}
+                    />
                   </label>
                   <label>
                     Cédula:
-                    <input type="text" defaultValue={user.cedula} name="cedula" />
+                    <input
+                      type="text"
+                      defaultValue={user.Cedula}
+                      name="cedula"
+                      onChange={() => setShowCurrentPasswordInput(true)}
+                    />
                   </label>
                   <label>
                     Fecha de Nacimiento:
-                    <input type="date" defaultValue={user.fecha_nacimiento ? user.fecha_nacimiento.split('T')[0] : ''} name="fecha_nacimiento" />
+                    <input
+                      type="date"
+                      defaultValue={user.FechaNacimiento ? user.FechaNacimiento.split('T')[0] : ''}
+                      name="fecha_nacimiento"
+                    />
                   </label>
                   <label>
                     Especialidad:
-                    <input type="text" defaultValue={user.especialidad} name="especialidad" />
+                    <input type="text" defaultValue={user.Especialidad} name="especialidad" />
                   </label>
                   <label>
                     Dirección:
-                    <input type="text" defaultValue={user.direccion} name="direccion" />
+                    <input type="text" defaultValue={user.Direccion} name="direccion" />
                   </label>
                   <label>
                     Estado:
-                    <select name="activo" defaultValue={user.activo ? 'true' : 'false'}>
+                    <select name="activo" defaultValue={user.Activo ? 'true' : 'false'}>
                       <option value="true">Activo</option>
                       <option value="false">Inactivo</option>
                     </select>
                   </label>
-                  <label>
-                    Contraseña Actual (para confirmar cambios sensibles):
-                    <input type="password" name="currentPassword" />
-                  </label>
+                  {showCurrentPasswordInput && (
+                    <label>
+                      Contraseña Actual (para confirmar cambios sensibles):
+                      <input type="password" name="currentPassword" />
+                    </label>
+                  )}
                   <label>
                     Foto de Perfil:
                     <input type="file" accept="image/*" onChange={handleFileChange} />
@@ -285,7 +377,7 @@ const Perfil = () => {
           )}
 
           {/* Modal para cambiar contraseña */}
-          {isChangePasswordModalOpen && (
+          {isOwnProfile && isChangePasswordModalOpen && (
             <div className="modal-overlay" onClick={closeChangePasswordModal}>
               <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <h2>Cambiar Contraseña</h2>

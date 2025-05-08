@@ -2,7 +2,7 @@ import express from 'express';
 import { body } from 'express-validator';
 import multer from 'multer';
 import path from 'path';
-import { getAllUsuarios, getUsuarioById, createUsuario, updateUsuario, deleteUsuario, login, getCurrentUser, logout, refreshToken } from '../controllers/usuarioController.js';
+import { getAllUsuarios, getUsuarioById, createUsuario, updateUsuario, deleteUsuario, login, getCurrentUser, logout, refreshToken, getFullUsuarioProfile, changePassword } from '../controllers/usuarioController.js';
 import { validateRequest, multerErrorHandler } from '../middlewares/validationMiddleware.js';
 import { loginRateLimiter } from '../middlewares/rateLimitMiddleware.js';
 import { authenticateToken } from '../middlewares/authMiddleware.js';
@@ -41,6 +41,19 @@ const router = express.Router();
 
 // New route to get current user info
 router.get('/me', authenticateToken, getCurrentUser);
+
+// New route to get full user profile info
+router.get('/profile', authenticateToken, getFullUsuarioProfile);
+
+// New route to change password
+router.post('/change-password', authenticateToken,
+  [
+    body('currentPassword').notEmpty().withMessage('Contraseña actual es requerida'),
+    body('newPassword').isLength({ min: 6 }).withMessage('La nueva contraseña debe tener al menos 6 caracteres')
+  ],
+  validateRequest,
+  changePassword
+);
 
 router.get('/', getAllUsuarios);
 router.get('/:id', getUsuarioById);
