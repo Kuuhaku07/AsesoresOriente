@@ -40,8 +40,11 @@ const Perfil = () => {
           response = await fetch('/api/usuario/profile', {
             headers: { Authorization: `Bearer ${token}` }
           });
+        } else if (id && !loggedUser) {
+          // Viewing other user's profile by id param without login
+          response = await fetch(`/api/usuario/public-profile/${id}`);
         } else if (id) {
-          // Viewing other user's profile by id param
+          // Viewing other user's profile by id param with login
           response = await fetch(`/api/usuario/${id}`);
         } else if (loggedUser && loggedUser.id) {
           // Viewing own profile without id param

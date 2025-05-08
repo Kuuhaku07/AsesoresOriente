@@ -2,7 +2,7 @@ import express from 'express';
 import { body } from 'express-validator';
 import multer from 'multer';
 import path from 'path';
-import { getAllUsuarios, getUsuarioById, createUsuario, updateUsuario, deleteUsuario, login, getCurrentUser, logout, refreshToken, getFullUsuarioProfile, changePassword } from '../controllers/usuarioController.js';
+import { getAllUsuarios,getPublicUsuarioProfileById, getUsuarioById, createUsuario, updateUsuario, deleteUsuario, login, getCurrentUser, logout, refreshToken, getFullUsuarioProfile, changePassword } from '../controllers/usuarioController.js';
 import { validateRequest, multerErrorHandler } from '../middlewares/validationMiddleware.js';
 import { loginRateLimiter } from '../middlewares/rateLimitMiddleware.js';
 import { authenticateToken } from '../middlewares/authMiddleware.js';
@@ -57,6 +57,9 @@ router.post('/change-password', authenticateToken,
 
 router.get('/', getAllUsuarios);
 router.get('/:id', getUsuarioById);
+
+// New public profile route without authentication
+router.get('/public-profile/:id', getPublicUsuarioProfileById);
 
 /**
  * Ruta para crear un nuevo usuario.

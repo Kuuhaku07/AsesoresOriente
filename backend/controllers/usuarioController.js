@@ -170,6 +170,21 @@ export const getCurrentUser = async (req, res) => {
   }
 };
 
+export const getPublicUsuarioProfileById = async (req, res) => {
+  try {
+    const usuario = await usuarioService.getFullUsuarioProfileById(req.params.id);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario not found' });
+    }
+    // Remove sensitive fields before sending public profile
+    delete usuario.contrasena_hash;
+    res.json(usuario);
+  } catch (error) {
+    console.error('Error fetching public usuario profile:', error);
+    res.status(500).json({ error: 'Failed to fetch public usuario profile' });
+  }
+};
+
 /**
  * Función para cerrar sesión y eliminar el refresh token.
  */
