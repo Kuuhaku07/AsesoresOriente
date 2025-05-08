@@ -145,15 +145,45 @@ export const updateUsuario = async (id, usuario) => {
     [correo, hashedPassword, asesor_id, rol_id, nombre_usuario, id]
   );
 
-  // Actualizar foto de perfil en tabla Asesor si se proporciona foto_perfil
-  if (usuario.foto_perfil && asesor_id) {
-    await pool.query(
-      'UPDATE "Asesor" SET foto_perfil = $1 WHERE id = $2',
-      [usuario.foto_perfil, asesor_id]
-    );
+  // Actualizar foto de perfil y otros campos en tabla Asesor si se proporciona asesor_id
+  if (asesor_id) {
+    const fieldsToUpdate = [];
+    const values = [];
+    let idx = 1;
+
+    if (usuario.foto_perfil) {
+      fieldsToUpdate.push(`foto_perfil = $${idx++}`);
+      values.push(usuario.foto_perfil);
+    }
+    if (usuario.cedula) {
+      fieldsToUpdate.push(`cedula = $${idx++}`);
+      values.push(usuario.cedula);
+    }
+    if (usuario.telefono) {
+      fieldsToUpdate.push(`telefono = $${idx++}`);
+      values.push(usuario.telefono);
+    }
+    if (usuario.fecha_nacimiento) {
+      fieldsToUpdate.push(`fecha_nacimiento = $${idx++}`);
+      values.push(usuario.fecha_nacimiento);
+    }
+    if (usuario.especialidad) {
+      fieldsToUpdate.push(`especialidad = $${idx++}`);
+      values.push(usuario.especialidad);
+    }
+    if (usuario.direccion) {
+      fieldsToUpdate.push(`direccion = $${idx++}`);
+      values.push(usuario.direccion);
+    }
+
+    if (fieldsToUpdate.length > 0) {
+      const query = `UPDATE "Asesor" SET ${fieldsToUpdate.join(', ')} WHERE id = $${idx}`;
+      values.push(asesor_id);
+      await pool.query(query, values);
+    }
 
     // Borrar archivo antiguo si existe y es diferente al nuevo
-    if (oldPfp && oldPfp !== usuario.foto_perfil) {
+    if (usuario.foto_perfil && oldPfp && oldPfp !== usuario.foto_perfil) {
       const uploadsDir = path.join(process.cwd(), 'uploads', 'profile_pictures');
       const oldPfpPath = path.join(uploadsDir, oldPfp);
       fs.unlink(oldPfpPath, (err) => {

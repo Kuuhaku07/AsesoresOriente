@@ -83,7 +83,12 @@ export const updateUsuario = async (req, res) => {
       asesor_id: req.body.id_asesor,
       rol_id: rol_id,
       nombre_usuario: req.body.NombreUsuario,
-      foto_perfil: req.file ? req.file.filename : undefined
+      foto_perfil: req.file ? req.file.filename : undefined,
+      cedula: req.body.Cedula,
+      telefono: req.body.Telefono,
+      fecha_nacimiento: req.body.FechaNacimiento,
+      especialidad: req.body.Especialidad,
+      direccion: req.body.Direccion
     };
 
     const updatedUsuario = await usuarioService.updateUsuario(req.params.id, usuarioData);
@@ -178,6 +183,10 @@ export const getPublicUsuarioProfileById = async (req, res) => {
     }
     // Remove sensitive fields before sending public profile
     delete usuario.contrasena_hash;
+    // Remove fields not allowed for public view
+    delete usuario.Cedula;
+    delete usuario.Direccion;
+    delete usuario.FechaNacimiento;
     res.json(usuario);
   } catch (error) {
     console.error('Error fetching public usuario profile:', error);

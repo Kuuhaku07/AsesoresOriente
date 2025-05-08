@@ -117,7 +117,6 @@ const Perfil = () => {
     name: { required: true, min: 3 },
     telefono: { required: true, min: 7 },
     correo: { required: true, email: true },
-    currentPassword: { required: true, min: 6 }
   };
 
   // Manejar envío del formulario de edición de perfil (sin email)
@@ -135,8 +134,16 @@ const Perfil = () => {
       name: formData.get('name'),
       telefono: formData.get('telefono'),
       correo: formData.get('correo'),
-      currentPassword: formData.get('currentPassword')
     };
+
+    // Conditionally add currentPassword to validation if shown
+    if (showCurrentPasswordInput) {
+      formValues.currentPassword = formData.get('currentPassword');
+      validationRules.currentPassword = { required: true, min: 6 };
+    } else {
+      delete validationRules.currentPassword;
+    }
+
     const validationErrors = validateData(formValues, validationRules);
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
@@ -176,6 +183,25 @@ const Perfil = () => {
     const currentPasswordInput = formData.get('currentPassword');
     formData.delete('currentPassword');
     formData.append('CurrentPassword', currentPasswordInput);
+
+    // Rename additional fields to match backend expected keys
+    const direccionInput = formData.get('direccion');
+    if (direccionInput !== null) {
+      formData.delete('direccion');
+      formData.append('Direccion', direccionInput);
+    }
+
+    const especialidadInput = formData.get('especialidad');
+    if (especialidadInput !== null) {
+      formData.delete('especialidad');
+      formData.append('Especialidad', especialidadInput);
+    }
+
+    const fechaNacimientoInput = formData.get('fecha_nacimiento');
+    if (fechaNacimientoInput !== null) {
+      formData.delete('fecha_nacimiento');
+      formData.append('FechaNacimiento', fechaNacimientoInput);
+    }
 
     try {
       const response = await fetch(`/api/usuario/${user.id}`, {
@@ -246,10 +272,10 @@ const Perfil = () => {
               <ul className="profile-info-list">
                 <li><strong>Email:</strong> {user.Correo}</li>
                 <li><strong>Teléfono:</strong> {user.Telefono}</li>
-                <li><strong>Cédula:</strong> {user.Cedula}</li>
-                <li><strong>Fecha de Nacimiento:</strong> {user.FechaNacimiento ? new Date(user.FechaNacimiento).toLocaleDateString() : 'No especificado'}</li>
+                {user.Cedula && <li><strong>Cédula:</strong> {user.Cedula}</li>}
+                {user.FechaNacimiento && <li><strong>Fecha de Nacimiento:</strong> {new Date(user.FechaNacimiento).toLocaleDateString()}</li>}
                 <li><strong>Especialidad:</strong> {user.Especialidad ? user.Especialidad : 'No especificado'}</li>
-                <li><strong>Dirección:</strong> {user.Direccion ? user.Direccion : 'No especificado'}</li>
+                {user.Direccion && <li><strong>Dirección:</strong> {user.Direccion}</li>}
                 <li><strong>Estado:</strong> {user.Activo ? 'Activo' : 'Inactivo'}</li>
                 <li><strong>Fecha de Ingreso:</strong> {user.FechaIngreso ? new Date(user.FechaIngreso).toLocaleDateString() : 'No especificado'}</li>
                 <li><strong>Nombre de Usuario:</strong> {user.NombreUsuario}</li>
