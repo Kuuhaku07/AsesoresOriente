@@ -98,10 +98,12 @@ CREATE TABLE "Asesor" (
     "fecha_creacion" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Tablas de asesores y usuarios
 CREATE TABLE "RedSocial" (
     "id" SERIAL PRIMARY KEY,
     "nombre" VARCHAR(50) NOT NULL UNIQUE,
-    "icono" VARCHAR(50) NULL
+    "icono" VARCHAR(50) NULL,
+    "color" VARCHAR(20) NULL  -- Columna añadida
 );
 
 CREATE TABLE "RedAsesor" (
@@ -109,6 +111,7 @@ CREATE TABLE "RedAsesor" (
     "asesor_id" INTEGER NOT NULL REFERENCES "Asesor"("id") ON DELETE CASCADE,
     "red_social_id" INTEGER NOT NULL REFERENCES "RedSocial"("id"),
     "url" VARCHAR(255) NOT NULL,
+    "contenido" TEXT NULL,  -- Columna añadida
     CONSTRAINT uq_red_asesor UNIQUE (asesor_id, red_social_id)
 );
 
@@ -340,6 +343,11 @@ INSERT INTO "Rol" ("nombre", "nivel_acceso") VALUES
 ('ADMINISTRADOR', 100),
 ('GERENTE', 80),
 ('ASESOR', 40);
+-- Insertar redes sociales con colores (movido a la sección de datos iniciales)
+INSERT INTO "RedSocial" ("nombre", "icono", "color") VALUES
+('Facebook', 'fa-facebook', '#3b5998'),
+('Instagram', 'fa-instagram', '#E1306C'),
+('X', 'fa-twitter', '#1DA1F2');
 
 -- Funciones y triggers
 CREATE OR REPLACE FUNCTION update_modified_column()

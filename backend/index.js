@@ -7,7 +7,6 @@ import url from 'url';
 
 dotenv.config();
 
-
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 const app = express();
@@ -35,10 +34,14 @@ app.get('/', (req, res) => {
 import sampleRoutes from './routes/sampleRoutes.js';
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import asesorRoutes from './routes/asesorRoutes.js';
+import redesAsesorRoutes from './routes/redesAsesorRoutes.js';
+import redesSocialRoutes from './routes/redesSocialRoutes.js';
 
 app.use('/api/sample', sampleRoutes);
 app.use('/api/usuario', usuarioRoutes);
 app.use('/api/asesor', asesorRoutes);
+app.use('/api/redesasesor', redesAsesorRoutes);
+app.use('/api/redessocial', redesSocialRoutes);
 
 // Example route to test PostgreSQL connection
 app.get('/test-db', async (req, res) => {
