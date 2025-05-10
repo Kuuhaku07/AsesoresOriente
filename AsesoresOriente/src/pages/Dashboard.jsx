@@ -1,12 +1,23 @@
 // src/pages/Dashboard.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Menu } from '../components/Menu';
 import { Navigate } from 'react-router-dom';
 import '../styles/Dashboard.css';
+import ImageViewerModal from '../components/ImageViewerModal';
 
 const Dashboard = () => {
   const { user } = useAuth();
+
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
+
+  const openImageViewer = () => {
+    setIsImageViewerOpen(true);
+  };
+
+  const closeImageViewer = () => {
+    setIsImageViewerOpen(false);
+  };
 
   // Show loading or null while user is being initialized
   if (user === null) {
@@ -28,12 +39,17 @@ const Dashboard = () => {
           <section className="user-info">
             {/* Use user.pfp for profile picture with fallback */}
             {user.pfp ? (
-              <img src={`uploads/profile_pictures/${user.pfp}`} alt={user.name} className="user-avatar" />
+              <img
+                src={`uploads/profile_pictures/${user.pfp}`}
+                alt={user.name}
+                className="user-avatar"
+                onClick={openImageViewer}
+                style={{ cursor: 'pointer' }}
+              />
             ) : (
               <div className="user-avatar-fallback">{user.name.charAt(0)}</div>
             )}
             <h2>Bienvenido, {user.name}</h2>
-
           </section>
 
           {/* Placeholder for additional dashboard content */}
@@ -43,6 +59,12 @@ const Dashboard = () => {
           </section>
         </div>
       </div>
+      <ImageViewerModal
+        isOpen={isImageViewerOpen}
+        onClose={closeImageViewer}
+        imageSrc={user && user.pfp ? `uploads/profile_pictures/${user.pfp}` : ''}
+        altText={user ? user.name : 'Imagen de perfil'}
+      />
     </>
   );
 };

@@ -19,8 +19,8 @@ export const getRedesAsesor = async (req, res) => {
 
 export const createRedAsesor = async (req, res) => {
   try {
-    console.log('Authenticated userId:', req.userId);
-    console.log('Request body:', req.body);
+    // console.log('Authenticated userId:', req.userId);
+    // console.log('Request body:', req.body);
     const userId = req.userId;
     const usuario = await usuarioService.getUsuarioById(userId);
     if (!usuario) {

@@ -5,9 +5,11 @@ import { Navigate, useParams } from 'react-router-dom';
 import PageTitle from '../components/PageTitle';
 import '../styles/Perfil.css';
 import HorizontalInfoCard from '../components/HorizontalInfoCard';
+import iconMap from '../utils/iconMap';
 import SocialNetworksModal from '../components/SocialNetworksModal';
 import EditProfileModal from '../components/EditProfileModal';
 import ChangePasswordModal from '../components/ChangePasswordModal';
+import ImageViewerModal from '../components/ImageViewerModal';
 
 // Import icons from react-icons
 import { FaPhone, FaEnvelope } from 'react-icons/fa';
@@ -23,6 +25,24 @@ const Perfil = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
+
+  // Image viewer modal state
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
+
+  const fetchRedesAsesor = async () => {
+    try {
+      const response = await fetch('/api/redesasesor', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        throw new Error('Error al cargar las redes del asesor');
+      }
+      const redesData = await response.json();
+      setUser((prevUser) => ({ ...prevUser, redes: redesData }));
+    } catch (error) {
+      // ignore redes fetch errors
+    }
+  };
 
   useEffect(() => {
     const fetchUserDataFunc = async () => {
@@ -54,6 +74,8 @@ const Perfil = () => {
         const data = await response.json();
         setUser(data);
         setLoading(false);
+        // Fetch redes after user data is set
+        await fetchRedesAsesor();
       } catch (error) {
         setUser(null);
         setLoading(false);
@@ -68,19 +90,39 @@ const Perfil = () => {
 
   const isOwnProfile = loggedUser && user && loggedUser.id === user.id;
 
-  // Handler to refresh user data after updates
+  // Handler to refresh user data and redes after updates
   const handleUserUpdate = async () => {
     if (!user) return;
     try {
+      // Fetch user profile data
       const response = await fetch('/api/usuario/profile', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!response.ok) return;
       const data = await response.json();
-      setUser(data);
+
+      // Fetch redes data
+      const redesResponse = await fetch('/api/redesasesor', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      let redesData = [];
+      if (redesResponse.ok) {
+        redesData = await redesResponse.json();
+      }
+
+      // Merge redes into user data
+      setUser({ ...data, redes: redesData });
     } catch {
       // ignore errors here
     }
+  };
+
+  const openImageViewer = () => {
+    setIsImageViewerOpen(true);
+  };
+
+  const closeImageViewer = () => {
+    setIsImageViewerOpen(false);
   };
 
   return (
@@ -91,7 +133,13 @@ const Perfil = () => {
         <div className="perfil-content">
           <section className="profile-header">
             {user.Pfp ? (
-              <img src={`/uploads/profile_pictures/${user.Pfp}`} alt={user.Nombre} className="user-avatar" />
+              <img
+                src={`/uploads/profile_pictures/${user.Pfp}`}
+                alt={user.Nombre}
+                className="user-avatar"
+                onClick={openImageViewer}
+                style={{ cursor: 'pointer' }}
+              />
             ) : null}
             <div className="profile-header-info">
               <h2>{user.Nombre} {user.Apellido ? user.Apellido : ''}</h2>
@@ -135,16 +183,19 @@ const Perfil = () => {
                   color="#28a745"
                 />
                 {user.redes && user.redes.length > 0 ? (
-                  user.redes.map((red) => (
-                    <HorizontalInfoCard
-                      key={red.id}
-                      icon={<i className={red.icono} style={{ color: red.color || '#000' }}></i>}
-                      title={red.nombre}
-                      content={red.url}
-                      link={red.url}
-                      color={red.color || '#000'}
-                    />
-                  ))
+                  user.redes.map((red) => {
+                    const IconComponent = iconMap[red.icono];
+                    return (
+                      <HorizontalInfoCard
+                        key={red.id}
+                        icon={IconComponent ? <IconComponent style={{ color: red.color || '#000' }} /> : null}
+                        title={red.nombre}
+                        content={`${red.contenido || ''} ${red.url || ''}`.trim()}
+                        link={red.url || null}
+                        color={red.color || '#000'}
+                      />
+                    );
+                  })
                 ) : (
                   <p>No hay redes sociales asociadas.</p>
                 )}
@@ -189,6 +240,12 @@ const Perfil = () => {
           )}
         </div>
       </div>
+      <ImageViewerModal
+        isOpen={isImageViewerOpen}
+        onClose={closeImageViewer}
+        imageSrc={user && user.Pfp ? `/uploads/profile_pictures/${user.Pfp}` : ''}
+        altText={user ? user.Nombre : 'Imagen de perfil'}
+      />
     </>
   );
 };
