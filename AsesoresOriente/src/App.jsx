@@ -13,6 +13,7 @@ import Panel from './pages/Panel'; // Import Panel page
 import Gestion from './pages/Gestion'; // Import Gestion page
 import Dashboard from './pages/Dashboard';
 import Register from './pages/Register';
+import Asesores from './pages/Asesores';
 
 export function App(){
     return (
@@ -31,6 +32,7 @@ export function App(){
                         <Route path="/gestion" element={<Gestion />} /> {/* Gestion route */}
                         <Route path="/dashboard" element={<Dashboard />} /> {/* Gestion route */}
                         <Route path="/register" element={<Register />} /> {/* Register route */}
+                        <Route path="/asesores" element={<Asesores />} /> {/* Asesores route */}
                     </Routes>
                 </div>
             </AuthProvider>

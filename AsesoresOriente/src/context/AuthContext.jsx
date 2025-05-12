@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
         pfp: data.Pfp || data.pfp || '',
         id_asesor: data.id_asesor || null,
       };
+      console.log('AuthContext: setting user:', normalizedUser);
       setUser(normalizedUser);
       localStorage.setItem('user', JSON.stringify(normalizedUser));
     } catch (error) {

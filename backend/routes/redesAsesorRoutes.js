@@ -4,6 +4,7 @@ import { authenticateToken } from '../middlewares/authMiddleware.js';
 import { validateRequest } from '../middlewares/validationMiddleware.js';
 import {
   getRedesAsesor,
+  getRedesAsesorByUserId,
   createRedAsesor,
   updateRedAsesor,
   deleteRedAsesor
@@ -13,6 +14,9 @@ const router = express.Router();
 
 // Get all redes for current asesor
 router.get('/', authenticateToken, getRedesAsesor);
+
+// Get redes for asesor by user id (public)
+router.get('/user/:userId', getRedesAsesorByUserId);
 
 // Create new red asesor
 router.post(

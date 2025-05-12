@@ -31,9 +31,18 @@ const Perfil = () => {
 
   const fetchRedesAsesor = async () => {
     try {
-      const response = await fetch('/api/redesasesor', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      let response;
+      if (id && loggedUser && id === String(loggedUser.id)) {
+        response = await fetch('/api/redesasesor', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } else if (id) {
+        response = await fetch(`/api/redesasesor/user/${id}`);
+      } else {
+        response = await fetch('/api/redesasesor', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
       if (!response.ok) {
         throw new Error('Error al cargar las redes del asesor');
       }
@@ -53,10 +62,8 @@ const Perfil = () => {
           response = await fetch('/api/usuario/profile', {
             headers: { Authorization: `Bearer ${token}` }
           });
-        } else if (id && !loggedUser) {
-          response = await fetch(`/api/usuario/public-profile/${id}`);
         } else if (id) {
-          response = await fetch(`/api/usuario/${id}`);
+          response = await fetch(`/api/usuario/public-profile/${id}`);
         } else if (loggedUser && loggedUser.id) {
           response = await fetch('/api/usuario/profile', {
             headers: { Authorization: `Bearer ${token}` }

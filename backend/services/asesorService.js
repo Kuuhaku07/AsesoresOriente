@@ -38,6 +38,19 @@ export const getAsesorById = async (id) => {
 };
 
 /**
+ * Obtiene todos los asesores junto con su id de usuario.
+ */
+export const getAllAsesors = async () => {
+  const result = await pool.query(`
+    SELECT a.*, u.id AS user_id
+    FROM "Asesor" a
+    LEFT JOIN "Usuario" u ON u.asesor_id = a.id
+    ORDER BY a.nombre, a.apellido
+  `);
+  return result.rows;
+};
+
+/**
  * Actualiza un asesor existente identificado por ID con los datos proporcionados.
  * Devuelve el asesor actualizado.
  */

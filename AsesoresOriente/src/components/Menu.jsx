@@ -63,7 +63,7 @@ export function Menu() {
               <button className="dropbtn profile-btn" onClick={toggleProfileDropdown}>
                 {/* Show profile picture if available, else fallback text */}
                 {user.pfp ? (
-                  <img src={`uploads/profile_pictures/${user.pfp}`} alt="Perfil" className="profile-pic" />
+                  <img src={`/uploads/profile_pictures/${user.pfp}`} alt="Perfil" className="profile-pic" />
                 ) : (
                   <span>{user.name}</span>
                 )} ▼

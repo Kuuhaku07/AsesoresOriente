@@ -17,6 +17,22 @@ export const getRedesAsesor = async (req, res) => {
   }
 };
 
+export const getRedesAsesorByUserId = async (req, res) => {
+  try {
+    const userId = parseInt(req.params.userId, 10);
+    const usuario = await usuarioService.getUsuarioById(userId);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    const asesorId = usuario.asesor_id;
+    const redes = await redesAsesorService.getRedesByAsesorId(asesorId);
+    res.json(redes);
+  } catch (error) {
+    console.error('Error getting redes asesor by user id:', error);
+    res.status(500).json({ error: 'Error al obtener las redes sociales' });
+  }
+};
+
 export const createRedAsesor = async (req, res) => {
   try {
     // console.log('Authenticated userId:', req.userId);

@@ -66,3 +66,16 @@ export const updateAsesor = async (req, res) => {
     res.status(500).json({ error: 'Failed to update asesor' });
   }
 };
+
+/**
+ * Obtiene todos los asesores.
+ */
+export const getAllAsesors = async (req, res) => {
+  try {
+    const asesors = await asesorService.getAllAsesors();
+    res.json(asesors);
+  } catch (error) {
+    console.error('Error getting asesors:', error);
+    res.status(500).json({ error: 'Failed to get asesors' });
+  }
+};
