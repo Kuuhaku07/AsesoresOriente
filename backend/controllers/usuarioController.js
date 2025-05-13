@@ -134,6 +134,9 @@ export const login = async (req, res) => {
     if (!passwordMatch) {
       return res.status(401).json({ error: 'Invalid username/email or password' });
     }
+    // Update ultimo_login timestamp on successful login
+    await usuarioService.updateUltimoLogin(usuario.id);
+
     const tokenPayload = {
       id: usuario.id,
       email: usuario.correo,

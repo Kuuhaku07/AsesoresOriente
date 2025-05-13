@@ -304,3 +304,18 @@ export const changeUsuarioPassword = async (id, currentPassword, newPassword) =>
     throw error;
   }
 };
+
+/**
+ * Actualiza el campo ultimo_login del usuario con la fecha y hora actual.
+ */
+export const updateUltimoLogin = async (usuarioId) => {
+  try {
+    await pool.query(
+      'UPDATE "Usuario" SET ultimo_login = NOW() WHERE id = $1',
+      [usuarioId]
+    );
+  } catch (error) {
+    console.error('Error updating ultimo_login:', error);
+    throw error;
+  }
+};

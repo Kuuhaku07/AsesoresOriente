@@ -14,6 +14,9 @@ import ImageViewerModal from '../components/ImageViewerModal';
 // Import icons from react-icons
 import { FaPhone, FaEnvelope } from 'react-icons/fa';
 
+// Import the new relative time formatter
+import { formatRelativeTime } from '../utils/timeUtils';
+
 const Perfil = () => {
   const { user: loggedUser, token } = useAuth();
   const { id } = useParams();
@@ -170,7 +173,7 @@ const Perfil = () => {
                   <li><strong>Estado:</strong> {user.Activo ? 'Activo' : 'Inactivo'}</li>
                   <li><strong>Fecha de Ingreso:</strong> {user.FechaIngreso ? new Date(user.FechaIngreso).toLocaleDateString() : 'No especificado'}</li>
                   <li><strong>Nombre de Usuario:</strong> {user.NombreUsuario}</li>
-                  <li><strong>Último Login:</strong> {user.UltimoLogin ? new Date(user.UltimoLogin).toLocaleString() : 'Nunca'}</li>
+                  <li><strong>Último Login:</strong> {formatRelativeTime(user.UltimoLogin)}</li>
                   <li><strong>Fecha de Creación:</strong> {user.FechaCreacion ? new Date(user.FechaCreacion).toLocaleDateString() : 'No especificado'}</li>
                 </ul>
               </div>
