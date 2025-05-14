@@ -86,8 +86,7 @@ router.post(
  */
 router.put(
   '/:id',
-  upload.single('pfp'), // Middleware para subir archivo con campo 'pfp'
-  multerErrorHandler,   // Middleware para manejar errores de multer
+  // Removed multer middleware since pfp upload is not used here
   [
     body('Correo').optional({ nullable: true }).isEmail().withMessage('Correo debe ser un email valido'),
     body('Contraseña').optional().isLength({ min: 6 }).withMessage('Contraseña debe tener al menos 6 caracteres'),

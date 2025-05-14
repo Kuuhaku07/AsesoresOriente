@@ -6,11 +6,8 @@ import '../styles/Register.css';
 import { verifyPermissions } from '../utils/permissionUtils';
 import ToastMessage from '../components/ToastMessage';
 
-
 const Register = () => {
-  
-
-  
+  // Estado para los datos del formulario
   const [formData, setFormData] = useState({
     Nombre: '',
     Apellido: '',
@@ -22,16 +19,21 @@ const Register = () => {
     Contraseña: '',
     Rol: '',
   });
+  // Estado para la lista de usuarios registrados
   const [usuarios, setUsuarios] = useState([]);
+  // Estado para el usuario seleccionado (edición)
   const [selectedUsuarioId, setSelectedUsuarioId] = useState(null);
   const [selectedAsesorId, setSelectedAsesorId] = useState(null);
+  // Estados para mensajes de error y éxito
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const { user } = useAuth();
-  const navigate = useNavigate();
-   // Function to show toast messages
+  // Estado para mostrar mensajes toast
   const [toast, setToast] = useState({ message: '', type: 'info' });
 
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Verificar permisos al cargar la página
   useEffect(() => {
     const allowed = verifyPermissions(user, ['ADMINISTRADOR', 'GERENTE']);
     if (!allowed) {
@@ -39,25 +41,29 @@ const Register = () => {
       navigate('/');
     }
   }, [user, navigate]);
+
+  // Cargar usuarios y limpiar formulario al iniciar
   useEffect(() => {
     fetchUsuarios();
-    clearForm(); // Clear form on initial load to avoid pre-filled data
-    
+    clearForm();
   }, []);
 
+  // Función para obtener usuarios desde la API
   const fetchUsuarios = async () => {
     try {
       const response = await fetch('/api/usuario');
       if (!response.ok) {
-        throw new Error('Failed to fetch usuarios');
+        throw new Error('Error al obtener usuarios');
       }
       const data = await response.json();
       setUsuarios(data);
     } catch (err) {
       setError(err.message);
+      setToast({ message: err.message, type: 'error' });
     }
   };
 
+  // Manejar cambios en los inputs del formulario
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -65,6 +71,7 @@ const Register = () => {
     });
   };
 
+  // Cargar datos de un usuario para edición
   const loadUsuario = (usuario) => {
     const roleMapDbToSelect = {
       'ADMINISTRADOR': 'Administrador',
@@ -84,13 +91,14 @@ const Register = () => {
       Pfp: usuario.Pfp || '',
       Correo: usuario.Correo || '',
       NombreUsuario: usuario.NombreUsuario || '',
-      Contraseña: '', // Do not load password for security reasons
+      Contraseña: '', // No cargar contraseña por seguridad
       Rol: roleMapDbToSelect[usuario.rol] || roleMapDbToSelect[usuario.Rol] || roleMapDbToSelect[usuario.rol_id] || '',
     });
     setSuccess('');
     setError('');
   };
 
+  // Limpiar formulario y estados
   const clearForm = () => {
     setSelectedUsuarioId(null);
     setSelectedAsesorId(null);
@@ -109,6 +117,7 @@ const Register = () => {
     setError('');
   };
 
+  // Manejar envío del formulario para crear o actualizar usuario y asesor
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -120,8 +129,7 @@ const Register = () => {
     };
     try {
       if (selectedUsuarioId && selectedAsesorId) {
-        // Update flow
-        // Update asesor first
+        // Actualizar asesor primero
         const asesorResponse = await fetch(`/api/asesor/${selectedAsesorId}`, {
           method: 'PUT',
           headers: {
@@ -133,41 +141,52 @@ const Register = () => {
             Cedula: formData.Cedula || null,
             Telefono: formData.Telefono || null,
             Correo: formData.Correo || null,
-            Pfp: formData.Pfp || null,
+            // Removed Pfp field from update
           }),
         });
 
         if (!asesorResponse.ok) {
           const data = await asesorResponse.json();
-          setError(data.error || 'Failed to update asesor');
+          setError(data.error || 'Error al actualizar asesor');
+          setToast({ message: data.error || 'Error al actualizar asesor', type: 'error' });
           return;
         }
 
-        // Update usuario
+        // Actualizar usuario
+        const updateBody = {
+          nombre_usuario: formData.NombreUsuario,
+          correo: formData.Correo,
+          contrasena: formData.Contraseña,
+          ...(formData.Rol ? { Rol: roleMapSelectToDb[formData.Rol] || formData.Rol } : {}),
+          id_asesor: selectedAsesorId,
+        };
+        console.log('Update usuario request body:', updateBody);
         const usuarioResponse = await fetch(`/api/usuario/${selectedUsuarioId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            NombreUsuario: formData.NombreUsuario,
-            Correo: formData.Correo,
-            Contraseña: formData.Contraseña,
-            Rol: roleMapSelectToDb[formData.Rol] || formData.Rol,
-            id_asesor: selectedAsesorId,
-          }),
+          body: JSON.stringify(updateBody),
         });
 
         if (!usuarioResponse.ok) {
           const data = await usuarioResponse.json();
-          setError(data.error || 'Failed to update usuario');
+          setError(data.error || 'Error al actualizar usuario');
+          setToast({ message: data.error || 'Error al actualizar usuario', type: 'error' });
           return;
         }
 
-        setSuccess('User and asesor updated successfully!');
+        setSuccess('Usuario y asesor actualizados correctamente');
+        setToast({ message: 'Usuario y asesor actualizados correctamente', type: 'success' });
+        // Recargar usuarios y recargar formulario con datos actualizados
+        await fetchUsuarios();
+        // Recargar datos del usuario actualizado en el formulario
+        const updatedUsuario = usuarios.find(u => u.usuario_id === selectedUsuarioId);
+        if (updatedUsuario) {
+          loadUsuario(updatedUsuario);
+        }
       } else {
-        // Create flow
-        // Create asesor first
+        // Crear asesor primero
         const asesorResponse = await fetch('/api/asesor', {
           method: 'POST',
           headers: {
@@ -179,19 +198,20 @@ const Register = () => {
             Cedula: formData.Cedula || null,
             Telefono: formData.Telefono || null,
             Correo: formData.Correo || null,
-            Pfp: formData.Pfp || null,
+            // Removed Pfp field from create
           }),
         });
 
         if (!asesorResponse.ok) {
           const data = await asesorResponse.json();
-          setError(data.error || 'Failed to register asesor');
+          setError(data.error || 'Error al registrar asesor');
+          setToast({ message: data.error || 'Error al registrar asesor', type: 'error' });
           return;
         }
 
         const asesorData = await asesorResponse.json();
 
-        // Create usuario with asesor id
+        // Crear usuario con id de asesor
         const usuarioResponse = await fetch('/api/usuario', {
           method: 'POST',
           headers: {
@@ -208,30 +228,34 @@ const Register = () => {
 
         if (!usuarioResponse.ok) {
           const data = await usuarioResponse.json();
-          setError(data.error || 'Failed to register usuario');
+          setError(data.error || 'Error al registrar usuario');
+          setToast({ message: data.error || 'Error al registrar usuario', type: 'error' });
           return;
         }
 
-        setSuccess('User and asesor registered successfully!');
+        setSuccess('Usuario y asesor registrados correctamente');
+        setToast({ message: 'Usuario y asesor registrados correctamente', type: 'success' });
       }
 
       clearForm();
       fetchUsuarios();
     } catch (err) {
-      setError('Failed to register or update user');
+      setError('Error al registrar o actualizar usuario');
+      setToast({ message: 'Error al registrar o actualizar usuario', type: 'error' });
     }
   };
 
   return (
     <>
+      {/* Mostrar mensaje toast si existe */}
       {toast.message && <ToastMessage message={toast.message} type={toast.type} />}
       <Menu />
       <div className="register-page">
         <div className="form-container">
           <div className="form-header">
-            <h2>{selectedUsuarioId ? 'Update User and Asesor' : 'Register User and Asesor'}</h2>
+            <h2>{selectedUsuarioId ? 'Actualizar Usuario y Asesor' : 'Registrar Usuario y Asesor'}</h2>
             {selectedUsuarioId && (
-              <button className="clear-button" onClick={clearForm} title="Add New User">
+              <button className="clear-button" onClick={clearForm} title="Agregar Nuevo Usuario">
                 +
               </button>
             )}
@@ -259,7 +283,7 @@ const Register = () => {
               autoComplete="off"
             />
 
-            <label htmlFor="Cedula">Cedula:</label>
+            <label htmlFor="Cedula">Cédula:</label>
             <input
               type="text"
               id="Cedula"
@@ -269,7 +293,7 @@ const Register = () => {
               autoComplete="off"
             />
 
-            <label htmlFor="Telefono">Telefono:</label>
+            <label htmlFor="Telefono">Teléfono:</label>
             <input
               type="text"
               id="Telefono"
@@ -279,15 +303,7 @@ const Register = () => {
               autoComplete="off"
             />
 
-            <label htmlFor="Pfp">Pfp (profile picture URL):</label>
-            <input
-              type="text"
-              id="Pfp"
-              name="Pfp"
-              value={formData.Pfp}
-              onChange={handleChange}
-              autoComplete="off"
-            />
+            {/* Removed Pfp field as user can change profile picture from their profile page */}
 
             <label htmlFor="NombreUsuario">Nombre de Usuario:</label>
             <input
@@ -317,7 +333,7 @@ const Register = () => {
               name="Contraseña"
               value={formData.Contraseña}
               onChange={handleChange}
-              required={!selectedUsuarioId} // Password required only on create
+              required={!selectedUsuarioId} // Contraseña requerida solo al crear
               autoComplete="new-password"
             />
 
@@ -330,19 +346,19 @@ const Register = () => {
               required
               className="select-input"
             >
-              <option value="">Select role</option>
+              <option value="">Seleccione un rol</option>
               <option value="Asesor">Asesor</option>
               <option value="Gerente">Gerente</option>
               <option value="Administrador">Administrador</option>
             </select>
 
-            <button type="submit">{selectedUsuarioId ? 'Update' : 'Register'}</button>
+            <button type="submit">{selectedUsuarioId ? 'Actualizar' : 'Registrar'}</button>
           </form>
           {success && <p className="success-message">{success}</p>}
           {error && <p className="error-message">{error}</p>}
         </div>
         <div className="list-container">
-          <h3>Registered Users</h3>
+          <h3>Usuarios Registrados</h3>
           <ul className="user-list">
             {usuarios.map((usuario) => (
               <li
