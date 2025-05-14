@@ -63,7 +63,7 @@
     z-index: 1000;
     border-radius: var(--border-radius-sm);
     top: 100%;
-    left: 0;
+    right: 0;
 }
 
 /* Show dropdown content when visible */
@@ -78,7 +78,9 @@
     color: #eee; /* More legible text color */
     padding: var(--spacing-md);
     text-decoration: none;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
     background-color: transparent;
     border: none;
     width: 100%;

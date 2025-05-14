@@ -1,9 +1,11 @@
 /* src/pages/Dashboard.css */
-.dashboard {
-    display: flex;
+.perfil {
     flex-direction: column;
     min-height: 100vh;
-    padding-top: 90px; /* Padding to avoid fixed menu overlap */
+    background-color: #fafafa;
+    width: 100%;
+    padding: 20px; /* margen interno para separar contenido */
+    box-sizing: border-box;
 }
 
 .dashboard-content {

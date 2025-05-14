@@ -1,15 +1,19 @@
 /* src/styles/Perfil.css */
 
 .perfil {
-    display: flex;
     flex-direction: column;
     min-height: 100vh;
-    padding-top: 90px; /* Padding to avoid fixed menu overlap */
     background-color: #fafafa;
+    width: 100%;
+    padding: 20px; /* margen interno para separar contenido */
+    box-sizing: border-box;
 }
+
 
 .perfil-content {
     padding: 20px;
+    max-width: 1800px;
+    margin: 0 auto;
 }
 
 /* Profile header: name, role, edit button */

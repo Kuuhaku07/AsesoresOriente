@@ -1,0 +1,15 @@
+/* src/styles/layout.css */
+
+/* Common layout styles */
+
+.menu-offset {
+    padding-top: 90px; /* Padding to avoid fixed menu overlap */
+}
+
+/* Container for main page content */
+/* Increased max-width for wider content */
+.page-container {
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 0 160px;
+}

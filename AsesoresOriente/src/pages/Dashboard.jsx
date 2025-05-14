@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Menu } from '../components/Menu';
 import { Navigate } from 'react-router-dom';
+import PageTitle from '../components/PageTitle';
 import '../styles/Dashboard.css';
 import ImageViewerModal from '../components/ImageViewerModal';
 
@@ -32,9 +33,9 @@ const Dashboard = () => {
   return (
     <>
       <Menu />
-      <div className="dashboard">
-        <h1>Panel de Control</h1>
-        <div className="dashboard-content">
+      <div className="dashboard menu-offset">
+        <PageTitle>Panel de Control</PageTitle>
+        <div className="dashboard-content page-container">
           {/* User information section */}
           <section className="user-info">
             {/* Use user.pfp for profile picture with fallback */}

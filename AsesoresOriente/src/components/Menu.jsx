@@ -71,7 +71,10 @@ export function Menu() {
               {showProfileDropdown && (
                 <div className="dropdown-content">
                   <Link to="/perfil">Perfil</Link>
-                  <button onClick={logout} className="logout-btn">Cerrar sesión</button>
+                  {(user.role === 'GERENTE' || user.role === 'ADMINISTRADOR') && (
+                    <Link to="/register">Registrar Usuario</Link>
+                  )}
+                  <a href="#" onClick={(e) => { e.preventDefault(); logout(); }} className="logout-btn">Cerrar sesión</a>
                 </div>
               )}
             </div>

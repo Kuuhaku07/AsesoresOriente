@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { Menu } from '../components/Menu';
 import '../styles/Register.css';
+import { verifyPermissions } from '../utils/permissionUtils';
+import ToastMessage from '../components/ToastMessage';
+
 
 const Register = () => {
+  
+
+  
   const [formData, setFormData] = useState({
     Nombre: '',
     Apellido: '',
@@ -19,11 +27,22 @@ const Register = () => {
   const [selectedAsesorId, setSelectedAsesorId] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const { user } = useAuth();
   const navigate = useNavigate();
+   // Function to show toast messages
+  const [toast, setToast] = useState({ message: '', type: 'info' });
 
+  useEffect(() => {
+    const allowed = verifyPermissions(user, ['ADMINISTRADOR', 'GERENTE']);
+    if (!allowed) {
+      setToast({ message: 'No tiene permisos para acceder a esta sección', type: 'error' });
+      navigate('/');
+    }
+  }, [user, navigate]);
   useEffect(() => {
     fetchUsuarios();
     clearForm(); // Clear form on initial load to avoid pre-filled data
+    
   }, []);
 
   const fetchUsuarios = async () => {
@@ -204,136 +223,140 @@ const Register = () => {
   };
 
   return (
-    <div className="register-page">
-      <div className="form-container">
-        <div className="form-header">
-          <h2>{selectedUsuarioId ? 'Update User and Asesor' : 'Register User and Asesor'}</h2>
-          {selectedUsuarioId && (
-            <button className="clear-button" onClick={clearForm} title="Add New User">
-              +
-            </button>
-          )}
-        </div>
-        <form onSubmit={handleSubmit} className="register-form" autoComplete="off">
-          <label htmlFor="Nombre">Nombre:</label>
-          <input
-            type="text"
-            id="Nombre"
-            name="Nombre"
-            value={formData.Nombre}
-            onChange={handleChange}
-            required
-            autoComplete="off"
-          />
+    <>
+      {toast.message && <ToastMessage message={toast.message} type={toast.type} />}
+      <Menu />
+      <div className="register-page">
+        <div className="form-container">
+          <div className="form-header">
+            <h2>{selectedUsuarioId ? 'Update User and Asesor' : 'Register User and Asesor'}</h2>
+            {selectedUsuarioId && (
+              <button className="clear-button" onClick={clearForm} title="Add New User">
+                +
+              </button>
+            )}
+          </div>
+          <form onSubmit={handleSubmit} className="register-form" autoComplete="off">
+            <label htmlFor="Nombre">Nombre:</label>
+            <input
+              type="text"
+              id="Nombre"
+              name="Nombre"
+              value={formData.Nombre}
+              onChange={handleChange}
+              required
+              autoComplete="off"
+            />
 
-          <label htmlFor="Apellido">Apellido:</label>
-          <input
-            type="text"
-            id="Apellido"
-            name="Apellido"
-            value={formData.Apellido}
-            onChange={handleChange}
-            required
-            autoComplete="off"
-          />
+            <label htmlFor="Apellido">Apellido:</label>
+            <input
+              type="text"
+              id="Apellido"
+              name="Apellido"
+              value={formData.Apellido}
+              onChange={handleChange}
+              required
+              autoComplete="off"
+            />
 
-          <label htmlFor="Cedula">Cedula:</label>
-          <input
-            type="text"
-            id="Cedula"
-            name="Cedula"
-            value={formData.Cedula}
-            onChange={handleChange}
-            autoComplete="off"
-          />
+            <label htmlFor="Cedula">Cedula:</label>
+            <input
+              type="text"
+              id="Cedula"
+              name="Cedula"
+              value={formData.Cedula}
+              onChange={handleChange}
+              autoComplete="off"
+            />
 
-          <label htmlFor="Telefono">Telefono:</label>
-          <input
-            type="text"
-            id="Telefono"
-            name="Telefono"
-            value={formData.Telefono}
-            onChange={handleChange}
-            autoComplete="off"
-          />
+            <label htmlFor="Telefono">Telefono:</label>
+            <input
+              type="text"
+              id="Telefono"
+              name="Telefono"
+              value={formData.Telefono}
+              onChange={handleChange}
+              autoComplete="off"
+            />
 
-          <label htmlFor="Pfp">Pfp (profile picture URL):</label>
-          <input
-            type="text"
-            id="Pfp"
-            name="Pfp"
-            value={formData.Pfp}
-            onChange={handleChange}
-            autoComplete="off"
-          />
+            <label htmlFor="Pfp">Pfp (profile picture URL):</label>
+            <input
+              type="text"
+              id="Pfp"
+              name="Pfp"
+              value={formData.Pfp}
+              onChange={handleChange}
+              autoComplete="off"
+            />
 
-          <label htmlFor="NombreUsuario">Nombre de Usuario:</label>
-          <input
-            type="text"
-            id="NombreUsuario"
-            name="NombreUsuario"
-            value={formData.NombreUsuario}
-            onChange={handleChange}
-            required
-            autoComplete="off"
-          />
-          <label htmlFor="Correo">Correo:</label>
-          <input
-            type="email"
-            id="Correo"
-            name="Correo"
-            value={formData.Correo}
-            onChange={handleChange}
-            required
-            autoComplete="off"
-          />
+            <label htmlFor="NombreUsuario">Nombre de Usuario:</label>
+            <input
+              type="text"
+              id="NombreUsuario"
+              name="NombreUsuario"
+              value={formData.NombreUsuario}
+              onChange={handleChange}
+              required
+              autoComplete="off"
+            />
+            <label htmlFor="Correo">Correo:</label>
+            <input
+              type="email"
+              id="Correo"
+              name="Correo"
+              value={formData.Correo}
+              onChange={handleChange}
+              required
+              autoComplete="off"
+            />
 
-          <label htmlFor="Contraseña">Contraseña:</label>
-          <input
-            type="password"
-            id="Contraseña"
-            name="Contraseña"
-            value={formData.Contraseña}
-            onChange={handleChange}
-            required={!selectedUsuarioId} // Password required only on create
-            autoComplete="new-password"
-          />
+            <label htmlFor="Contraseña">Contraseña:</label>
+            <input
+              type="password"
+              id="Contraseña"
+              name="Contraseña"
+              value={formData.Contraseña}
+              onChange={handleChange}
+              required={!selectedUsuarioId} // Password required only on create
+              autoComplete="new-password"
+            />
 
-          <label htmlFor="Rol">Rol:</label>
-          <select
-            id="Rol"
-            name="Rol"
-            value={formData.Rol}
-            onChange={handleChange}
-            required
-            className="select-input"
-          >
-            <option value="">Select role</option>
-            <option value="Asesor">Asesor</option>
-            <option value="Gerente">Gerente</option>
-            <option value="Administrador">Administrador</option>
-          </select>
-
-          <button type="submit">{selectedUsuarioId ? 'Update' : 'Register'}</button>
-        </form>
-        {success && <p className="success-message">{success}</p>}
-        {error && <p className="error-message">{error}</p>}
-      </div>
-      <div className="list-container">
-        <h3>Registered Users</h3>
-        <ul className="user-list">
-          {usuarios.map((usuario) => (
-            <li
-              key={usuario.usuario_id}
-              onClick={() => loadUsuario(usuario)}
-              className={usuario.usuario_id === selectedUsuarioId ? 'selected' : ''}
+            <label htmlFor="Rol">Rol:</label>
+            <select
+              id="Rol"
+              name="Rol"
+              value={formData.Rol}
+              onChange={handleChange}
+              required
+              className="select-input"
             >
-              {usuario.Nombre} {usuario.Apellido} - {usuario.Correo}
-            </li>
-          ))}
-        </ul>
+              <option value="">Select role</option>
+              <option value="Asesor">Asesor</option>
+              <option value="Gerente">Gerente</option>
+              <option value="Administrador">Administrador</option>
+            </select>
+
+            <button type="submit">{selectedUsuarioId ? 'Update' : 'Register'}</button>
+          </form>
+          {success && <p className="success-message">{success}</p>}
+          {error && <p className="error-message">{error}</p>}
+        </div>
+        <div className="list-container">
+          <h3>Registered Users</h3>
+          <ul className="user-list">
+            {usuarios.map((usuario) => (
+              <li
+                key={usuario.usuario_id}
+                onClick={() => loadUsuario(usuario)}
+                className={usuario.usuario_id === selectedUsuarioId ? 'selected' : ''}
+              >
+                {usuario.Nombre} {usuario.Apellido} - {usuario.Correo}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

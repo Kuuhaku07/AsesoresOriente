@@ -4,6 +4,7 @@ import { Menu } from '../components/Menu';
 import { Navigate, useParams } from 'react-router-dom';
 import PageTitle from '../components/PageTitle';
 import '../styles/Perfil.css';
+import '../styles/layout.css';
 import HorizontalInfoCard from '../components/HorizontalInfoCard';
 import iconMap from '../utils/iconMap';
 import SocialNetworksModal from '../components/SocialNetworksModal';
@@ -138,9 +139,9 @@ const Perfil = () => {
   return (
     <>
       <Menu />
-      <div className="perfil">
+      <div className="perfil menu-offset">
         <PageTitle>Perfil</PageTitle>
-        <div className="perfil-content">
+        <div className="perfil-content page-container">
           <section className="profile-header">
             {user.Pfp ? (
               <img
@@ -171,7 +172,6 @@ const Perfil = () => {
                   <li><strong>Especialidad:</strong> {user.Especialidad ? user.Especialidad : 'No especificado'}</li>
                   {user.Direccion && <li><strong>Dirección:</strong> {user.Direccion}</li>}
                   <li><strong>Estado:</strong> {user.Activo ? 'Activo' : 'Inactivo'}</li>
-                  <li><strong>Fecha de Ingreso:</strong> {user.FechaIngreso ? new Date(user.FechaIngreso).toLocaleDateString() : 'No especificado'}</li>
                   <li><strong>Nombre de Usuario:</strong> {user.NombreUsuario}</li>
                   <li><strong>Último Login:</strong> {formatRelativeTime(user.UltimoLogin)}</li>
                   <li><strong>Fecha de Creación:</strong> {user.FechaCreacion ? new Date(user.FechaCreacion).toLocaleDateString() : 'No especificado'}</li>
