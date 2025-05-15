@@ -3,6 +3,7 @@
     --color-primary: #2aaec9;
     --color-primary-light: rgba(42, 174, 201, 0.3);
     --color-background: #f0f0f0;
+    --color-background-2: #ebf3fa;
     --color-selected:#bbecf7;
     --color-text: #333333;
     --color-text-light: #666666;
@@ -25,6 +26,10 @@
     --spacing-lg: 24px;
     --spacing-xl: 32px;
 
+    /* Custom layout spacing */
+    --spacing-menu-offset: 90px;
+    --spacing-page-container-padding: 160px;
+
     /* Bordes */
     --border-radius-sm: 4px;
     --border-radius-md: 8px;
@@ -34,4 +39,4 @@
     /* Z-index */
     --z-index-menu: 10;
     --z-index-modal: 100;
-} 
+}

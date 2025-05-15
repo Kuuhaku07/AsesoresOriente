@@ -3,7 +3,7 @@
 /* Common layout styles */
 
 .menu-offset {
-    padding-top: 90px; /* Padding to avoid fixed menu overlap */
+    padding-top: var(--spacing-menu-offset); /* Padding to avoid fixed menu overlap */
 }
 
 /* Container for main page content */
@@ -11,5 +11,5 @@
 .page-container {
     max-width: 1800px;
     margin: 0 auto;
-    padding: 0 160px;
+    padding: 0 var(--spacing-page-container-padding);
 }
