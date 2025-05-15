@@ -1,43 +1,58 @@
-.register-page {
+.register-content {
   display: flex;
   gap: 20px;
-  padding: 20px;
-  font-family: Arial, sans-serif;
 }
 
 .form-container {
   flex: 1;
-  border: 1px solid #ccc;
   padding: 20px;
   border-radius: 8px;
   background-color: #fff;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-sizing: border-box;
 }
 
-.form-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+.list-container {
+  flex: 1;
+  max-height: 600px;
+  overflow-y: auto;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-sizing: border-box;
 }
 
-.clear-button {
-  font-size: 24px;
-  font-weight: bold;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  line-height: 24px;
-  text-align: center;
+.list-container h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.user-list {
+  list-style: none;
   padding: 0;
+  margin: 0;
 }
 
-.clear-button:hover {
-  background-color: #0056b3;
+.user-list li {
+  cursor: pointer;
+  padding: 8px;
+  margin-bottom: 5px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
 }
+
+.user-list li:hover {
+  background-color: #e9ecef;
+}
+
+.user-list li.selected {
+  background-color: #d3d3d3;
+  font-weight: bold;
+}
+
+/* Keep form input and button styles from original Register.css */
 
 .register-form label {
   display: block;
@@ -81,44 +96,5 @@
 .error-message {
   margin-top: 15px;
   color: red;
-  font-weight: bold;
-}
-
-.list-container {
-  flex: 1;
-  max-height: 600px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 8px;
-  background-color: #fff;
-}
-
-.list-container h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-
-.user-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.user-list li {
-  cursor: pointer;
-  padding: 8px;
-  margin-bottom: 5px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-}
-
-.user-list li:hover {
-  background-color: #e9ecef;
-}
-
-.user-list li.selected {
-  background-color: #d3d3d3;
   font-weight: bold;
 }

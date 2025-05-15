@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Menu } from '../components/Menu';
 import '../styles/Register.css';
+import '../styles/layout.css';
+
+import '../styles/layout.css';
+import PageTitle from '../components/PageTitle';
 import { verifyPermissions } from '../utils/permissionUtils';
 import ToastMessage from '../components/ToastMessage';
 
@@ -250,126 +254,128 @@ const Register = () => {
       {/* Mostrar mensaje toast si existe */}
       {toast.message && <ToastMessage message={toast.message} type={toast.type} />}
       <Menu />
-      <div className="register-page">
-        <div className="form-container">
-          <div className="form-header">
-            <h2>{selectedUsuarioId ? 'Actualizar Usuario y Asesor' : 'Registrar Usuario y Asesor'}</h2>
-            {selectedUsuarioId && (
-              <button className="clear-button" onClick={clearForm} title="Agregar Nuevo Usuario">
-                +
-              </button>
-            )}
-          </div>
-          <form onSubmit={handleSubmit} className="register-form" autoComplete="off">
-            <label htmlFor="Nombre">Nombre:</label>
-            <input
-              type="text"
-              id="Nombre"
-              name="Nombre"
-              value={formData.Nombre}
-              onChange={handleChange}
-              required
-              autoComplete="off"
-            />
+      <div className="register menu-offset">
+        <PageTitle>{selectedUsuarioId ? 'Actualizar Usuario y Asesor' : 'Registrar Usuario y Asesor'}</PageTitle>
+        <div className="register-content page-container">
+          <div className="form-container">
+            <div className="form-header">
+              {selectedUsuarioId && (
+                <button className="clear-button" onClick={clearForm} title="Agregar Nuevo Usuario">
+                  +
+                </button>
+              )}
+            </div>
+            <form onSubmit={handleSubmit} className="register-form" autoComplete="off">
+              <label htmlFor="Nombre">Nombre:</label>
+              <input
+                type="text"
+                id="Nombre"
+                name="Nombre"
+                value={formData.Nombre}
+                onChange={handleChange}
+                required
+                autoComplete="off"
+              />
 
-            <label htmlFor="Apellido">Apellido:</label>
-            <input
-              type="text"
-              id="Apellido"
-              name="Apellido"
-              value={formData.Apellido}
-              onChange={handleChange}
-              required
-              autoComplete="off"
-            />
+              <label htmlFor="Apellido">Apellido:</label>
+              <input
+                type="text"
+                id="Apellido"
+                name="Apellido"
+                value={formData.Apellido}
+                onChange={handleChange}
+                required
+                autoComplete="off"
+              />
 
-            <label htmlFor="Cedula">Cédula:</label>
-            <input
-              type="text"
-              id="Cedula"
-              name="Cedula"
-              value={formData.Cedula}
-              onChange={handleChange}
-              autoComplete="off"
-            />
+              <label htmlFor="Cedula">Cédula:</label>
+              <input
+                type="text"
+                id="Cedula"
+                name="Cedula"
+                value={formData.Cedula}
+                onChange={handleChange}
+                autoComplete="off"
+              />
 
-            <label htmlFor="Telefono">Teléfono:</label>
-            <input
-              type="text"
-              id="Telefono"
-              name="Telefono"
-              value={formData.Telefono}
-              onChange={handleChange}
-              autoComplete="off"
-            />
+              <label htmlFor="Telefono">Teléfono:</label>
+              <input
+                type="text"
+                id="Telefono"
+                name="Telefono"
+                value={formData.Telefono}
+                onChange={handleChange}
+                autoComplete="off"
+              />
 
-            {/* Removed Pfp field as user can change profile picture from their profile page */}
+              {/* Removed Pfp field as user can change profile picture from their profile page */}
 
-            <label htmlFor="NombreUsuario">Nombre de Usuario:</label>
-            <input
-              type="text"
-              id="NombreUsuario"
-              name="NombreUsuario"
-              value={formData.NombreUsuario}
-              onChange={handleChange}
-              required
-              autoComplete="off"
-            />
-            <label htmlFor="Correo">Correo:</label>
-            <input
-              type="email"
-              id="Correo"
-              name="Correo"
-              value={formData.Correo}
-              onChange={handleChange}
-              required
-              autoComplete="off"
-            />
+              <label htmlFor="NombreUsuario">Nombre de Usuario:</label>
+              <input
+                type="text"
+                id="NombreUsuario"
+                name="NombreUsuario"
+                value={formData.NombreUsuario}
+                onChange={handleChange}
+                required
+                autoComplete="off"
+              />
+              <label htmlFor="Correo">Correo:</label>
+              <input
+                type="email"
+                id="Correo"
+                name="Correo"
+                value={formData.Correo}
+                onChange={handleChange}
+                required
+                autoComplete="off"
+              />
 
-            <label htmlFor="Contraseña">Contraseña:</label>
-            <input
-              type="password"
-              id="Contraseña"
-              name="Contraseña"
-              value={formData.Contraseña}
-              onChange={handleChange}
-              required={!selectedUsuarioId} // Contraseña requerida solo al crear
-              autoComplete="new-password"
-            />
+              <label htmlFor="Contraseña">Contraseña:</label>
+              <input
+                type="password"
+                id="Contraseña"
+                name="Contraseña"
+                value={formData.Contraseña}
+                onChange={handleChange}
+                required={!selectedUsuarioId} // Contraseña requerida solo al crear
+                autoComplete="new-password"
+              />
 
-            <label htmlFor="Rol">Rol:</label>
-            <select
-              id="Rol"
-              name="Rol"
-              value={formData.Rol}
-              onChange={handleChange}
-              required
-              className="select-input"
-            >
-              <option value="">Seleccione un rol</option>
-              <option value="Asesor">Asesor</option>
-              <option value="Gerente">Gerente</option>
-              <option value="Administrador">Administrador</option>
-            </select>
-
-            <button type="submit">{selectedUsuarioId ? 'Actualizar' : 'Registrar'}</button>
-          </form>
-          {success && <p className="success-message">{success}</p>}
-          {error && <p className="error-message">{error}</p>}
-        </div>
-        <div className="list-container">
-          <h3>Usuarios Registrados</h3>
-          <ul className="user-list">
-            {usuarios.map((usuario) => (
-              <li
-                key={usuario.usuario_id}
-                onClick={() => loadUsuario(usuario)}
-                className={usuario.usuario_id === selectedUsuarioId ? 'selected' : ''}
+              <label htmlFor="Rol">Rol:</label>
+              <select
+                id="Rol"
+                name="Rol"
+                value={formData.Rol}
+                onChange={handleChange}
+                required
+                className="select-input"
               >
-                {usuario.Nombre} {usuario.Apellido} - {usuario.Correo}
-              </li>
-            ))}
-          </ul>
+                <option value="">Seleccione un rol</option>
+                <option value="Asesor">Asesor</option>
+                <option value="Gerente">Gerente</option>
+                <option value="Administrador">Administrador</option>
+              </select>
+
+              <button type="submit">{selectedUsuarioId ? 'Actualizar' : 'Registrar'}</button>
+            </form>
+            {success && <p className="success-message">{success}</p>}
+            {error && <p className="error-message">{error}</p>}
+          </div>
+          <div className="list-container">
+            <h3>Usuarios Registrados</h3>
+            <ul className="user-list">
+              {usuarios.map((usuario) => (
+                <li
+                  key={usuario.usuario_id}
+                  onClick={() => loadUsuario(usuario)}
+                  className={usuario.usuario_id === selectedUsuarioId ? 'selected' : ''}
+                >
+                  {usuario.Nombre} {usuario.Apellido} - {usuario.Correo}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </>
