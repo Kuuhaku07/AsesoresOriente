@@ -139,7 +139,7 @@ const Perfil = () => {
   return (
     <>
       <Menu />
-      <div className="perfil menu-offset">
+      <div className="perfil-layout menu-offset">
         <PageTitle>Perfil</PageTitle>
         <div className="perfil-content page-container">
           <section className="profile-header">

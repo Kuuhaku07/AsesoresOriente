@@ -9,31 +9,31 @@
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
-    padding: 20px;
+    padding: var(--spacing-lg);
   }
   
   .featured-properties {
     max-width: 1400px;
     width: 100%;
     margin: 0 auto;
-    padding: 20px;
+    padding: var(--spacing-lg);
   }
   
   .featured-properties h2 {
     text-align: center;
-    margin-bottom: 30px;
-    color: #333;
-    font-size: 2rem;
+    margin-bottom: var(--spacing-xl);
+    color: var(--color-text);
+    font-size: var(--font-size-xlarge);
   }
   
   @media (max-width: 768px) {
     .search-section,
     .featured-properties {
-      padding: 15px;
+      padding: var(--spacing-md);
     }
     
     .featured-properties h2 {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
+      font-size: var(--font-size-large);
+      margin-bottom: var(--spacing-lg);
     }
   }

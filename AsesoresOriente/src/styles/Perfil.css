@@ -1,11 +1,9 @@
-.perfil {
+.perfil-layout {
     flex-direction: column;
     min-height: 100vh;
     background-color: var(--color-background);
     width: 100%;
-    padding-left: var(--spacing-lg);
-    padding-right: var(--spacing-lg);
-    padding-bottom: var(--spacing-lg);
+
     box-sizing: border-box;
 
 }
