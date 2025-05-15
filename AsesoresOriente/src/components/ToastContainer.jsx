@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import ToastMessage from './ToastMessage';
 import '../styles/ToastMessage.css';
 
@@ -12,10 +12,11 @@ import '../styles/ToastMessage.css';
  */
 const ToastContainer = forwardRef((props, ref) => {
   const [toasts, setToasts] = useState([]);
+  const toastIdCounter = useRef(0);
 
   // Add a new toast
   const addToast = (message, type = 'info', duration = 5000) => {
-    const id = Date.now();
+    const id = Date.now() + '-' + toastIdCounter.current++;
     setToasts((prevToasts) => [...prevToasts, { id, message, type, duration }]);
   };
 

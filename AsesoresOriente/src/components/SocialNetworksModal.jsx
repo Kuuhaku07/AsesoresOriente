@@ -23,7 +23,8 @@ const SocialNetworksModal = ({ isOpen, onClose, token, onUpdate }) => {
   const [successMessage, setSuccessMessage] = useState('');
   const toastRef = useRef(null);
 
-  React.useEffect(() => {
+  // Show success toast when successMessage changes
+  useEffect(() => {
     if (successMessage) {
       if (toastRef.current) {
         toastRef.current.addToast(successMessage, 'success');
@@ -34,6 +35,30 @@ const SocialNetworksModal = ({ isOpen, onClose, token, onUpdate }) => {
       return () => clearTimeout(timer);
     }
   }, [successMessage]);
+
+  // Show error toasts when errors array changes
+  useEffect(() => {
+    if (errors.length > 0) {
+      if (toastRef.current) {
+        errors.forEach(err => {
+          toastRef.current.addToast(err, 'error');
+        });
+      }
+      // Clear errors after showing toasts to avoid repeated toasts
+      setErrors([]);
+    }
+  }, [errors]);
+
+  // Show server error toast when serverError changes
+  useEffect(() => {
+    if (serverError) {
+      if (toastRef.current) {
+        toastRef.current.addToast(serverError, 'error');
+      }
+      // Clear serverError after showing toast
+      setServerError('');
+    }
+  }, [serverError]);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
@@ -131,7 +156,6 @@ const SocialNetworksModal = ({ isOpen, onClose, token, onUpdate }) => {
         setServerError(data.error || 'Error al eliminar la red social');
         return;
       }
-      // console.log('handleDelete: Delete successful, setting success message');
       setSocialNetworks(socialNetworks.filter((sn) => sn.id !== selectedNetwork.id));
       setSuccessMessage('Red social eliminada correctamente');
       onUpdate();
@@ -200,7 +224,6 @@ const SocialNetworksModal = ({ isOpen, onClose, token, onUpdate }) => {
       } else {
         updatedNetworks = [...socialNetworks, savedNetwork];
       }
-      // console.log('handleSubmit: Update successful, setting success message');
       setSocialNetworks(updatedNetworks);
       setSuccessMessage('Red social guardada correctamente');
       onUpdate();
@@ -250,15 +273,6 @@ const SocialNetworksModal = ({ isOpen, onClose, token, onUpdate }) => {
             {selectedNetwork ? (
               <>
                 <h3>Editar Red Social</h3>
-                {/* Remove inline ToastContainer and add a single ToastContainer once at the root */}
-                {errors.length > 0 && errors.map(err => {
-                  if (toastRef.current) {
-                    toastRef.current.addToast(err, 'error');
-                  }
-                  return null;
-                })}
-                {serverError && toastRef.current && toastRef.current.addToast(serverError, 'error')}
-                {successMessage && toastRef.current && toastRef.current.addToast(successMessage, 'success')}
                 <form onSubmit={handleSubmit}>
                   <label>
                     Red Social:
