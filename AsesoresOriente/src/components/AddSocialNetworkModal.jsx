@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import ToastMessage from './ToastMessage.jsx';
+import React, { useState, useEffect, useRef } from 'react';
+import ToastContainer from './ToastContainer.jsx';
 import '../styles/Perfil.css';
 
 const AddSocialNetworkModal = ({ isOpen, onClose, redes, token, onUpdate }) => {
   const [formData, setFormData] = useState({ red_social_id: '', url: '', identifier: '' });
-  const [errors, setErrors] = useState([]);
-  const [serverError, setServerError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const toastRef = useRef(null);
 
   useEffect(() => {
+    if (isOpen && toastRef.current && typeof toastRef.current.clearToasts === 'function') {
+      toastRef.current.clearToasts();
+    }
     if (isOpen) {
       setFormData({ red_social_id: '', url: '', identifier: '' });
-      setErrors([]);
-      setServerError('');
-      setSuccessMessage('');
     }
   }, [isOpen]);
 
@@ -34,13 +32,17 @@ const AddSocialNetworkModal = ({ isOpen, onClose, redes, token, onUpdate }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrors([]);
-    setServerError('');
-    setSuccessMessage('');
+    if (toastRef.current && typeof toastRef.current.clearToasts === 'function') {
+      toastRef.current.clearToasts();
+    }
 
     const validationErrors = validateForm();
     if (validationErrors.length > 0) {
-      setErrors(validationErrors);
+      validationErrors.forEach(error => {
+        if (toastRef.current) {
+          toastRef.current.addToast(error, 'error');
+        }
+      });
       return;
     }
 
@@ -59,16 +61,22 @@ const AddSocialNetworkModal = ({ isOpen, onClose, redes, token, onUpdate }) => {
       });
       if (!response.ok) {
         const data = await response.json();
-        setServerError(data.error || 'Error al agregar la red social');
+        if (toastRef.current) {
+          toastRef.current.addToast(data.error || 'Error al agregar la red social', 'error');
+        }
         return;
       }
-      setSuccessMessage('Red social agregada correctamente');
+      if (toastRef.current) {
+        toastRef.current.addToast('Red social agregada correctamente', 'success');
+      }
       onUpdate();
       setTimeout(() => {
         onClose();
       }, 1500);
     } catch (error) {
-      setServerError('Error al agregar la red social');
+      if (toastRef.current) {
+        toastRef.current.addToast('Error al agregar la red social', 'error');
+      }
     }
   };
 
@@ -78,9 +86,7 @@ const AddSocialNetworkModal = ({ isOpen, onClose, redes, token, onUpdate }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <h2>Añadir Red Social</h2>
-        {errors.length > 0 && errors.map((err, i) => <ToastMessage key={i} message={err} type="error" />)}
-        {serverError && <ToastMessage message={serverError} type="error" />}
-        {successMessage && <ToastMessage message={successMessage} type="success" />}
+        <ToastContainer ref={toastRef} />
         <form onSubmit={handleSubmit}>
           <label>
             Red Social:

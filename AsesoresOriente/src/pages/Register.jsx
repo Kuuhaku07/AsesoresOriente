@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Menu } from '../components/Menu';
 import '../styles/Register.css';
 import '../styles/layout.css';
-
-import '../styles/layout.css';
 import PageTitle from '../components/PageTitle';
 import { verifyPermissions } from '../utils/permissionUtils';
-import ToastMessage from '../components/ToastMessage';
+import ToastContainer from '../components/ToastContainer';
 
 const Register = () => {
   // Estado para los datos del formulario
@@ -31,8 +29,8 @@ const Register = () => {
   // Estados para mensajes de error y éxito
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  // Estado para mostrar mensajes toast
-  const [toast, setToast] = useState({ message: '', type: 'info' });
+  // Ref para ToastContainer
+  const toastRef = useRef(null);
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -41,7 +39,9 @@ const Register = () => {
   useEffect(() => {
     const allowed = verifyPermissions(user, ['ADMINISTRADOR', 'GERENTE']);
     if (!allowed) {
-      setToast({ message: 'No tiene permisos para acceder a esta sección', type: 'error' });
+      if (toastRef.current) {
+        toastRef.current.addToast('No tiene permisos para acceder a esta sección', 'error');
+      }
       navigate('/');
     }
   }, [user, navigate]);
@@ -63,7 +63,9 @@ const Register = () => {
       setUsuarios(data);
     } catch (err) {
       setError(err.message);
-      setToast({ message: err.message, type: 'error' });
+      if (toastRef.current) {
+        toastRef.current.addToast(err.message, 'error');
+      }
     }
   };
 
@@ -152,7 +154,9 @@ const Register = () => {
         if (!asesorResponse.ok) {
           const data = await asesorResponse.json();
           setError(data.error || 'Error al actualizar asesor');
-          setToast({ message: data.error || 'Error al actualizar asesor', type: 'error' });
+          if (toastRef.current) {
+            toastRef.current.addToast(data.error || 'Error al actualizar asesor', 'error');
+          }
           return;
         }
 
@@ -176,12 +180,16 @@ const Register = () => {
         if (!usuarioResponse.ok) {
           const data = await usuarioResponse.json();
           setError(data.error || 'Error al actualizar usuario');
-          setToast({ message: data.error || 'Error al actualizar usuario', type: 'error' });
+          if (toastRef.current) {
+            toastRef.current.addToast(data.error || 'Error al actualizar usuario', 'error');
+          }
           return;
         }
 
         setSuccess('Usuario y asesor actualizados correctamente');
-        setToast({ message: 'Usuario y asesor actualizados correctamente', type: 'success' });
+        if (toastRef.current) {
+          toastRef.current.addToast('Usuario y asesor actualizados correctamente', 'success');
+        }
         // Recargar usuarios y recargar formulario con datos actualizados
         await fetchUsuarios();
         // Recargar datos del usuario actualizado en el formulario
@@ -209,7 +217,9 @@ const Register = () => {
         if (!asesorResponse.ok) {
           const data = await asesorResponse.json();
           setError(data.error || 'Error al registrar asesor');
-          setToast({ message: data.error || 'Error al registrar asesor', type: 'error' });
+          if (toastRef.current) {
+            toastRef.current.addToast(data.error || 'Error al registrar asesor', 'error');
+          }
           return;
         }
 
@@ -233,27 +243,32 @@ const Register = () => {
         if (!usuarioResponse.ok) {
           const data = await usuarioResponse.json();
           setError(data.error || 'Error al registrar usuario');
-          setToast({ message: data.error || 'Error al registrar usuario', type: 'error' });
+          if (toastRef.current) {
+            toastRef.current.addToast(data.error || 'Error al registrar usuario', 'error');
+          }
           return;
         }
 
         setSuccess('Usuario y asesor registrados correctamente');
-        setToast({ message: 'Usuario y asesor registrados correctamente', type: 'success' });
+        if (toastRef.current) {
+          toastRef.current.addToast('Usuario y asesor registrados correctamente', 'success');
+        }
       }
 
       clearForm();
       fetchUsuarios();
     } catch (err) {
       setError('Error al registrar o actualizar usuario');
-      setToast({ message: 'Error al registrar o actualizar usuario', type: 'error' });
+      if (toastRef.current) {
+        toastRef.current.addToast('Error al registrar o actualizar usuario', 'error');
+      }
     }
   };
 
   return (
     <>
-      {/* Mostrar mensaje toast si existe */}
-      {toast.message && <ToastMessage message={toast.message} type={toast.type} />}
       <Menu />
+      <ToastContainer ref={toastRef} />
       <div className="register menu-offset">
         <PageTitle>{selectedUsuarioId ? 'Actualizar Usuario y Asesor' : 'Registrar Usuario y Asesor'}</PageTitle>
         <div className="register-content page-container">
@@ -381,5 +396,4 @@ const Register = () => {
     </>
   );
 };
-
 export default Register;

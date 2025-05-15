@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import ToastMessage from './ToastMessage.jsx';
+import React, { useState, useEffect, useRef } from 'react';
+import ToastContainer from './ToastContainer.jsx';
 import ChangePasswordModal from './ChangePasswordModal.jsx';
 import '../styles/Perfil.css';
 
@@ -11,16 +11,14 @@ const EditProfileModal = ({ isOpen, onClose, user, token, onUpdate }) => {
     Correo: user.Correo || '',
     Cedula: user.Cedula || ''
   });
-  const [errors, setErrors] = useState([]);
-  const [serverError, setServerError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const toastRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
-      setErrors([]);
-      setServerError('');
-      setSuccessMessage('');
+      if (toastRef.current && typeof toastRef.current.clearToasts === 'function') {
+        toastRef.current.clearToasts();
+      }
       setSelectedFile(null);
       setShowCurrentPasswordInput(false);
     }
@@ -47,9 +45,9 @@ const EditProfileModal = ({ isOpen, onClose, user, token, onUpdate }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrors([]);
-    setServerError('');
-    setSuccessMessage('');
+    if (toastRef.current && typeof toastRef.current.clearToasts === 'function') {
+      toastRef.current.clearToasts();
+    }
 
     const form = e.target;
     const formData = new FormData(form);
@@ -111,19 +109,31 @@ const EditProfileModal = ({ isOpen, onClose, user, token, onUpdate }) => {
       if (!response.ok) {
         const errorData = await response.json();
         if (errorData.errors) {
-          setErrors(errorData.errors);
+          errorData.errors.forEach(error => {
+            if (toastRef.current) {
+              toastRef.current.addToast(error, 'error');
+            }
+          });
         } else if (errorData.error) {
-          setServerError(errorData.error);
+          if (toastRef.current) {
+            toastRef.current.addToast(errorData.error, 'error');
+          }
         } else {
-          setServerError('Error al actualizar el perfil');
+          if (toastRef.current) {
+            toastRef.current.addToast('Error al actualizar el perfil', 'error');
+          }
         }
         return;
       }
       await onUpdate();
-      setSuccessMessage('Perfil actualizado correctamente');
+      if (toastRef.current) {
+        toastRef.current.addToast('Perfil actualizado correctamente', 'success');
+      }
       // Modal stays open; user closes manually
     } catch (error) {
-      setServerError('Error al actualizar el perfil');
+      if (toastRef.current) {
+        toastRef.current.addToast('Error al actualizar el perfil', 'error');
+      }
     }
   };
 
@@ -132,11 +142,7 @@ const EditProfileModal = ({ isOpen, onClose, user, token, onUpdate }) => {
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
           <h2>Editar Perfil</h2>
-          {errors.length > 0 && errors.map((error, index) => (
-            <ToastMessage key={index} message={error} type="error" />
-          ))}
-          {serverError && <ToastMessage message={serverError} type="error" />}
-          {successMessage && <ToastMessage message={successMessage} type="success" />}
+          <ToastContainer ref={toastRef} />
           <form onSubmit={handleSubmit}>
             <label>
               Nombre de Usuario:
@@ -219,5 +225,5 @@ const EditProfileModal = ({ isOpen, onClose, user, token, onUpdate }) => {
     </>
   );
 };
-
 export default EditProfileModal;
+

@@ -1,17 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import ToastMessage from './ToastMessage.jsx';
+import React, { useState, useEffect, useRef } from 'react';
+import ToastContainer from './ToastContainer.jsx';
 import '../styles/Perfil.css';
 
 const ChangePasswordModal = ({ isOpen, onClose, user, token }) => {
-  const [errors, setErrors] = useState([]);
-  const [serverError, setServerError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const toastRef = useRef(null);
 
   useEffect(() => {
-    if (isOpen) {
-      setErrors([]);
-      setServerError('');
-      setSuccessMessage('');
+    if (isOpen && toastRef.current && typeof toastRef.current.clearToasts === 'function') {
+      toastRef.current.clearToasts();
     }
   }, [isOpen]);
 
@@ -19,16 +16,20 @@ const ChangePasswordModal = ({ isOpen, onClose, user, token }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrors([]);
-    setServerError('');
-    setSuccessMessage('');
+    if (toastRef.current && typeof toastRef.current.clearToasts === 'function') {
+      toastRef.current.clearToasts();
+    }
+    setIsLoading(true);
 
     const currentPassword = e.target.currentPassword.value;
     const newPassword = e.target.newPassword.value;
     const confirmPassword = e.target.confirmPassword.value;
 
     if (newPassword !== confirmPassword) {
-      setErrors(['La nueva contraseña y la confirmación no coinciden.']);
+      if (toastRef.current) {
+        toastRef.current.addToast('La nueva contraseña y la confirmación no coinciden.', 'error');
+      }
+      setIsLoading(false);
       return;
     }
 
@@ -46,15 +47,24 @@ const ChangePasswordModal = ({ isOpen, onClose, user, token }) => {
       });
       if (!response.ok) {
         const data = await response.json();
-        setServerError(data.error || 'Error al cambiar la contraseña');
+        if (toastRef.current) {
+          toastRef.current.addToast(data.error || 'Error al cambiar la contraseña', 'error');
+        }
+        setIsLoading(false);
         return;
       }
-      setSuccessMessage('Contraseña cambiada correctamente');
+      if (toastRef.current) {
+        toastRef.current.addToast('Contraseña cambiada correctamente', 'success');
+      }
       setTimeout(() => {
         onClose();
       }, 1500);
     } catch (error) {
-      setServerError('Error al cambiar la contraseña');
+      if (toastRef.current) {
+        toastRef.current.addToast('Error al cambiar la contraseña', 'error');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -62,11 +72,7 @@ const ChangePasswordModal = ({ isOpen, onClose, user, token }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <h2>Cambiar Contraseña</h2>
-        {errors.length > 0 && errors.map((error, index) => (
-          <ToastMessage key={index} message={error} type="error" />
-        ))}
-        {serverError && <ToastMessage message={serverError} type="error" />}
-        {successMessage && <ToastMessage message={successMessage} type="success" />}
+        <ToastContainer ref={toastRef} />
         <form onSubmit={handleSubmit}>
           <label>
             Contraseña Actual:
@@ -81,8 +87,8 @@ const ChangePasswordModal = ({ isOpen, onClose, user, token }) => {
             <input type="password" name="confirmPassword" required />
           </label>
           <div className="modal-buttons">
-            <button type="submit">Guardar</button>
-            <button type="button" onClick={onClose}>Cancelar</button>
+            <button type="submit" disabled={isLoading}>Guardar</button>
+            <button type="button" onClick={onClose} disabled={isLoading}>Cancelar</button>
           </div>
         </form>
       </div>

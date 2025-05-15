@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import ToastMessage from '../components/ToastMessage.jsx';
+import ToastContainer from '../components/ToastContainer.jsx';
 import { validateData } from '../utils/validationUtils.js';
 import '../styles/Login.css';
 import Logo from '../assets/Logo.png';
@@ -16,6 +16,7 @@ const Login = () => {
   const [serverError, setServerError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const toastRef = useRef(null);
 
   const rules = {
     identificador: { required: true },
@@ -38,6 +39,11 @@ const Login = () => {
     // Validar datos localmente
     const validationErrors = validateData(credentials, rules);
     if (validationErrors.length > 0) {
+      validationErrors.forEach(error => {
+        if (toastRef.current) {
+          toastRef.current.addToast(error, 'error');
+        }
+      });
       setErrors(validationErrors);
       return;
     }
@@ -64,6 +70,9 @@ const Login = () => {
         if (errorMsg === 'Invalid username/email or password') {
           errorMsg = 'Usuario o contraseña inválidos';
         }
+        if (toastRef.current) {
+          toastRef.current.addToast(errorMsg, 'error');
+        }
         setServerError(errorMsg);
         setIsLoading(false);
         return;
@@ -85,70 +94,67 @@ const Login = () => {
       // Optionally navigate after login
       // navigate('/dashboard');
     } catch (err) {
+      if (toastRef.current) {
+        toastRef.current.addToast('Error de red. Intenta nuevamente.', 'error');
+      }
       setServerError('Error de red. Intenta nuevamente.');
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <img src={Logo} alt="Logo" className="login-logo" />
-          <h2>Iniciar Sesión</h2>
-          <p>Acceso exclusivo para los Agentes Asociados</p>
-        </div>
-
-        {/* Mostrar errores de validación */}
-        {errors.length > 0 &&
-          errors.map((error, index) => (
-            <ToastMessage key={index} message={error} type="error" />
-          ))}
-
-        {/* Mostrar error del servidor */}
-        {serverError && <ToastMessage message={serverError} type="error" />}
-
-        <form onSubmit={handleSubmit} className="login-form" noValidate>
-          <div className="form-group">
-            <label htmlFor="identificador">Usuario o Correo Electrónico</label>
-            <input
-              type="text"
-              id="identificador"
-              name="identificador"
-              value={credentials.identificador}
-              onChange={handleChange}
-              required
-              placeholder="usuario o correo"
-            />
+    <>
+      <ToastContainer ref={toastRef} />
+      <div className="login-container">
+        <div className="login-card">
+          <div className="login-header">
+            <img src={Logo} alt="Logo" className="login-logo" />
+            <h2>Iniciar Sesión</h2>
+            <p>Acceso exclusivo para los Agentes Asociados</p>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="Contraseña">Contraseña</label>
-            <input
-              type="password"
-              id="Contraseña"
-              name="Contraseña"
-              value={credentials.Contraseña}
-              onChange={handleChange}
-              required
-              placeholder="••••••••"
-            />
+          <form onSubmit={handleSubmit} className="login-form" noValidate>
+            <div className="form-group">
+              <label htmlFor="identificador">Usuario o Correo Electrónico</label>
+              <input
+                type="text"
+                id="identificador"
+                name="identificador"
+                value={credentials.identificador}
+                onChange={handleChange}
+                required
+                placeholder="usuario o correo"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="Contraseña">Contraseña</label>
+              <input
+                type="password"
+                id="Contraseña"
+                name="Contraseña"
+                value={credentials.Contraseña}
+                onChange={handleChange}
+                required
+                placeholder="••••••••"
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              className="login-button"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Ingresando...' : 'Ingresar'}
+            </button>
+          </form>
+
+          <div className="login-footer">
+            <p>¿Problemas para acceder? Contacta al administrador</p>
           </div>
-
-          <button 
-            type="submit" 
-            className="login-button"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Ingresando...' : 'Ingresar'}
-          </button>
-        </form>
-
-        <div className="login-footer">
-          <p>¿Problemas para acceder? Contacta al administrador</p>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
