@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import PageTemplate from '../components/PageTemplate';
 import ToastContainer from '../components/ToastContainer';
 import FloatingContactButton from '../components/FloatingContactButton';
+import CopyButton from '../components/CopyButton';
 import { FaWhatsapp, FaCommentDots } from 'react-icons/fa';
 
 const About = () => {
@@ -44,6 +45,13 @@ const About = () => {
         <button onClick={() => showToast('Este es un toast de confirmación', 'success')}>
           Mostrar Toast de Confirmación
         </button>
+      </div>
+      <div style={{ marginTop: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <span>Prueba de copia</span>
+        <CopyButton
+          textToCopy="Texto de prueba para copiar"
+          onCopy={(message) => showToast(message, 'info')}
+        />
       </div>
     </PageTemplate>
   );
