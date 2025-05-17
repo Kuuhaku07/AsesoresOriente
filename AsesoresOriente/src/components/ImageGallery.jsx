@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { FaTrashAlt } from 'react-icons/fa';
 import './ImageGallery.css';
 import ImageViewerModal from './ImageViewerModal';
 
@@ -103,32 +104,42 @@ const ImageGallery = ({
             style={{ width: '100%', height: thumbnailSize, objectFit: 'cover', borderRadius: '6px', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}
             onClick={() => openModal(index)}
           />
-          <div className="image-controls" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600', color: '#444' }}>
+          <div className="image-controls" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', alignItems: 'center' }}>
+            <label htmlFor={`portada-radio-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600', color: '#444', cursor: 'pointer' }}>
               <input
+                id={`portada-radio-${index}`}
                 type="radio"
                 name="portada"
                 checked={selectedPortada === index}
                 onChange={() => handlePortadaChange(index)}
+                style={{ cursor: 'pointer' }}
               />
               {labels.portada}
             </label>
-            <button type="button" onClick={() => handleRemove(index)} style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
-              {labels.eliminar}
+            <button type="button" onClick={() => handleRemove(index)} style={{ backgroundColor: 'transparent', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label={labels.eliminar}>
+              <FaTrashAlt color="#dc3545" size={20} />
             </button>
           </div>
+          <label htmlFor={`title-input-${index}`} style={{ display: 'block', marginTop: '8px', fontWeight: '600', color: '#333' }}>
+            {labels.tituloPlaceholder}
+          </label>
           <input
+            id={`title-input-${index}`}
             type="text"
             placeholder={labels.tituloPlaceholder}
             value={img.titulo || ''}
             onChange={(e) => handleTitleChange(index, e.target.value)}
-            style={{ width: '100%', marginTop: '8px', boxSizing: 'border-box', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.95rem', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
+            style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.95rem', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
           />
+          <label htmlFor={`description-textarea-${index}`} style={{ display: 'block', marginTop: '8px', fontWeight: '600', color: '#333' }}>
+            {labels.descripcionPlaceholder}
+          </label>
           <textarea
+            id={`description-textarea-${index}`}
             placeholder={labels.descripcionPlaceholder}
             value={img.descripcion || ''}
             onChange={(e) => handleDescriptionChange(index, e.target.value)}
-            style={{ width: '100%', marginTop: '8px', boxSizing: 'border-box', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.95rem', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
+            style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.95rem', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", resize: 'vertical', minHeight: '60px' }}
           />
         </div>
       ))}
