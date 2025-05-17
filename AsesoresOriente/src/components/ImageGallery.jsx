@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { FaTrashAlt } from 'react-icons/fa';
 import './ImageGallery.css';
@@ -9,13 +9,16 @@ const ImageGallery = ({
   onChange,
   mode = 'edit',
   thumbnailSize = 150,
-  labels = { portada: 'Portada', eliminar: 'Eliminar', tituloPlaceholder: 'Título', descripcionPlaceholder: 'Descripción' },
+  labels = { portada: 'Portada', eliminar: 'Eliminar', tituloPlaceholder: 'Título', descripcionPlaceholder: 'Descripción', bannerSelector: false },
 }) => {
   const [selectedPortada, setSelectedPortada] = useState(
     images.findIndex((img) => img.es_portada) >= 0 ? images.findIndex((img) => img.es_portada) : 0
   );
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
+  const [bannerIndex, setBannerIndex] = useState(0);
+  const [bannerDimensions, setBannerDimensions] = useState({ width: 0, height: 0 });
+  const bannerRef = useRef(null);
 
   const handlePortadaChange = (index) => {
     setSelectedPortada(index);
@@ -33,6 +36,11 @@ const ImageGallery = ({
       setSelectedPortada(0);
     } else if (selectedPortada > index) {
       setSelectedPortada(selectedPortada - 1);
+    }
+    if (bannerIndex === index) {
+      setBannerIndex(0);
+    } else if (bannerIndex > index) {
+      setBannerIndex(bannerIndex - 1);
     }
   };
 
@@ -59,7 +67,92 @@ const ImageGallery = ({
     setModalOpen(false);
   };
 
+  const selectBannerImage = (index) => {
+    setBannerIndex(index);
+  };
+
+  // Effect to update banner image natural dimensions
+  useEffect(() => {
+    if (!images[bannerIndex]) return;
+    const img = new Image();
+    img.src = images[bannerIndex].preview || (images[bannerIndex].file ? URL.createObjectURL(images[bannerIndex].file) : '');
+    img.onload = () => {
+      setBannerDimensions({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+  }, [bannerIndex, images]);
+
   if (mode === 'display') {
+    if (labels.bannerSelector) {
+      // Calculate container height based on image aspect ratio, with min and max height limits
+      const containerWidth = bannerRef.current ? bannerRef.current.clientWidth : 800;
+      let containerHeight = 400; // default min height
+      if (bannerDimensions.width && bannerDimensions.height) {
+        const aspectRatio = bannerDimensions.width / bannerDimensions.height;
+        containerHeight = Math.min(Math.max(containerWidth / aspectRatio, 400), 700);
+      }
+
+      return (
+        <>
+          <div
+            className="banner-image-container"
+            ref={bannerRef}
+            style={{
+              width: '100%',
+              height: containerHeight,
+              marginBottom: '12px',
+              position: 'relative',
+              overflow: 'hidden',
+              borderRadius: '8px',
+              backgroundColor: '#f0f0f0',
+            }}
+          >
+            <img
+              src={images[bannerIndex]?.preview || (images[bannerIndex]?.file ? URL.createObjectURL(images[bannerIndex].file) : '')}
+              alt={images[bannerIndex]?.titulo || `Banner Image ${bannerIndex + 1}`}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                width: 'auto',
+                height: 'auto',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                cursor: 'pointer',
+              }}
+              onClick={() => openModal(bannerIndex)}
+            />
+            <div style={{ position: 'absolute', bottom: '10px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '8px' }}>
+              {images.map((img, index) => (
+                <img
+                  key={index}
+                  src={img.preview || (img.file ? URL.createObjectURL(img.file) : '')}
+                  alt={img.titulo || `Thumbnail ${index + 1}`}
+                  style={{
+                    width: 60,
+                    height: 60,
+                    objectFit: 'cover',
+                    borderRadius: '4px',
+                    border: bannerIndex === index ? '3px solid #007bff' : '2px solid #ccc',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => selectBannerImage(index)}
+                />
+              ))}
+            </div>
+          </div>
+          <ImageViewerModal
+            isOpen={modalOpen}
+            onClose={closeModal}
+            imageSrc={images[modalImageIndex]?.preview || (images[modalImageIndex]?.file ? URL.createObjectURL(images[modalImageIndex].file) : '')}
+            altText={images[modalImageIndex]?.titulo || `Imagen ${modalImageIndex + 1}`}
+            caption={images[modalImageIndex]?.titulo}
+          />
+        </>
+      );
+    }
+
+    // existing display modes here (unchanged)
     return (
       <>
         <div className="image-gallery-display" style={{ display: 'flex', flexWrap: 'nowrap', gap: '10px', overflowX: 'auto', paddingBottom: '8px' }}>
@@ -92,7 +185,7 @@ const ImageGallery = ({
     );
   }
 
-  // edit mode UI with horizontal scroll
+  // edit mode UI with horizontal scroll (unchanged)
   return (
     <div className="image-gallery" style={{ display: 'flex', flexWrap: 'nowrap', gap: '16px', maxWidth: '100%', overflowX: 'auto', paddingBottom: '8px' }}>
       {images.map((img, index) => (
@@ -172,6 +265,7 @@ ImageGallery.propTypes = {
     eliminar: PropTypes.string,
     tituloPlaceholder: PropTypes.string,
     descripcionPlaceholder: PropTypes.string,
+    bannerSelector: PropTypes.bool,
   }),
 };
 

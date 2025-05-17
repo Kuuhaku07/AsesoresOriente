@@ -89,6 +89,13 @@ const About = () => {
         <h2>Prueba de DocumentList</h2>
         <DocumentList documents={documents} onChange={setDocuments} />
       </section>
+
+      <section style={{ marginTop: '40px' }}>
+        <h2>Image Gallery - Alternate Display Mode</h2>
+              
+        <ImageGallery images={images} onChange={setImages} mode="display" labels={{ bannerSelector: true }}/>
+      </section>
+
     </PageTemplate>
   );
 };
