@@ -2,6 +2,7 @@
     /* Colores */
     --color-primary: #2aaec9;
     --color-primary-light: rgba(42, 174, 201, 0.3);
+    --color-primary-hover: rgb(2, 94, 112);
     --color-background: #f0f0f0;
     --color-background-2: #ebf3fa;
     --color-selected:#bbecf7;
@@ -11,7 +12,7 @@
     --color-gray-light: rgba(248, 249, 250, 0.8);
 
     /* Tipografía */
-    --font-family-primary: Arial, sans-serif;
+    --font-family-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     --font-size-small: 14px;
     --font-size-normal: 16px;
     --font-size-large: 20px;
