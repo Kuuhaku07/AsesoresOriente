@@ -13,8 +13,9 @@ import '../styles/FloatingContactButton.css';
  *    - action: 'link' or 'copy' (click behavior)
  * - mainIcon: React node for the main button icon (default FaCommentDots)
  * - mainText: optional string to display below the main button
+ * - onCopy: optional function to handle copy success notification
  */
-const FloatingContactButton = ({ contacts, mainIcon, mainText }) => {
+const FloatingContactButton = ({ contacts, mainIcon, mainText, onCopy }) => {
   const [expanded, setExpanded] = useState(false);
 
   const toggleExpanded = () => setExpanded(!expanded);
@@ -23,10 +24,18 @@ const FloatingContactButton = ({ contacts, mainIcon, mainText }) => {
     if (contact.action === 'copy') {
       if (navigator.clipboard) {
         navigator.clipboard.writeText(contact.link).then(() => {
-          alert('Información copiada al portapapeles');
+          if (onCopy && typeof onCopy === 'function') {
+            onCopy('Información copiada al portapapeles');
+          } else {
+            alert('Información copiada al portapapeles');
+          }
         });
       } else {
-        alert('Tu navegador no soporta copiar al portapapeles');
+        if (onCopy && typeof onCopy === 'function') {
+          onCopy('Tu navegador no soporta copiar al portapapeles');
+        } else {
+          alert('Tu navegador no soporta copiar al portapapeles');
+        }
       }
     } else if (contact.action === 'link') {
       window.open(contact.link, '_blank', 'noopener,noreferrer');
@@ -79,11 +88,13 @@ FloatingContactButton.propTypes = {
   ).isRequired,
   mainIcon: PropTypes.node,
   mainText: PropTypes.string,
+  onCopy: PropTypes.func,
 };
 
 FloatingContactButton.defaultProps = {
   mainIcon: null,
   mainText: null,
+  onCopy: null,
 };
 
 export default FloatingContactButton;
