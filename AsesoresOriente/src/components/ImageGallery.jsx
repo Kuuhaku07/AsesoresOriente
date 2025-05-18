@@ -19,6 +19,7 @@ const ImageGallery = ({
   const [bannerIndex, setBannerIndex] = useState(0);
   const [bannerDimensions, setBannerDimensions] = useState({ width: 0, height: 0 });
   const bannerRef = useRef(null);
+  const thumbnailListRef = useRef(null);
 
   const handlePortadaChange = (index) => {
     setSelectedPortada(index);
@@ -69,6 +70,12 @@ const ImageGallery = ({
 
   const selectBannerImage = (index) => {
     setBannerIndex(index);
+    // Scroll thumbnail list to make selected thumbnail visible
+    if (thumbnailListRef.current) {
+      const thumbnailWidth = 68; // 60px width + 8px gap approx
+      const scrollPosition = index * thumbnailWidth - thumbnailListRef.current.clientWidth / 2 + thumbnailWidth / 2;
+      thumbnailListRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' });
+    }
   };
 
   // Effect to update banner image natural dimensions
@@ -122,7 +129,23 @@ const ImageGallery = ({
               }}
               onClick={() => openModal(bannerIndex)}
             />
-            <div style={{ position: 'absolute', bottom: '10px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '8px' }}>
+            <div
+              ref={thumbnailListRef}
+              className="thumbnail-list"
+              style={{
+                position: 'absolute',
+                bottom: '10px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                display: 'flex',
+                gap: '8px',
+                overflowX: 'auto',
+                maxWidth: '90%',
+                paddingBottom: '4px',
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#888 transparent',
+              }}
+            >
               {images.map((img, index) => (
                 <img
                   key={index}
@@ -135,6 +158,8 @@ const ImageGallery = ({
                     borderRadius: '4px',
                     border: bannerIndex === index ? '3px solid #007bff' : '2px solid #ccc',
                     cursor: 'pointer',
+                    flexShrink: 0,
+                    transition: 'border-color 0.3s ease',
                   }}
                   onClick={() => selectBannerImage(index)}
                 />
