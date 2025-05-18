@@ -23,6 +23,38 @@ const ImageGallery = ({
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
 
+  // New state for keyboard focus on thumbnails
+  const [focusedThumbnailIndex, setFocusedThumbnailIndex] = useState(null);
+
+  // Keyboard navigation handler for thumbnails
+  const handleThumbnailKeyDown = (e, index) => {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextIndex = (index + 1) % images.length;
+      setFocusedThumbnailIndex(nextIndex);
+      scrollThumbnailIntoView(nextIndex);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevIndex = (index - 1 + images.length) % images.length;
+      setFocusedThumbnailIndex(prevIndex);
+      scrollThumbnailIntoView(prevIndex);
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (mode === 'edit') {
+        handlePortadaChange(index);
+      }
+      openModal(index);
+    }
+  };
+
+  const scrollThumbnailIntoView = (index) => {
+    if (thumbnailListRef.current) {
+      const thumbnailWidth = 68;
+      const scrollPosition = index * thumbnailWidth - thumbnailListRef.current.clientWidth / 2 + thumbnailWidth / 2;
+      thumbnailListRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' });
+    }
+  };
+
   const handlePortadaChange = (index) => {
     setSelectedPortada(index);
     const newImages = images.map((img, i) => ({
@@ -163,6 +195,11 @@ const ImageGallery = ({
                 cursor: 'pointer',
               }}
               onClick={() => openModal(bannerIndex)}
+              loading="lazy"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = '/img/icons/image-fallback.png';
+              }}
             />
             <div
               ref={thumbnailListRef}
@@ -197,6 +234,15 @@ const ImageGallery = ({
                     transition: 'border-color 0.3s ease',
                   }}
                   onClick={() => selectBannerImage(index)}
+                  tabIndex={0}
+                  onKeyDown={(e) => handleThumbnailKeyDown(e, index)}
+                  onFocus={() => setFocusedThumbnailIndex(index)}
+                  onBlur={() => setFocusedThumbnailIndex(null)}
+                  loading="lazy"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/img/icons/image-fallback.png';
+                  }}
                 />
               ))}
             </div>
@@ -207,6 +253,14 @@ const ImageGallery = ({
             imageSrc={images[modalImageIndex]?.preview || (images[modalImageIndex].file ? URL.createObjectURL(images[modalImageIndex].file) : '')}
             altText={images[modalImageIndex]?.titulo || `Imagen ${modalImageIndex + 1}`}
             caption={images[modalImageIndex]?.titulo}
+            onPrev={() => {
+              const prevIndex = (modalImageIndex - 1 + images.length) % images.length;
+              setModalImageIndex(prevIndex);
+            }}
+            onNext={() => {
+              const nextIndex = (modalImageIndex + 1) % images.length;
+              setModalImageIndex(nextIndex);
+            }}
           />
         </>
       );
@@ -230,6 +284,11 @@ const ImageGallery = ({
                 objectFit: 'cover',
                 borderRadius: '4px',
               }}
+              loading="lazy"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = '/img/icons/image-fallback.png';
+              }}
             />
           ))}
         </div>
@@ -239,6 +298,14 @@ const ImageGallery = ({
           imageSrc={images[modalImageIndex]?.preview || (images[modalImageIndex].file ? URL.createObjectURL(images[modalImageIndex].file) : '')}
           altText={images[modalImageIndex]?.titulo || `Imagen ${modalImageIndex + 1}`}
           caption={images[modalImageIndex]?.titulo}
+          onPrev={() => {
+            const prevIndex = (modalImageIndex - 1 + images.length) % images.length;
+            setModalImageIndex(prevIndex);
+          }}
+          onNext={() => {
+            const nextIndex = (modalImageIndex + 1) % images.length;
+            setModalImageIndex(nextIndex);
+          }}
         />
       </>
     );
@@ -262,6 +329,11 @@ const ImageGallery = ({
             className={img.es_portada ? 'portada' : ''}
             style={{ width: '100%', height: thumbnailSize, objectFit: 'cover', borderRadius: '6px', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}
             onClick={() => openModal(index)}
+            loading="lazy"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = '/img/icons/image-fallback.png';
+            }}
           />
           <div className="image-controls" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', alignItems: 'center' }}>
             <label htmlFor={`portada-radio-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600', color: '#444', cursor: 'pointer' }}>
@@ -342,6 +414,14 @@ const ImageGallery = ({
         imageSrc={images[modalImageIndex]?.preview || (images[modalImageIndex].file ? URL.createObjectURL(images[modalImageIndex].file) : '')}
         altText={images[modalImageIndex]?.titulo || `Imagen ${modalImageIndex + 1}`}
         caption={images[modalImageIndex]?.titulo}
+        onPrev={() => {
+          const prevIndex = (modalImageIndex - 1 + images.length) % images.length;
+          setModalImageIndex(prevIndex);
+        }}
+        onNext={() => {
+          const nextIndex = (modalImageIndex + 1) % images.length;
+          setModalImageIndex(nextIndex);
+        }}
       />
     </div>
   );

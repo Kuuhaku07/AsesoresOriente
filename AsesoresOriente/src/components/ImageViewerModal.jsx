@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import '../styles/ImageViewerModal.css';
 
-const ImageViewerModal = ({ isOpen, onClose, imageSrc, altText, caption }) => {
+const ImageViewerModal = ({ isOpen, onClose, imageSrc, altText, caption, onPrev, onNext }) => {
   const [zoomed, setZoomed] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
@@ -11,13 +11,35 @@ const ImageViewerModal = ({ isOpen, onClose, imageSrc, altText, caption }) => {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (!isOpen) return;
+
+      if (e.key === 'Escape') {
         onClose();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (onPrev) onPrev();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (onNext) onNext();
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        toggleZoom();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, onPrev, onNext, zoomed]);
+
+  const toggleZoom = () => {
+    if (dragOccurred.current) {
+      dragOccurred.current = false;
+      return;
+    }
+    setZoomed((prev) => !prev);
+    if (zoomed) {
+      setPosition({ x: 0, y: 0 });
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -32,17 +54,6 @@ const ImageViewerModal = ({ isOpen, onClose, imageSrc, altText, caption }) => {
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
-    }
-  };
-
-  const toggleZoom = (e) => {
-    if (dragOccurred.current) {
-      dragOccurred.current = false;
-      return;
-    }
-    setZoomed((prev) => !prev);
-    if (zoomed) {
-      setPosition({ x: 0, y: 0 });
     }
   };
 
