@@ -7,25 +7,34 @@
   background-color: rgba(0,0,0,0.8);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center; /* Center vertically */
+  padding: 20px 0; /* Vertical padding */
   z-index: 2000;
+  overflow-y: auto; /* Allow vertical scroll if needed */
 }
 
 .image-viewer-content {
   position: relative;
   max-width: 90vw;
-  max-height: 90vh;
-  overflow: hidden;
+  height: auto;
   border-radius: 8px;
   box-shadow: 0 0 15px rgba(0,0,0,0.5);
-  background-color: #fff;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;
+  margin: 0 auto;
 }
 
 .image-viewer-img {
   max-width: 100%;
-  max-height: 100%;
+  max-height: 80vh; /* Limit max height */
   display: block;
   object-fit: contain;
+  width: auto;
+  height: auto;
+  margin: auto;
 }
 
 .image-viewer-close {
@@ -35,10 +44,11 @@
   background: transparent;
   border: none;
   font-size: 2rem;
-  color: #333;
+  color: #fff;
   cursor: pointer;
   font-weight: bold;
   line-height: 1;
   padding: 0;
   user-select: none;
+  z-index: 10;
 }

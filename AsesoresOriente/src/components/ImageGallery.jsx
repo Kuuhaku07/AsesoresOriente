@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { FaTrashAlt } from 'react-icons/fa';
+import { FaTrashAlt, FaUpload } from 'react-icons/fa';
 import './ImageGallery.css';
 import ImageViewerModal from './ImageViewerModal';
 
@@ -20,6 +20,8 @@ const ImageGallery = ({
   const [bannerDimensions, setBannerDimensions] = useState({ width: 0, height: 0 });
   const bannerRef = useRef(null);
   const thumbnailListRef = useRef(null);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handlePortadaChange = (index) => {
     setSelectedPortada(index);
@@ -70,15 +72,13 @@ const ImageGallery = ({
 
   const selectBannerImage = (index) => {
     setBannerIndex(index);
-    // Scroll thumbnail list to make selected thumbnail visible
     if (thumbnailListRef.current) {
-      const thumbnailWidth = 68; // 60px width + 8px gap approx
+      const thumbnailWidth = 68;
       const scrollPosition = index * thumbnailWidth - thumbnailListRef.current.clientWidth / 2 + thumbnailWidth / 2;
       thumbnailListRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' });
     }
   };
 
-  // Effect to update banner image natural dimensions
   useEffect(() => {
     if (!images[bannerIndex]) return;
     const img = new Image();
@@ -88,11 +88,46 @@ const ImageGallery = ({
     };
   }, [bannerIndex, images]);
 
+  // New handlers for file upload and drag-and-drop
+  const onFilesAdded = (files) => {
+    const newFiles = Array.from(files).map(file => ({
+      file,
+      preview: URL.createObjectURL(file),
+      es_portada: false,
+      titulo: '',
+      descripcion: '',
+    }));
+    onChange([...images, ...newFiles]);
+  };
+
+  const handleFileInputChange = (e) => {
+    onFilesAdded(e.target.files);
+    e.target.value = null; // reset input
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      onFilesAdded(e.dataTransfer.files);
+      e.dataTransfer.clearData();
+    }
+  };
+
   if (mode === 'display') {
     if (labels.bannerSelector) {
-      // Calculate container height based on image aspect ratio, with min and max height limits
       const containerWidth = bannerRef.current ? bannerRef.current.clientWidth : 800;
-      let containerHeight = 400; // default min height
+      let containerHeight = 400;
       if (bannerDimensions.width && bannerDimensions.height) {
         const aspectRatio = bannerDimensions.width / bannerDimensions.height;
         containerHeight = Math.min(Math.max(containerWidth / aspectRatio, 400), 700);
@@ -169,7 +204,7 @@ const ImageGallery = ({
           <ImageViewerModal
             isOpen={modalOpen}
             onClose={closeModal}
-            imageSrc={images[modalImageIndex]?.preview || (images[modalImageIndex]?.file ? URL.createObjectURL(images[modalImageIndex].file) : '')}
+            imageSrc={images[modalImageIndex]?.preview || (images[modalImageIndex].file ? URL.createObjectURL(images[modalImageIndex].file) : '')}
             altText={images[modalImageIndex]?.titulo || `Imagen ${modalImageIndex + 1}`}
             caption={images[modalImageIndex]?.titulo}
           />
@@ -177,7 +212,6 @@ const ImageGallery = ({
       );
     }
 
-    // existing display modes here (unchanged)
     return (
       <>
         <div className="image-gallery-display" style={{ display: 'flex', flexWrap: 'nowrap', gap: '10px', overflowX: 'auto', paddingBottom: '8px' }}>
@@ -202,7 +236,7 @@ const ImageGallery = ({
         <ImageViewerModal
           isOpen={modalOpen}
           onClose={closeModal}
-          imageSrc={images[modalImageIndex]?.preview || (images[modalImageIndex]?.file ? URL.createObjectURL(images[modalImageIndex].file) : '')}
+          imageSrc={images[modalImageIndex]?.preview || (images[modalImageIndex].file ? URL.createObjectURL(images[modalImageIndex].file) : '')}
           altText={images[modalImageIndex]?.titulo || `Imagen ${modalImageIndex + 1}`}
           caption={images[modalImageIndex]?.titulo}
         />
@@ -210,9 +244,16 @@ const ImageGallery = ({
     );
   }
 
-  // edit mode UI with horizontal scroll (unchanged)
+  // Edit mode UI with upload area and drag-and-drop support
   return (
-    <div className="image-gallery" style={{ display: 'flex', flexWrap: 'nowrap', gap: '16px', maxWidth: '100%', overflowX: 'auto', paddingBottom: '8px' }}>
+    <div
+      className={`image-gallery ${dragOver ? 'drag-over' : ''}`}
+      style={{ display: 'flex', flexWrap: 'nowrap', gap: '16px', maxWidth: '100%', overflowX: 'auto', paddingBottom: '8px' }}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      aria-label="Image gallery with upload"
+    >
       {images.map((img, index) => (
         <div key={index} className="image-item" style={{ minWidth: thumbnailSize, boxShadow: '0 4px 8px rgba(0,0,0,0.15)', backgroundColor: '#fff', borderRadius: '8px', padding: '12px', flexShrink: 0 }}>
           <img
@@ -261,10 +302,44 @@ const ImageGallery = ({
           />
         </div>
       ))}
+      {/* Upload area */}
+      <div
+        className="image-upload-area"
+        onClick={() => fileInputRef.current && fileInputRef.current.click()}
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current && fileInputRef.current.click(); }}
+        role="button"
+        aria-label="Upload images"
+        style={{
+          minWidth: thumbnailSize,
+          height: thumbnailSize,
+          border: '2px dashed #007bff',
+          borderRadius: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          color: '#007bff',
+          cursor: 'pointer',
+          flexShrink: 0,
+          userSelect: 'none',
+        }}
+      >
+        <FaUpload size={32} />
+        <span style={{ marginTop: '8px', fontWeight: '600' }}>Subir imágenes</span>
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={handleFileInputChange}
+        />
+      </div>
       <ImageViewerModal
         isOpen={modalOpen}
         onClose={closeModal}
-        imageSrc={images[modalImageIndex]?.preview || (images[modalImageIndex]?.file ? URL.createObjectURL(images[modalImageIndex].file) : '')}
+        imageSrc={images[modalImageIndex]?.preview || (images[modalImageIndex].file ? URL.createObjectURL(images[modalImageIndex].file) : '')}
         altText={images[modalImageIndex]?.titulo || `Imagen ${modalImageIndex + 1}`}
         caption={images[modalImageIndex]?.titulo}
       />
