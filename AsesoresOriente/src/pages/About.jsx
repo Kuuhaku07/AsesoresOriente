@@ -91,6 +91,23 @@ const About = () => {
         <DocumentList documents={documents} onChange={setDocuments} mode='view' />
       </section>
 
+      <section style={{ marginTop: '40px' }}>
+        <h2>Prueba de DocumentList - Nuevas mejoras</h2>
+        <DocumentList
+          documents={documents}
+          onChange={setDocuments}
+          mode="edit"
+          containerHeight="300px"
+          onSelect={(index, doc) => console.log('Selected document:', index, doc)}
+          onPreview={(index, doc) => console.log('Previewing document:', index, doc)}
+          labels={{
+            upload: 'Subir documentos',
+            eliminar: 'Eliminar',
+            nombrePlaceholder: 'Nombre del documento',
+          }}
+        />
+      </section>
+
 
 
       <section style={{ marginTop: '40px' }}>

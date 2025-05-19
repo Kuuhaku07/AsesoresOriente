@@ -274,3 +274,20 @@
   border-radius: 4px;
   object-fit: contain;
 }
+
+.document-item:focus, .document-item-display:focus {
+outline: 2px solid #007bff;
+outline-offset: 2px;
+background-color: #d0e7ff;
+}
+
+.document-item.selected, .document-item-display.selected {
+background-color: #e6f0ff;
+border-color: #007bff;
+box-shadow: 0 0 8px #007bff;
+}
+
+.document-item:focus:not(:focus-visible), .document-item-display:focus:not(:focus-visible) {
+outline: none;
+background-color: transparent;
+}

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { FaTrashAlt, FaUpload, FaFileAlt, FaDownload } from 'react-icons/fa';
 import './DocumentList.css';
@@ -13,6 +13,8 @@ const DocumentList = ({
     eliminar: 'Eliminar',
     nombrePlaceholder: 'Nombre del documento',
   },
+  onSelect, // new callback for selection
+  onPreview, // new callback for preview
 }) => {
   const [dragOver, setDragOver] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
@@ -69,7 +71,21 @@ const DocumentList = ({
 
   const handleSelect = (index) => {
     setSelectedIndex(index);
+    if (onSelect) {
+      onSelect(index, documents[index]);
+    }
   };
+
+  const [previewUrl, setPreviewUrl] = useState(null);
+
+  useEffect(() => {
+    // Cleanup the preview URL when component unmounts or previewUrl changes
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const renderPreview = () => {
     if (selectedIndex === null || !documents[selectedIndex]) return <div className="document-preview-empty">Seleccione un documento para previsualizar</div>;
@@ -77,8 +93,15 @@ const DocumentList = ({
     const doc = documents[selectedIndex];
     const file = doc.file;
 
+    if (onPreview) {
+      onPreview(selectedIndex, doc);
+    }
+
     if (file && file.type === 'application/pdf') {
-      const url = doc.preview || URL.createObjectURL(file);
+      const url = doc.preview || previewUrl || URL.createObjectURL(file);
+      if (!doc.preview && !previewUrl) {
+        setPreviewUrl(url);
+      }
       return (
         <iframe
           src={url}
@@ -90,21 +113,27 @@ const DocumentList = ({
     }
 
     // For other file types, show an icon and file name
-    return (
-      <div className="document-preview-other" style={{ height: '100%' }}>
-        {file && file.type.startsWith('image/') ? (
+    if (file && file.type.startsWith('image/')) {
+      const url = doc.preview || previewUrl || URL.createObjectURL(file);
+      if (!doc.preview && !previewUrl) {
+        setPreviewUrl(url);
+      }
+      return (
+        <div className="document-preview-other" style={{ height: '100%' }}>
           <img
-            src={doc.preview || URL.createObjectURL(file)}
+            src={url}
             alt={doc.nombre || file.name}
             className="document-preview-image"
             style={{ height: '100%' }}
           />
-        ) : (
-          <>
-            <FaFileAlt size={64} />
-            <p>{doc.nombre || (file && file.name)}</p>
-          </>
-        )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="document-preview-other" style={{ height: '100%' }}>
+        <FaFileAlt size={64} />
+        <p>{doc.nombre || (file && file.name)}</p>
       </div>
     );
   };
@@ -256,6 +285,8 @@ DocumentList.propTypes = {
     eliminar: PropTypes.string,
     nombrePlaceholder: PropTypes.string,
   }),
+  onSelect: PropTypes.func,
+  onPreview: PropTypes.func,
 };
 
 export default DocumentList;
