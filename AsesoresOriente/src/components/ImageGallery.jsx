@@ -12,7 +12,7 @@ const ImageGallery = ({
   labels = { portada: 'Portada', eliminar: 'Eliminar', tituloPlaceholder: 'Título', descripcionPlaceholder: 'Descripción', bannerSelector: false },
 }) => {
   const [selectedPortada, setSelectedPortada] = useState(
-    images.findIndex((img) => img.es_portada) >= 0 ? images.findIndex((img) => img.es_portada) : 0
+    images.length > 0 ? (images.findIndex((img) => img.es_portada) >= 0 ? images.findIndex((img) => img.es_portada) : 0) : -1
   );
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
@@ -22,11 +22,8 @@ const ImageGallery = ({
   const thumbnailListRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
-
-  // New state for keyboard focus on thumbnails
   const [focusedThumbnailIndex, setFocusedThumbnailIndex] = useState(null);
 
-  // Keyboard navigation handler for thumbnails
   const handleThumbnailKeyDown = (e, index) => {
     if (e.key === 'ArrowRight') {
       e.preventDefault();
@@ -48,7 +45,7 @@ const ImageGallery = ({
   };
 
   const scrollThumbnailIntoView = (index) => {
-    if (thumbnailListRef.current) {
+    if (thumbnailListRef.current && images.length > 0) {
       const thumbnailWidth = 68;
       const scrollPosition = index * thumbnailWidth - thumbnailListRef.current.clientWidth / 2 + thumbnailWidth / 2;
       thumbnailListRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' });
@@ -67,6 +64,13 @@ const ImageGallery = ({
   const handleRemove = (index) => {
     const newImages = images.filter((_, i) => i !== index);
     onChange(newImages);
+    
+    if (newImages.length === 0) {
+      setSelectedPortada(-1);
+      setBannerIndex(0);
+      return;
+    }
+    
     if (selectedPortada === index) {
       setSelectedPortada(0);
     } else if (selectedPortada > index) {
@@ -94,6 +98,7 @@ const ImageGallery = ({
   };
 
   const openModal = (index) => {
+    if (images.length === 0) return;
     setModalImageIndex(index);
     setModalOpen(true);
   };
@@ -104,15 +109,11 @@ const ImageGallery = ({
 
   const selectBannerImage = (index) => {
     setBannerIndex(index);
-    if (thumbnailListRef.current) {
-      const thumbnailWidth = 68;
-      const scrollPosition = index * thumbnailWidth - thumbnailListRef.current.clientWidth / 2 + thumbnailWidth / 2;
-      thumbnailListRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' });
-    }
+    scrollThumbnailIntoView(index);
   };
 
   useEffect(() => {
-    if (!images[bannerIndex]) return;
+    if (!images[bannerIndex] || images.length === 0) return;
     const img = new Image();
     img.src = images[bannerIndex].preview || (images[bannerIndex].file ? URL.createObjectURL(images[bannerIndex].file) : '');
     img.onload = () => {
@@ -120,21 +121,26 @@ const ImageGallery = ({
     };
   }, [bannerIndex, images]);
 
-  // New handlers for file upload and drag-and-drop
   const onFilesAdded = (files) => {
     const newFiles = Array.from(files).map(file => ({
       file,
       preview: URL.createObjectURL(file),
-      es_portada: false,
+      es_portada: images.length === 0, // Si no hay imágenes, la primera será portada
       titulo: '',
       descripcion: '',
     }));
-    onChange([...images, ...newFiles]);
+    
+    const updatedImages = [...images, ...newFiles];
+    onChange(updatedImages);
+    
+    if (images.length === 0) {
+      setSelectedPortada(0);
+    }
   };
 
   const handleFileInputChange = (e) => {
     onFilesAdded(e.target.files);
-    e.target.value = null; // reset input
+    e.target.value = null;
   };
 
   const handleDragOver = (e) => {
@@ -157,6 +163,10 @@ const ImageGallery = ({
   };
 
   if (mode === 'display') {
+    if (images.length === 0) {
+      return <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>No hay imágenes para mostrar</div>;
+    }
+
     if (labels.bannerSelector) {
       const containerWidth = bannerRef.current ? bannerRef.current.clientWidth : 800;
       let containerHeight = 400;
@@ -292,122 +302,139 @@ const ImageGallery = ({
             />
           ))}
         </div>
-        <ImageViewerModal
-          isOpen={modalOpen}
-          onClose={closeModal}
-          imageSrc={images[modalImageIndex]?.preview || (images[modalImageIndex].file ? URL.createObjectURL(images[modalImageIndex].file) : '')}
-          altText={images[modalImageIndex]?.titulo || `Imagen ${modalImageIndex + 1}`}
-          caption={images[modalImageIndex]?.titulo}
-          onPrev={() => {
-            const prevIndex = (modalImageIndex - 1 + images.length) % images.length;
-            setModalImageIndex(prevIndex);
-          }}
-          onNext={() => {
-            const nextIndex = (modalImageIndex + 1) % images.length;
-            setModalImageIndex(nextIndex);
-          }}
-        />
+        {images.length > 0 && (
+          <ImageViewerModal
+            isOpen={modalOpen}
+            onClose={closeModal}
+            imageSrc={images[modalImageIndex]?.preview || (images[modalImageIndex].file ? URL.createObjectURL(images[modalImageIndex].file) : '')}
+            altText={images[modalImageIndex]?.titulo || `Imagen ${modalImageIndex + 1}`}
+            caption={images[modalImageIndex]?.titulo}
+            onPrev={() => {
+              const prevIndex = (modalImageIndex - 1 + images.length) % images.length;
+              setModalImageIndex(prevIndex);
+            }}
+            onNext={() => {
+              const nextIndex = (modalImageIndex + 1) % images.length;
+              setModalImageIndex(nextIndex);
+            }}
+          />
+        )}
       </>
     );
   }
 
-  // Edit mode UI with upload area and drag-and-drop support
   return (
-    <div
-      className={`image-gallery ${dragOver ? 'drag-over' : ''}`}
-      style={{ display: 'flex', flexWrap: 'nowrap', gap: '16px', maxWidth: '100%', overflowX: 'auto', paddingBottom: '8px' }}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      aria-label="Image gallery with upload"
-    >
-      {images.map((img, index) => (
-        <div key={index} className="image-item" style={{ minWidth: thumbnailSize, boxShadow: '0 4px 8px rgba(0,0,0,0.15)', backgroundColor: '#fff', borderRadius: '8px', padding: '12px', flexShrink: 0 }}>
-          <img
-            src={img.preview || (img.file ? URL.createObjectURL(img.file) : '')}
-            alt={img.titulo || `Imagen ${index + 1}`}
-            className={img.es_portada ? 'portada' : ''}
-            style={{ width: '100%', height: thumbnailSize, objectFit: 'cover', borderRadius: '6px', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}
-            onClick={() => openModal(index)}
-            loading="lazy"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = '/img/icons/image-fallback.png';
-            }}
-          />
-          <div className="image-controls" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', alignItems: 'center' }}>
-            <label htmlFor={`portada-radio-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600', color: '#444', cursor: 'pointer' }}>
-              <input
-                id={`portada-radio-${index}`}
-                type="radio"
-                name="portada"
-                checked={selectedPortada === index}
-                onChange={() => handlePortadaChange(index)}
-                style={{ cursor: 'pointer' }}
-              />
-              {labels.portada}
-            </label>
-            <button type="button" onClick={() => handleRemove(index)} style={{ backgroundColor: 'transparent', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label={labels.eliminar}>
-              <FaTrashAlt color="#dc3545" size={20} />
-            </button>
-          </div>
-          <label htmlFor={`title-input-${index}`} style={{ display: 'block', marginTop: '8px', fontWeight: '600', color: '#333' }}>
-            {labels.tituloPlaceholder}
-          </label>
+  <div
+    className={`image-gallery ${dragOver ? 'drag-over' : ''} ${images.length === 0 ? 'empty-gallery' : ''}`}
+    onDragOver={handleDragOver}
+    onDragLeave={handleDragLeave}
+    onDrop={handleDrop}
+    aria-label="Image gallery with upload"
+  >
+    {images.length === 0 ? (
+      <div className="empty-gallery-container">
+        <div className="empty-gallery-message">
+          No hay imágenes en la galería. Arrastra imágenes aquí o haz clic para subir.
+        </div>
+        <div
+          className="image-upload-area"
+          onClick={() => fileInputRef.current?.click()}
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click(); }}
+          role="button"
+          aria-label="Upload images"
+        >
+          <FaUpload size={32} />
+          <span style={{ marginTop: '8px', fontWeight: '600' }}>Subir imágenes</span>
           <input
-            id={`title-input-${index}`}
-            type="text"
-            placeholder={labels.tituloPlaceholder}
-            value={img.titulo || ''}
-            onChange={(e) => handleTitleChange(index, e.target.value)}
-            style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.95rem', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
-          />
-          <label htmlFor={`description-textarea-${index}`} style={{ display: 'block', marginTop: '8px', fontWeight: '600', color: '#333' }}>
-            {labels.descripcionPlaceholder}
-          </label>
-          <textarea
-            id={`description-textarea-${index}`}
-            placeholder={labels.descripcionPlaceholder}
-            value={img.descripcion || ''}
-            onChange={(e) => handleDescriptionChange(index, e.target.value)}
-            style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.95rem', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", resize: 'vertical', minHeight: '60px' }}
+            type="file"
+            multiple
+            accept="image/*"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            onChange={handleFileInputChange}
           />
         </div>
-      ))}
-      {/* Upload area */}
-      <div
-        className="image-upload-area"
-        onClick={() => fileInputRef.current && fileInputRef.current.click()}
-        tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current && fileInputRef.current.click(); }}
-        role="button"
-        aria-label="Upload images"
-        style={{
-          minWidth: thumbnailSize,
-          height: thumbnailSize,
-          border: '2px dashed #007bff',
-          borderRadius: '8px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          color: '#007bff',
-          cursor: 'pointer',
-          flexShrink: 0,
-          userSelect: 'none',
-        }}
-      >
-        <FaUpload size={32} />
-        <span style={{ marginTop: '8px', fontWeight: '600' }}>Subir imágenes</span>
-        <input
-          type="file"
-          multiple
-          accept="image/*"
-          ref={fileInputRef}
-          style={{ display: 'none' }}
-          onChange={handleFileInputChange}
-        />
       </div>
+    ) : (
+      <>
+        {images.map((img, index) => (
+          <div key={index} className="image-item" style={{ minWidth: thumbnailSize }}>
+            <img
+              src={img.preview || (img.file ? URL.createObjectURL(img.file) : '')}
+              alt={img.titulo || `Imagen ${index + 1}`}
+              className={img.es_portada ? 'portada' : ''}
+              style={{ width: '100%', height: thumbnailSize, objectFit: 'cover', borderRadius: '6px', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}
+              onClick={() => openModal(index)}
+              loading="lazy"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = '/img/icons/image-fallback.png';
+              }}
+            />
+            <div className="image-controls" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', alignItems: 'center' }}>
+              <label htmlFor={`portada-radio-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600', color: '#444', cursor: 'pointer' }}>
+                <input
+                  id={`portada-radio-${index}`}
+                  type="radio"
+                  name="portada"
+                  checked={selectedPortada === index}
+                  onChange={() => handlePortadaChange(index)}
+                  style={{ cursor: 'pointer' }}
+                />
+                {labels.portada}
+              </label>
+              <button type="button" onClick={() => handleRemove(index)} style={{ backgroundColor: 'transparent', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label={labels.eliminar}>
+                <FaTrashAlt color="#dc3545" size={20} />
+              </button>
+            </div>
+            <label htmlFor={`title-input-${index}`} style={{ display: 'block', marginTop: '8px', fontWeight: '600', color: '#333' }}>
+              {labels.tituloPlaceholder}
+            </label>
+            <input
+              id={`title-input-${index}`}
+              type="text"
+              placeholder={labels.tituloPlaceholder}
+              value={img.titulo || ''}
+              onChange={(e) => handleTitleChange(index, e.target.value)}
+              style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.95rem', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
+            />
+            <label htmlFor={`description-textarea-${index}`} style={{ display: 'block', marginTop: '8px', fontWeight: '600', color: '#333' }}>
+              {labels.descripcionPlaceholder}
+            </label>
+            <textarea
+              id={`description-textarea-${index}`}
+              placeholder={labels.descripcionPlaceholder}
+              value={img.descripcion || ''}
+              onChange={(e) => handleDescriptionChange(index, e.target.value)}
+              style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.95rem', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", resize: 'vertical', minHeight: '60px' }}
+            />
+          </div>
+        ))}
+        <div
+          className="image-upload-area"
+          onClick={() => fileInputRef.current?.click()}
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click(); }}
+          role="button"
+          aria-label="Upload images"
+          style={{ position: 'sticky', right: 0 }}
+        >
+          <FaUpload size={32} />
+          <span style={{ marginTop: '8px', fontWeight: '600' }}>Subir imágenes</span>
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            onChange={handleFileInputChange}
+          />
+        </div>
+      </>
+    )}
+    
+    {images.length > 0 && modalOpen && (
       <ImageViewerModal
         isOpen={modalOpen}
         onClose={closeModal}
@@ -423,8 +450,9 @@ const ImageGallery = ({
           setModalImageIndex(nextIndex);
         }}
       />
-    </div>
-  );
+    )}
+  </div>
+);
 };
 
 ImageGallery.propTypes = {
