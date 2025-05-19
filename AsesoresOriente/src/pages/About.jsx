@@ -35,25 +35,7 @@ const About = () => {
   const [images, setImages] = useState([
     { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
     { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BNTE1ZWRhOTItZWQwZS00NzY1LTgxMzQtM2I3MTBiYjIyMWQ2XkEyXkFqcGc@._V1_QL75_UX190_CR0,0,190,190_.jpg', es_portada: false, titulo: 'Imagen 2', descripcion: 'Descripción 2' },
-    { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BNTE1ZWRhOTItZWQwZS00NzY1LTgxMzQtM2I3MTBiYjIyMWQ2XkEyXkFqcGc@._V1_QL75_UX190_CR0,0,190,190_.jpg', es_portada: false, titulo: 'Imagen 2', descripcion: 'Descripción 2' },
-    { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BNTE1ZWRhOTItZWQwZS00NzY1LTgxMzQtM2I3MTBiYjIyMWQ2XkEyXkFqcGc@._V1_QL75_UX190_CR0,0,190,190_.jpg', es_portada: false, titulo: 'Imagen 2', descripcion: 'Descripción 2' },
-    { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BNTE1ZWRhOTItZWQwZS00NzY1LTgxMzQtM2I3MTBiYjIyMWQ2XkEyXkFqcGc@._V1_QL75_UX190_CR0,0,190,190_.jpg', es_portada: false, titulo: 'Imagen 2', descripcion: 'Descripción 2' },
-    { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BNTE1ZWRhOTItZWQwZS00NzY1LTgxMzQtM2I3MTBiYjIyMWQ2XkEyXkFqcGc@._V1_QL75_UX190_CR0,0,190,190_.jpg', es_portada: false, titulo: 'Imagen 2', descripcion: 'Descripción 2' },
-     { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BNTE1ZWRhOTItZWQwZS00NzY1LTgxMzQtM2I3MTBiYjIyMWQ2XkEyXkFqcGc@._V1_QL75_UX190_CR0,0,190,190_.jpg', es_portada: false, titulo: 'Imagen 2', descripcion: 'Descripción 2' },
-      { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BNTE1ZWRhOTItZWQwZS00NzY1LTgxMzQtM2I3MTBiYjIyMWQ2XkEyXkFqcGc@._V1_QL75_UX190_CR0,0,190,190_.jpg', es_portada: false, titulo: 'Imagen 2', descripcion: 'Descripción 2' },
-       { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BNTE1ZWRhOTItZWQwZS00NzY1LTgxMzQtM2I3MTBiYjIyMWQ2XkEyXkFqcGc@._V1_QL75_UX190_CR0,0,190,190_.jpg', es_portada: false, titulo: 'Imagen 2', descripcion: 'Descripción 2' },
-       { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
-       { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
-       { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
-       { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
-       { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
-       { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
-       { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
-        { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
-        { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
-        { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
-        { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
-  ]);
+   ]);
 
   // Sample documents state for testing DocumentList
   const [documents, setDocuments] = useState([
@@ -98,8 +80,18 @@ const About = () => {
 
       <section style={{ marginTop: '40px' }}>
         <h2>Prueba de DocumentList</h2>
-        <DocumentList documents={documents} onChange={setDocuments} />
+        <DocumentList documents={documents} onChange={setDocuments} mode='list' />
       </section>
+      <section style={{ marginTop: '40px' }}>
+        <h2>Prueba de DocumentList</h2>
+        <DocumentList documents={documents} onChange={setDocuments} mode='edit' />
+      </section>
+      <section style={{ marginTop: '40px' }}>
+        <h2>Prueba de DocumentList</h2>
+        <DocumentList documents={documents} onChange={setDocuments} mode='view' />
+      </section>
+
+
 
       <section style={{ marginTop: '40px' }}>
         <h2>Image Gallery - Alternate Display Mode</h2>

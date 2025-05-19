@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { FaTrashAlt, FaUpload, FaFilePdf, FaFileAlt } from 'react-icons/fa';
+import { FaTrashAlt, FaUpload, FaFileAlt, FaDownload } from 'react-icons/fa';
 import './DocumentList.css';
 
 const DocumentList = ({
   documents,
   onChange,
-  mode = 'edit',
+  mode = 'edit', // 'edit', 'view', 'list'
   labels = {
     upload: 'Subir documentos',
     eliminar: 'Eliminar',
@@ -106,10 +106,36 @@ const DocumentList = ({
     );
   };
 
-  if (mode === 'display') {
+  if (mode === 'list') {
+    // List only mode: show list with download links, no preview, no editing
+    return (
+      <div className="document-list-listmode" role="list">
+        {documents.map((doc, index) => {
+          const file = doc.file;
+          const url = file ? (doc.preview || URL.createObjectURL(file)) : '#';
+          return (
+            <div
+              key={index}
+              className="document-item-display"
+              role="listitem"
+              title={doc.nombre || doc.nombre_archivo || (file && file.name)}
+            >
+              <a href={url} download={doc.nombre || (file && file.name)} target="_blank" rel="noopener noreferrer" className="document-name-link">
+                {doc.nombre || doc.nombre_archivo || (file && file.name)}
+              </a>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (mode === 'view') {
+    // View mode: show list with clickable items and preview, no editing or removing
     return (
       <div className="document-list-display" role="list">
-        {documents.map((doc, index) => (
+        <div className="document-list">
+          {documents.map((doc, index) => (
           <div
             key={index}
             className={`document-item-display ${selectedIndex === index ? 'selected' : ''}`}
@@ -123,8 +149,19 @@ const DocumentList = ({
             <span className="document-name" >
               {doc.nombre || doc.nombre_archivo || (doc.file && doc.file.name)}
             </span>
+            <a
+              href={doc.file ? (doc.preview || URL.createObjectURL(doc.file)) : '#'}
+              download={doc.nombre || (doc.file && doc.file.name)}
+              onClick={(e) => e.stopPropagation()}
+              className="document-download-button"
+              aria-label={`Descargar ${doc.nombre || (doc.file && doc.file.name)}`}
+              title={`Descargar ${doc.nombre || (doc.file && doc.file.name)}`}
+            >
+              <FaDownload />
+            </a>
           </div>
-        ))}
+          ))}
+        </div>
         <div className="document-preview-container">
           {renderPreview()}
         </div>
@@ -132,7 +169,7 @@ const DocumentList = ({
     );
   }
 
-  // Edit mode UI
+  // Default: edit mode
   return (
     <div className={`document-list-edit-container ${dragOver ? 'drag-over' : ''}`}>
       <div
@@ -209,7 +246,7 @@ DocumentList.propTypes = {
     })
   ).isRequired,
   onChange: PropTypes.func.isRequired,
-  mode: PropTypes.oneOf(['edit', 'display']),
+  mode: PropTypes.oneOf(['edit', 'view', 'list']),
   labels: PropTypes.shape({
     upload: PropTypes.string,
     eliminar: PropTypes.string,
