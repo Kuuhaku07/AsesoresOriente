@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PageTemplate from '../components/PageTemplate';
 import ToastContainer from '../components/ToastContainer';
+import ImageGallery from '../components/ImageGallery';
+import DocumentList from '../components/DocumentList';
 import '../styles/Register.css';
+import '../styles/CrearInmueble.css';
 
 const CrearInmueble = () => {
   const toastRef = useRef(null);
@@ -31,8 +34,8 @@ const CrearInmueble = () => {
     coordenadas: '',
     tipoNegocios: [], // { tipoNegocioId, precio, moneda }
     caracteristicas: [], // { caracteristicaId, valor, cantidad }
-    imagenes: [],
-    documentos: [],
+    imagenes: [], // array of { file, preview, es_portada, titulo, descripcion }
+    documentos: [], // array of { file, nombre }
   });
 
   // State for dropdown options
@@ -47,7 +50,6 @@ const CrearInmueble = () => {
 
   // Fetch dropdown data on mount (mocked here, replace with API calls)
   useEffect(() => {
-    // TODO: Fetch data from backend APIs
     setTipoInmuebles([
       { id: 1, nombre: 'Casa' },
       { id: 2, nombre: 'Apartamento' },
@@ -100,10 +102,25 @@ const CrearInmueble = () => {
     }));
   };
 
+  // Handle images change from ImageGallery
+  const handleImagesChange = (images) => {
+    setFormData((prev) => ({
+      ...prev,
+      imagenes: images,
+    }));
+  };
+
+  // Handle documents change from DocumentList
+  const handleDocumentsChange = (documents) => {
+    setFormData((prev) => ({
+      ...prev,
+      documentos: documents,
+    }));
+  };
+
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: Validate form data and submit to backend API
     if (!formData.codigo || !formData.titulo) {
       toastRef.current?.addToast('Por favor complete los campos obligatorios.', 'error', 5000);
       return;
@@ -352,30 +369,8 @@ const CrearInmueble = () => {
 
         <section>
           <h2>Imágenes y Documentos</h2>
-          <label>
-            Imágenes:
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => {
-                const files = Array.from(e.target.files);
-                setFormData((prev) => ({ ...prev, imagenes: files }));
-              }}
-            />
-          </label>
-          <label>
-            Documentos:
-            <input
-              type="file"
-              multiple
-              accept=".pdf,.doc,.docx"
-              onChange={(e) => {
-                const files = Array.from(e.target.files);
-                setFormData((prev) => ({ ...prev, documentos: files }));
-              }}
-            />
-          </label>
+          <ImageGallery images={formData.imagenes} onChange={handleImagesChange} mode="edit" />
+          <DocumentList documents={formData.documentos} onChange={handleDocumentsChange} mode="edit" containerHeight="400px" />
         </section>
 
         <button type="submit">Crear Inmueble</button>

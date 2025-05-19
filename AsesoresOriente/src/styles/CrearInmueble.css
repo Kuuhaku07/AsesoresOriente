@@ -1,0 +1,159 @@
+@import './variables.css';
+
+.crear-inmueble-layout {
+  padding-top: var(--spacing-menu-offset); /* Match menu offset padding to avoid overlap */
+  padding-left: 2rem;
+  padding-right: 2rem;
+  background-color: var(--background-color, #f9f9f9);
+  font-family: var(--font-family, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+  color: var(--text-color, #333);
+}
+
+.crear-inmueble-content {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--card-background, #fff);
+  border-radius: 8px;
+  box-shadow: var(--box-shadow, 0 2px 8px rgba(0,0,0,0.1));
+  padding: 2rem;
+}
+
+.crear-inmueble-form section {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color, #ddd);
+  padding-bottom: 1.5rem;
+}
+
+.crear-inmueble-form h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--primary-color, #007bff);
+  border-left: 4px solid var(--primary-color, #007bff);
+  padding-left: 0.5rem;
+}
+
+.crear-inmueble-form label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--label-color, #444);
+}
+
+.crear-inmueble-form input[type="text"],
+.crear-inmueble-form input[type="number"],
+.crear-inmueble-form select,
+.crear-inmueble-form textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--input-border-color, #ccc);
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.crear-inmueble-form input[type="text"]:focus,
+.crear-inmueble-form input[type="number"]:focus,
+.crear-inmueble-form select:focus,
+.crear-inmueble-form textarea:focus {
+  border-color: var(--primary-color, #007bff);
+  outline: none;
+}
+
+.crear-inmueble-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.crear-inmueble-form fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 1rem;
+}
+
+.crear-inmueble-form fieldset legend {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--label-color, #444);
+}
+
+.crear-inmueble-form fieldset label {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.crear-inmueble-form fieldset input[type="radio"] {
+  margin-right: 0.5rem;
+}
+
+.tipo-negocio-item,
+.caracteristica-item {
+  margin-bottom: 1rem;
+}
+
+.tipo-negocio-item label,
+.caracteristica-item label {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.tipo-negocio-item input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.tipo-negocio-item input[type="number"] {
+  width: 120px;
+  margin-right: 0.5rem;
+}
+
+.tipo-negocio-item select {
+  width: 100px;
+}
+
+button[type="submit"] {
+  background-color: var(--primary-color, #007bff);
+  color: var(--button-text-color, #fff);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: block;
+  margin: 0 auto;
+  margin-top: 1rem;
+}
+
+button[type="submit"]:hover {
+  background-color: var(--primary-color-dark, #0056b3);
+}
+
+/* Adjust ImageGallery and DocumentList container spacing */
+.crear-inmueble-form section h2 + .image-gallery,
+.crear-inmueble-form section h2 + .document-list-edit-container {
+  margin-top: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .crear-inmueble-content {
+    padding: 1rem;
+  }
+
+  .tipo-negocio-item input[type="number"],
+  .tipo-negocio-item select {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .tipo-negocio-item {
+    display: flex;
+    flex-direction: column;
+  }
+}

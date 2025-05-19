@@ -32,11 +32,15 @@ const About = () => {
   ];
 
   // Sample images state for testing ImageGallery
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState([
+    { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
+    { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BNTE1ZWRhOTItZWQwZS00NzY1LTgxMzQtM2I3MTBiYjIyMWQ2XkEyXkFqcGc@._V1_QL75_UX190_CR0,0,190,190_.jpg', es_portada: false, titulo: 'Imagen 2', descripcion: 'Descripción 2' },
+   ]);
 
   // Sample documents state for testing DocumentList
   const [documents, setDocuments] = useState([
-
+    { file: null, nombre: 'Documento 1.pdf' },
+    { file: null, nombre: 'Documento 2.docx' },
   ]);
 
   return (
