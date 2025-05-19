@@ -7,6 +7,7 @@ const DocumentList = ({
   documents,
   onChange,
   mode = 'edit', // 'edit', 'view', 'list'
+  containerHeight = '400px',
   labels = {
     upload: 'Subir documentos',
     eliminar: 'Eliminar',
@@ -83,18 +84,20 @@ const DocumentList = ({
           src={url}
           title={doc.nombre || file.name}
           className="document-preview-iframe"
+          style={{ height: '100%' }}
         />
       );
     }
 
     // For other file types, show an icon and file name
     return (
-      <div className="document-preview-other">
+      <div className="document-preview-other" style={{ height: '100%' }}>
         {file && file.type.startsWith('image/') ? (
           <img
             src={doc.preview || URL.createObjectURL(file)}
             alt={doc.nombre || file.name}
             className="document-preview-image"
+            style={{ height: '100%' }}
           />
         ) : (
           <>
@@ -109,7 +112,7 @@ const DocumentList = ({
   if (mode === 'list') {
     // List only mode: show list with download links, no preview, no editing
     return (
-      <div className="document-list-listmode" role="list">
+      <div className="document-list-listmode" role="list" style={{ maxHeight: containerHeight, minHeight: containerHeight }}>
         {documents.map((doc, index) => {
           const file = doc.file;
           const url = file ? (doc.preview || URL.createObjectURL(file)) : '#';
@@ -133,8 +136,8 @@ const DocumentList = ({
   if (mode === 'view') {
     // View mode: show list with clickable items and preview, no editing or removing
     return (
-      <div className="document-list-display" role="list">
-        <div className="document-list">
+      <div className="document-list-display" role="list" style={{ maxHeight: containerHeight, minHeight: containerHeight, height: containerHeight, display: 'flex' }}>
+        <div className="document-list" style={{ maxHeight: containerHeight, minHeight: containerHeight, height: containerHeight, overflowY: 'auto' }}>
           {documents.map((doc, index) => (
           <div
             key={index}
@@ -162,7 +165,7 @@ const DocumentList = ({
           </div>
           ))}
         </div>
-        <div className="document-preview-container">
+        <div className="document-preview-container" style={{ maxHeight: containerHeight, minHeight: containerHeight, height: containerHeight, flexShrink: 0, flexGrow: 1 }}>
           {renderPreview()}
         </div>
       </div>
@@ -171,7 +174,7 @@ const DocumentList = ({
 
   // Default: edit mode
   return (
-    <div className={`document-list-edit-container ${dragOver ? 'drag-over' : ''}`}>
+    <div className={`document-list-edit-container ${dragOver ? 'drag-over' : ''}`} style={{ maxHeight: containerHeight, minHeight: containerHeight, height: containerHeight, display: 'flex' }}>
       <div
         className="document-list"
         onDragOver={handleDragOver}
@@ -179,6 +182,7 @@ const DocumentList = ({
         onDrop={handleDrop}
         aria-label="Lista de documentos con soporte para subir archivos"
         role="list"
+        style={{ maxHeight: containerHeight, minHeight: containerHeight, height: containerHeight, overflowY: 'auto' }}
       >
         {documents.map((doc, index) => (
           <div
@@ -230,7 +234,7 @@ const DocumentList = ({
           />
         </div>
       </div>
-      <div className="document-preview-container">
+      <div className="document-preview-container" style={{ maxHeight: containerHeight, minHeight: containerHeight, height: containerHeight, flexShrink: 0, flexGrow: 1 }}>
         {renderPreview()}
       </div>
     </div>

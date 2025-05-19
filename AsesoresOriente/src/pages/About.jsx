@@ -84,7 +84,7 @@ const About = () => {
       </section>
       <section style={{ marginTop: '40px' }}>
         <h2>Prueba de DocumentList</h2>
-        <DocumentList documents={documents} onChange={setDocuments} mode='edit' />
+        <DocumentList documents={documents} onChange={setDocuments} mode='edit' containerHeight='600px'/>
       </section>
       <section style={{ marginTop: '40px' }}>
         <h2>Prueba de DocumentList</h2>
