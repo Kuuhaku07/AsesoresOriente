@@ -70,25 +70,34 @@ const DocumentList = ({
   };
 
   const handleSelect = (index) => {
-    setSelectedIndex(index);
-    if (onSelect) {
-      onSelect(index, documents[index]);
-    }
-  };
-
-  const [previewUrl, setPreviewUrl] = useState(null);
-
-  useEffect(() => {
-    // Cleanup the preview URL when component unmounts or previewUrl changes
-    return () => {
+      // Limpiar la URL anterior si existe
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
+      
+      setSelectedIndex(index);
+      if (onSelect) {
+        onSelect(index, documents[index]);
       }
     };
-  }, [previewUrl]);
 
-  const renderPreview = () => {
-    if (selectedIndex === null || !documents[selectedIndex]) return <div className="document-preview-empty">Seleccione un documento para previsualizar</div>;
+
+    const [previewUrl, setPreviewUrl] = useState(null);
+
+    useEffect(() => {
+      // Cleanup the preview URL when component unmounts or previewUrl changes
+      return () => {
+        if (previewUrl) {
+          URL.revokeObjectURL(previewUrl);
+        }
+      };
+    }, [previewUrl]);
+
+    const renderPreview = () => {
+    if (selectedIndex === null || !documents[selectedIndex]) {
+      return <div className="document-preview-empty">Seleccione un documento para previsualizar</div>;
+    }
 
     const doc = documents[selectedIndex];
     const file = doc.file;
@@ -97,11 +106,24 @@ const DocumentList = ({
       onPreview(selectedIndex, doc);
     }
 
-    if (file && file.type === 'application/pdf') {
-      const url = doc.preview || previewUrl || URL.createObjectURL(file);
-      if (!doc.preview && !previewUrl) {
-        setPreviewUrl(url);
-      }
+    if (!file) {
+      return (
+        <div className="document-preview-other" style={{ height: '100%' }}>
+          <FaFileAlt size={64} />
+          <p>{doc.nombre || doc.nombre_archivo}</p>
+        </div>
+      );
+    }
+
+    // Generar nueva URL si no hay preview en el doc y no hay URL actual
+    if (!doc.preview && !previewUrl) {
+      const newUrl = URL.createObjectURL(file);
+      setPreviewUrl(newUrl);
+    }
+
+    const url = doc.preview || previewUrl;
+
+    if (file.type === 'application/pdf') {
       return (
         <iframe
           src={url}
@@ -112,12 +134,7 @@ const DocumentList = ({
       );
     }
 
-    // For other file types, show an icon and file name
-    if (file && file.type.startsWith('image/')) {
-      const url = doc.preview || previewUrl || URL.createObjectURL(file);
-      if (!doc.preview && !previewUrl) {
-        setPreviewUrl(url);
-      }
+    if (file.type.startsWith('image/')) {
       return (
         <div className="document-preview-other" style={{ height: '100%' }}>
           <img
@@ -130,13 +147,13 @@ const DocumentList = ({
       );
     }
 
-    return (
-      <div className="document-preview-other" style={{ height: '100%' }}>
-        <FaFileAlt size={64} />
-        <p>{doc.nombre || (file && file.name)}</p>
-      </div>
-    );
-  };
+  return (
+    <div className="document-preview-other" style={{ height: '100%' }}>
+      <FaFileAlt size={64} />
+      <p>{doc.nombre || file.name}</p>
+    </div>
+  );
+};
 
   if (mode === 'list') {
     // List only mode: show list with download links, no preview, no editing
