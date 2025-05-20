@@ -13,12 +13,15 @@ const DocumentList = ({
     eliminar: 'Eliminar',
     nombrePlaceholder: 'Nombre del documento',
   },
-  onSelect, // new callback for selection
-  onPreview, // new callback for preview
+  onSelect,
+  onPreview,
 }) => {
   const [dragOver, setDragOver] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
+  const [focusedIndex, setFocusedIndex] = useState(null);
   const fileInputRef = useRef(null);
+  const previewUrlRef = useRef(null);
+  const itemsRef = useRef([]);
 
   const handleRemove = (index) => {
     const newDocuments = documents.filter((_, i) => i !== index);
@@ -27,6 +30,16 @@ const DocumentList = ({
       setSelectedIndex(null);
     } else if (selectedIndex > index) {
       setSelectedIndex(selectedIndex - 1);
+    }
+    // Mover el foco al elemento anterior o siguiente
+    if (focusedIndex === index) {
+      const newFocusedIndex = Math.min(index, documents.length - 2);
+      setFocusedIndex(newFocusedIndex >= 0 ? newFocusedIndex : null);
+      setTimeout(() => {
+        if (itemsRef.current[newFocusedIndex]) {
+          itemsRef.current[newFocusedIndex].focus();
+        }
+      }, 0);
     }
   };
 
@@ -43,11 +56,19 @@ const DocumentList = ({
       nombre: file.name,
     }));
     onChange([...documents, ...newFiles]);
+    // Enfocar el último elemento añadido
+    setTimeout(() => {
+      const newIndex = documents.length + newFiles.length - 1;
+      if (itemsRef.current[newIndex]) {
+        itemsRef.current[newIndex].focus();
+        setFocusedIndex(newIndex);
+      }
+    }, 0);
   };
 
   const handleFileInputChange = (e) => {
     onFilesAdded(e.target.files);
-    e.target.value = null; // reset input
+    e.target.value = null;
   };
 
   const handleDragOver = (e) => {
@@ -70,31 +91,82 @@ const DocumentList = ({
   };
 
   const handleSelect = (index) => {
-      // Limpiar la URL anterior si existe
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-        setPreviewUrl(null);
-      }
-      
-      setSelectedIndex(index);
-      if (onSelect) {
-        onSelect(index, documents[index]);
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+    
+    setSelectedIndex(index);
+    setFocusedIndex(index);
+    if (onSelect) {
+      onSelect(index, documents[index]);
+    }
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (!documents.length) return;
+
+    switch (e.key) {
+      case 'ArrowUp':
+        e.preventDefault();
+        if (index > 0) {
+          const newIndex = index - 1;
+          setFocusedIndex(newIndex);
+          itemsRef.current[newIndex]?.focus();
+        }
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        if (index < documents.length - 1) {
+          const newIndex = index + 1;
+          setFocusedIndex(newIndex);
+          itemsRef.current[newIndex]?.focus();
+        }
+        break;
+      case 'Home':
+        e.preventDefault();
+        setFocusedIndex(0);
+        itemsRef.current[0]?.focus();
+        break;
+      case 'End':
+        e.preventDefault();
+        setFocusedIndex(documents.length - 1);
+        itemsRef.current[documents.length - 1]?.focus();
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        handleSelect(index);
+        break;
+      case 'Delete':
+        if (mode === 'edit') {
+          e.preventDefault();
+          handleRemove(index);
+        }
+        break;
+      default:
+        break;
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
       }
     };
+  }, []);
 
+  useEffect(() => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+    setSelectedIndex(null);
+    setFocusedIndex(null);
+  }, [documents]);
 
-    const [previewUrl, setPreviewUrl] = useState(null);
-
-    useEffect(() => {
-      // Cleanup the preview URL when component unmounts or previewUrl changes
-      return () => {
-        if (previewUrl) {
-          URL.revokeObjectURL(previewUrl);
-        }
-      };
-    }, [previewUrl]);
-
-    const renderPreview = () => {
+  const renderPreview = () => {
     if (selectedIndex === null || !documents[selectedIndex]) {
       return <div className="document-preview-empty">Seleccione un documento para previsualizar</div>;
     }
@@ -115,21 +187,26 @@ const DocumentList = ({
       );
     }
 
-    // Generar nueva URL si no hay preview en el doc y no hay URL actual
-    if (!doc.preview && !previewUrl) {
-      const newUrl = URL.createObjectURL(file);
-      setPreviewUrl(newUrl);
+    if (doc.preview) {
+      return renderPreviewContent(doc.preview, doc, file);
     }
 
-    const url = doc.preview || previewUrl;
+    if (!previewUrlRef.current) {
+      previewUrlRef.current = URL.createObjectURL(file);
+    }
 
+    return renderPreviewContent(previewUrlRef.current, doc, file);
+  };
+
+  const renderPreviewContent = (url, doc, file) => {
     if (file.type === 'application/pdf') {
       return (
         <iframe
           src={url}
-          title={doc.nombre || file.name}
+          title={doc.nombre || file.name || 'Documento PDF'}
           className="document-preview-iframe"
           style={{ height: '100%' }}
+          aria-label={`Vista previa de ${doc.nombre || file.name || 'documento PDF'}`}
         />
       );
     }
@@ -139,38 +216,64 @@ const DocumentList = ({
         <div className="document-preview-other" style={{ height: '100%' }}>
           <img
             src={url}
-            alt={doc.nombre || file.name}
+            alt={doc.nombre || file.name || 'Imagen'}
             className="document-preview-image"
-            style={{ height: '100%' }}
+            style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
           />
         </div>
       );
     }
 
-  return (
-    <div className="document-preview-other" style={{ height: '100%' }}>
-      <FaFileAlt size={64} />
-      <p>{doc.nombre || file.name}</p>
-    </div>
-  );
-};
+    return (
+      <div className="document-preview-other" style={{ height: '100%' }}>
+        <FaFileAlt size={64} />
+        <p>{doc.nombre || file.name || 'Documento'}</p>
+        <a
+          href={url}
+          download={doc.nombre || file.name}
+          className="document-download-button"
+          aria-label={`Descargar ${doc.nombre || file.name || 'documento'}`}
+        >
+          <FaDownload /> Descargar
+        </a>
+      </div>
+    );
+  };
 
   if (mode === 'list') {
-    // List only mode: show list with download links, no preview, no editing
     return (
-      <div className="document-list-listmode" role="list" style={{ maxHeight: containerHeight, minHeight: containerHeight }}>
+      <div 
+        className="document-list-listmode" 
+        role="listbox" 
+        aria-multiselectable="false"
+        style={{ maxHeight: containerHeight, minHeight: containerHeight }}
+      >
         {documents.map((doc, index) => {
           const file = doc.file;
           const url = file ? (doc.preview || URL.createObjectURL(file)) : '#';
           return (
             <div
               key={index}
-              className="document-item-display"
-              role="listitem"
+              className={`document-item-display ${selectedIndex === index ? 'selected' : ''}`}
+              role="option"
+              aria-selected={selectedIndex === index}
+              tabIndex={focusedIndex === index ? 0 : -1}
+              ref={el => itemsRef.current[index] = el}
+              onClick={() => handleSelect(index)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
+              onFocus={() => setFocusedIndex(index)}
               title={doc.nombre || doc.nombre_archivo || (file && file.name)}
             >
-              <a href={url} download={doc.nombre || (file && file.name)} target="_blank" rel="noopener noreferrer" className="document-name-link">
+              <a 
+                href={url} 
+                download={doc.nombre || (file && file.name)} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="document-name-link"
+                aria-label={`Descargar ${doc.nombre || (file && file.name) || 'documento'}`}
+              >
                 {doc.nombre || doc.nombre_archivo || (file && file.name)}
+                <FaDownload className="document-download-icon" />
               </a>
             </div>
           );
@@ -180,68 +283,110 @@ const DocumentList = ({
   }
 
   if (mode === 'view') {
-    // View mode: show list with clickable items and preview, no editing or removing
     return (
-      <div className="document-list-display" role="list" style={{ maxHeight: containerHeight, minHeight: containerHeight, height: containerHeight, display: 'flex' }}>
-        <div className="document-list" style={{ maxHeight: containerHeight, minHeight: containerHeight, height: containerHeight, overflowY: 'auto' }}>
+      <div 
+        className="document-list-display" 
+        style={{ 
+          maxHeight: containerHeight, 
+          minHeight: containerHeight, 
+          height: containerHeight, 
+          display: 'flex' 
+        }}
+      >
+        <div 
+          className="document-list" 
+          role="listbox"
+          aria-multiselectable="false"
+          style={{ 
+            maxHeight: containerHeight, 
+            minHeight: containerHeight, 
+            height: containerHeight, 
+            overflowY: 'auto' 
+          }}
+        >
           {documents.map((doc, index) => (
-          <div
-            key={index}
-            className={`document-item-display ${selectedIndex === index ? 'selected' : ''}`}
-            onClick={() => handleSelect(index)}
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect(index); }}
-            aria-selected={selectedIndex === index}
-            role="listitem"
-            title={doc.nombre || doc.nombre_archivo || (doc.file && doc.file.name)}
-          >
-            <span className="document-name" >
-              {doc.nombre || doc.nombre_archivo || (doc.file && doc.file.name)}
-            </span>
-            <a
-              href={doc.file ? (doc.preview || URL.createObjectURL(doc.file)) : '#'}
-              download={doc.nombre || (doc.file && doc.file.name)}
-              onClick={(e) => e.stopPropagation()}
-              className="document-download-button"
-              aria-label={`Descargar ${doc.nombre || (doc.file && doc.file.name)}`}
-              title={`Descargar ${doc.nombre || (doc.file && doc.file.name)}`}
+            <div
+              key={index}
+              className={`document-item-display ${selectedIndex === index ? 'selected' : ''}`}
+              role="option"
+              aria-selected={selectedIndex === index}
+              tabIndex={focusedIndex === index ? 0 : -1}
+              ref={el => itemsRef.current[index] = el}
+              onClick={() => handleSelect(index)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
+              onFocus={() => setFocusedIndex(index)}
+              title={doc.nombre || doc.nombre_archivo || (doc.file && doc.file.name)}
             >
-              <FaDownload />
-            </a>
-          </div>
+              <span className="document-name">
+                {doc.nombre || doc.nombre_archivo || (doc.file && doc.file.name)}
+              </span>
+              <a
+                href={doc.file ? (doc.preview || URL.createObjectURL(doc.file)) : '#'}
+                download={doc.nombre || (doc.file && doc.file.name)}
+                onClick={(e) => e.stopPropagation()}
+                className="document-download-button"
+                aria-label={`Descargar ${doc.nombre || (doc.file && doc.file.name) || 'documento'}`}
+              >
+                <FaDownload />
+              </a>
+            </div>
           ))}
         </div>
-        <div className="document-preview-container" style={{ maxHeight: containerHeight, minHeight: containerHeight, height: containerHeight, flexShrink: 0, flexGrow: 1 }}>
+        <div 
+          className="document-preview-container" 
+          style={{ 
+            maxHeight: containerHeight, 
+            minHeight: containerHeight, 
+            height: containerHeight, 
+            flexShrink: 0, 
+            flexGrow: 1 
+          }}
+        >
           {renderPreview()}
         </div>
       </div>
     );
   }
 
-  // Default: edit mode
+  // Edit mode
   return (
-    <div className={`document-list-edit-container ${dragOver ? 'drag-over' : ''}`} style={{ maxHeight: containerHeight, minHeight: containerHeight, height: containerHeight, display: 'flex' }}>
+    <div 
+      className={`document-list-edit-container ${dragOver ? 'drag-over' : ''}`} 
+      style={{ 
+        maxHeight: containerHeight, 
+        minHeight: containerHeight, 
+        height: containerHeight, 
+        display: 'flex' 
+      }}
+    >
       <div
         className="document-list"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        aria-label="Lista de documentos con soporte para subir archivos"
-        role="list"
-        style={{ maxHeight: containerHeight, minHeight: containerHeight, height: containerHeight, overflowY: 'auto' }}
+        role="listbox"
+        aria-multiselectable="false"
+        style={{ 
+          maxHeight: containerHeight, 
+          minHeight: containerHeight, 
+          height: containerHeight, 
+          overflowY: 'auto' 
+        }}
       >
         {documents.map((doc, index) => (
           <div
             key={index}
             className={`document-item ${selectedIndex === index ? 'selected' : ''}`}
-            onClick={() => handleSelect(index)}
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect(index); }}
+            role="option"
             aria-selected={selectedIndex === index}
-            role="listitem"
+            tabIndex={focusedIndex === index ? 0 : -1}
+            ref={el => itemsRef.current[index] = el}
+            onClick={() => handleSelect(index)}
+            onKeyDown={(e) => handleKeyDown(e, index)}
+            onFocus={() => setFocusedIndex(index)}
             title={doc.file ? doc.file.name : doc.nombre_archivo}
           >
-            <span className="document-filename" >
+            <span className="document-filename">
               {doc.file ? doc.file.name : doc.nombre_archivo}
             </span>
             <input
@@ -250,6 +395,8 @@ const DocumentList = ({
               value={doc.nombre || ''}
               onChange={(e) => handleNameChange(index, e.target.value)}
               aria-label={`Nombre del documento ${index + 1}`}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
             />
             <button
               type="button"
@@ -263,9 +410,14 @@ const DocumentList = ({
         ))}
         <div
           className="document-upload-area"
-          onClick={() => fileInputRef.current && fileInputRef.current.click()}
+          onClick={() => fileInputRef.current?.click()}
           tabIndex={0}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current && fileInputRef.current.click(); }}
+          onKeyDown={(e) => { 
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
           role="button"
           aria-label={labels.upload}
         >
@@ -280,7 +432,16 @@ const DocumentList = ({
           />
         </div>
       </div>
-      <div className="document-preview-container" style={{ maxHeight: containerHeight, minHeight: containerHeight, height: containerHeight, flexShrink: 0, flexGrow: 1 }}>
+      <div 
+        className="document-preview-container" 
+        style={{ 
+          maxHeight: containerHeight, 
+          minHeight: containerHeight, 
+          height: containerHeight, 
+          flexShrink: 0, 
+          flexGrow: 1 
+        }}
+      >
         {renderPreview()}
       </div>
     </div>
@@ -293,6 +454,7 @@ DocumentList.propTypes = {
       file: PropTypes.object,
       nombre: PropTypes.string,
       nombre_archivo: PropTypes.string,
+      preview: PropTypes.string,
     })
   ).isRequired,
   onChange: PropTypes.func.isRequired,
