@@ -6,6 +6,7 @@ import CopyButton from '../components/CopyButton';
 import { FaWhatsapp, FaCommentDots } from 'react-icons/fa';
 import ImageGallery from '../components/ImageGallery';
 import DocumentList from '../components/DocumentList';
+import Map from '../components/Map';
 
 const About = () => {
   const toastRef = useRef(null);
@@ -99,6 +100,14 @@ const About = () => {
         <h2>Image Gallery - Alternate Display Mode</h2>
               
         <ImageGallery images={images} onChange={setImages} mode="display" labels={{ bannerSelector: true }}/>
+      </section>
+
+      <section style={{ marginTop: '40px' }}>
+        <h2>Prueba de Mapa Interactivo</h2>
+        <Map  
+          onChangeCoordinates={(coords) => console.log('Coordenadas seleccionadas:', coords)} 
+          height="400px" 
+        />
       </section>
 
     </PageTemplate>
