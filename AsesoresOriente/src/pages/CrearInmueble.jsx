@@ -7,9 +7,19 @@ import '../styles/Register.css';
 import '../styles/CrearInmueble.css';
 
 const CrearInmueble = () => {
+  // Referencia para mostrar notificaciones toast
   const toastRef = useRef(null);
+  
+  // Estado para controlar la pestaña activa
   const [activeTab, setActiveTab] = useState('basica');
+  
+  // Estado para controlar la pestaña activa en multimedia
+  const [activeMultimediaTab, setActiveMultimediaTab] = useState('imagenes');
+  
+  // Estado para mostrar/ocultar el formulario de nuevo propietario
   const [showPropietarioForm, setShowPropietarioForm] = useState(false);
+  
+  // Estado para el nuevo propietario
   const [newPropietario, setNewPropietario] = useState({
     tipo: 'persona',
     nombre: '',
@@ -23,7 +33,7 @@ const CrearInmueble = () => {
     representanteLegal: ''
   });
 
-  // State for form fields
+  // Estado principal del formulario
   const [formData, setFormData] = useState({
     codigo: '',
     titulo: '',
@@ -55,7 +65,7 @@ const CrearInmueble = () => {
     documentos: [],
   });
 
-  // State for dropdown options
+  // Estados para las opciones de los dropdowns
   const [tipoInmuebles, setTipoInmuebles] = useState([]);
   const [estadoInmuebles, setEstadoInmuebles] = useState([]);
   const [asesores, setAsesores] = useState([]);
@@ -69,7 +79,11 @@ const CrearInmueble = () => {
   const [filteredCaracteristicas, setFilteredCaracteristicas] = useState([]);
   const [caracteristicaSearch, setCaracteristicaSearch] = useState('');
 
-  // Fetch dropdown data
+  // ==============================================
+  // EFECTOS SECUNDARIOS (useEffect)
+  // ==============================================
+
+  // Cargar datos iniciales (simulación de API)
   useEffect(() => {
     // Simular llamadas API
     setTipoInmuebles([
@@ -168,7 +182,14 @@ const CrearInmueble = () => {
     }
   }, [caracteristicaSearch, caracteristicas]);
 
-  // Handle input changes
+  // ==============================================
+  // MANEJADORES DE EVENTOS
+  // ==============================================
+
+  /**
+   * Maneja cambios en los inputs del formulario principal
+   * @param {Object} e - Evento del input
+   */
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -177,7 +198,10 @@ const CrearInmueble = () => {
     }));
   };
 
-  // Handle new propietario input changes
+  /**
+   * Maneja cambios en los inputs del formulario de nuevo propietario
+   * @param {Object} e - Evento del input
+   */
   const handleNewPropietarioChange = (e) => {
     const { name, value, type, checked } = e.target;
     setNewPropietario((prev) => ({
@@ -186,7 +210,10 @@ const CrearInmueble = () => {
     }));
   };
 
-  // Handle propietario type change
+  /**
+   * Maneja el cambio de tipo de propietario (persona/empresa)
+   * @param {Object} e - Evento del input
+   */
   const handlePropietarioTipoChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -195,7 +222,9 @@ const CrearInmueble = () => {
     }));
   };
 
-  // Save new propietario
+  /**
+   * Guarda un nuevo propietario en el estado correspondiente
+   */
   const handleSaveNewPropietario = () => {
     // Simular guardado en API
     const newId = Math.max(...propietariosPersona.map(p => p.id), 0) + 1;
@@ -246,7 +275,10 @@ const CrearInmueble = () => {
     toastRef.current?.addToast('Propietario registrado correctamente', 'success', 3000);
   };
 
-  // Handle images change from ImageGallery
+  /**
+   * Maneja cambios en las imágenes del inmueble
+   * @param {Array} images - Lista de imágenes actualizada
+   */
   const handleImagesChange = (images) => {
     setFormData((prev) => ({
       ...prev,
@@ -254,7 +286,10 @@ const CrearInmueble = () => {
     }));
   };
 
-  // Handle documents change from DocumentList
+  /**
+   * Maneja cambios en los documentos del inmueble
+   * @param {Array} documents - Lista de documentos actualizada
+   */
   const handleDocumentsChange = (documents) => {
     setFormData((prev) => ({
       ...prev,
@@ -262,10 +297,12 @@ const CrearInmueble = () => {
     }));
   };
 
-  // Handle adding custom characteristic
+  /**
+   * Agrega una nueva característica personalizada
+   */
   const handleAddCustomCharacteristic = () => {
     const newCharacteristic = {
-      id: Date.now(), // Temporal ID
+      id: Date.now(), // ID temporal
       nombre: `Característica personalizada ${formData.caracteristicasPersonalizadas.length + 1}`,
       valor: '',
       personalizada: true
@@ -277,7 +314,12 @@ const CrearInmueble = () => {
     }));
   };
 
-  // Handle custom characteristic change
+  /**
+   * Maneja cambios en una característica personalizada
+   * @param {Number} id - ID de la característica
+   * @param {String} field - Campo a modificar
+   * @param {String} value - Nuevo valor
+   */
   const handleCustomCharacteristicChange = (id, field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -287,7 +329,10 @@ const CrearInmueble = () => {
     }));
   };
 
-  // Handle remove custom characteristic
+  /**
+   * Elimina una característica personalizada
+   * @param {Number} id - ID de la característica a eliminar
+   */
   const handleRemoveCustomCharacteristic = (id) => {
     setFormData(prev => ({
       ...prev,
@@ -295,7 +340,10 @@ const CrearInmueble = () => {
     }));
   };
 
-  // Handle form submission
+  /**
+   * Maneja el envío del formulario
+   * @param {Object} e - Evento del formulario
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -331,52 +379,73 @@ const CrearInmueble = () => {
     // setFormData({...initialFormState});
   };
 
+  // ==============================================
+  // RENDERIZADO DEL COMPONENTE
+  // ==============================================
+
   return (
     <PageTemplate 
       pageClass="crear-inmueble-layout" 
       contentClass="crear-inmueble-content" 
       title="Crear Inmueble"
     >
-      <div className="form-tabs">
-        <button 
-          className={activeTab === 'basica' ? 'active' : ''} 
-          onClick={() => setActiveTab('basica')}
-        >
-          Información Básica
-        </button>
-        <button 
-          className={activeTab === 'fisica' ? 'active' : ''} 
-          onClick={() => setActiveTab('fisica')}
-        >
-          Atributos Físicos
-        </button>
-        <button 
-          className={activeTab === 'ubicacion' ? 'active' : ''} 
-          onClick={() => setActiveTab('ubicacion')}
-        >
-          Ubicación
-        </button>
-        <button 
-          className={activeTab === 'negocios' ? 'active' : ''} 
-          onClick={() => setActiveTab('negocios')}
-        >
-          Negocios
-        </button>
-        <button 
-          className={activeTab === 'caracteristicas' ? 'active' : ''} 
-          onClick={() => setActiveTab('caracteristicas')}
-        >
-          Características
-        </button>
-        <button 
-          className={activeTab === 'multimedia' ? 'active' : ''} 
-          onClick={() => setActiveTab('multimedia')}
-        >
-          Multimedia
-        </button>
-      </div>
-
       <form onSubmit={handleSubmit} className="crear-inmueble-form">
+        {/* Encabezado con pestañas y botón de guardar */}
+        <div className="form-header">
+          <div className="form-tabs">
+            <button 
+              type="button"
+              className={activeTab === 'basica' ? 'active' : ''} 
+              onClick={() => setActiveTab('basica')}
+            >
+              Información Básica
+            </button>
+            <button 
+              type="button"
+              className={activeTab === 'fisica' ? 'active' : ''} 
+              onClick={() => setActiveTab('fisica')}
+            >
+              Atributos Físicos
+            </button>
+            <button 
+              type="button"
+              className={activeTab === 'ubicacion' ? 'active' : ''} 
+              onClick={() => setActiveTab('ubicacion')}
+            >
+              Ubicación
+            </button>
+            <button 
+              type="button"
+              className={activeTab === 'negocios' ? 'active' : ''} 
+              onClick={() => setActiveTab('negocios')}
+            >
+              Negocios
+            </button>
+            <button 
+              type="button"
+              className={activeTab === 'caracteristicas' ? 'active' : ''} 
+              onClick={() => setActiveTab('caracteristicas')}
+            >
+              Características
+            </button>
+            <button 
+              type="button"
+              className={activeTab === 'multimedia' ? 'active' : ''} 
+              onClick={() => {
+                setActiveTab('multimedia');
+                setActiveMultimediaTab('imagenes');
+              }}
+            >
+              Multimedia
+            </button>
+          </div>
+          
+          <button type="submit" className="btn-primary">
+            Guardar Inmueble
+          </button>
+        </div>
+
+        {/* SECCIÓN: Información Básica */}
         {activeTab === 'basica' && (
           <section className="form-section">
             <h2>Información Básica</h2>
@@ -502,7 +571,7 @@ const CrearInmueble = () => {
                     </label>
                     <button 
                       type="button" 
-                      className="btn-secondary"
+                      className="btn-add"
                       onClick={() => setShowPropietarioForm(true)}
                     >
                       + Registrar Nuevo
@@ -544,6 +613,7 @@ const CrearInmueble = () => {
           </section>
         )}
 
+        {/* SECCIÓN: Atributos Físicos */}
         {activeTab === 'fisica' && (
           <section className="form-section">
             <h2>Atributos Físicos</h2>
@@ -645,25 +715,27 @@ const CrearInmueble = () => {
               </div>
               
               <div className="form-group checkbox-group">
-                <label>
+                <label className="checkbox-label">
                   <input 
                     type="checkbox" 
                     name="amueblado" 
                     checked={formData.amueblado} 
                     onChange={handleChange} 
                   />
+                  <span className="checkbox-custom"></span>
                   Amueblado
                 </label>
               </div>
               
               <div className="form-group checkbox-group">
-                <label>
+                <label className="checkbox-label">
                   <input 
                     type="checkbox" 
                     name="climatizado" 
                     checked={formData.climatizado} 
                     onChange={handleChange} 
                   />
+                  <span className="checkbox-custom"></span>
                   Climatizado
                 </label>
               </div>
@@ -671,6 +743,7 @@ const CrearInmueble = () => {
           </section>
         )}
 
+        {/* SECCIÓN: Ubicación */}
         {activeTab === 'ubicacion' && (
           <section className="form-section">
             <h2>Ubicación</h2>
@@ -782,6 +855,7 @@ const CrearInmueble = () => {
           </section>
         )}
 
+        {/* SECCIÓN: Tipos de Negocio */}
         {activeTab === 'negocios' && (
           <section className="form-section">
             <h2>Tipos de Negocio y Precios</h2>
@@ -789,7 +863,7 @@ const CrearInmueble = () => {
               {tipoNegocios.map((tipo) => (
                 <div key={tipo.id} className="tipo-negocio-item">
                   <div className="tipo-negocio-header">
-                    <label>
+                    <label className="checkbox-label">
                       <input
                         type="checkbox"
                         checked={formData.tipoNegocios.some((tn) => tn.tipoNegocioId === tipo.id)}
@@ -811,6 +885,7 @@ const CrearInmueble = () => {
                           });
                         }}
                       />
+                      <span className="checkbox-custom"></span>
                       {tipo.nombre}
                     </label>
                   </div>
@@ -859,7 +934,7 @@ const CrearInmueble = () => {
                       </div>
                       
                       <div className="disponible-checkbox">
-                        <label>
+                        <label className="checkbox-label">
                           <input
                             type="checkbox"
                             checked={formData.tipoNegocios.find((tn) => tn.tipoNegocioId === tipo.id)?.disponible !== false}
@@ -873,6 +948,7 @@ const CrearInmueble = () => {
                               });
                             }}
                           />
+                          <span className="checkbox-custom"></span>
                           Disponible
                         </label>
                       </div>
@@ -884,6 +960,7 @@ const CrearInmueble = () => {
           </section>
         )}
 
+        {/* SECCIÓN: Características */}
         {activeTab === 'caracteristicas' && (
           <section className="form-section">
             <h2>Características</h2>
@@ -902,37 +979,40 @@ const CrearInmueble = () => {
               <div className="caracteristicas-grid">
                 {filteredCaracteristicas.map((carac) => (
                   <div key={carac.id} className="caracteristica-item">
-                    <label>{carac.nombre}:</label>
+                    <label className="caracteristica-label">{carac.nombre}:</label>
                     {carac.tipo === 'boolean' ? (
-                      <input
-                        type="checkbox"
-                        checked={formData.caracteristicas.some(c => c.caracteristicaId === carac.id && c.valor === 'true')}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setFormData((prev) => {
-                            const exists = prev.caracteristicas.find((c) => c.caracteristicaId === carac.id);
-                            let newCaracteristicas;
-                            
-                            if (exists) {
-                              if (checked) {
-                                newCaracteristicas = prev.caracteristicas.map((c) =>
-                                  c.caracteristicaId === carac.id ? { ...c, valor: 'true' } : c
-                                );
+                      <label className="checkbox-label caracteristica-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={formData.caracteristicas.some(c => c.caracteristicaId === carac.id && c.valor === 'true')}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setFormData((prev) => {
+                              const exists = prev.caracteristicas.find((c) => c.caracteristicaId === carac.id);
+                              let newCaracteristicas;
+                              
+                              if (exists) {
+                                if (checked) {
+                                  newCaracteristicas = prev.caracteristicas.map((c) =>
+                                    c.caracteristicaId === carac.id ? { ...c, valor: 'true' } : c
+                                  );
+                                } else {
+                                  newCaracteristicas = prev.caracteristicas.filter(c => c.caracteristicaId !== carac.id);
+                                }
                               } else {
-                                newCaracteristicas = prev.caracteristicas.filter(c => c.caracteristicaId !== carac.id);
+                                newCaracteristicas = [...prev.caracteristicas, { 
+                                  caracteristicaId: carac.id, 
+                                  valor: 'true', 
+                                  cantidad: null 
+                                }];
                               }
-                            } else {
-                              newCaracteristicas = [...prev.caracteristicas, { 
-                                caracteristicaId: carac.id, 
-                                valor: 'true', 
-                                cantidad: null 
-                              }];
-                            }
-                            
-                            return { ...prev, caracteristicas: newCaracteristicas };
-                          });
-                        }}
-                      />
+                              
+                              return { ...prev, caracteristicas: newCaracteristicas };
+                            });
+                          }}
+                        />
+                        <span className="checkbox-custom"></span>
+                      </label>
                     ) : (
                       <input
                         type={carac.tipo === 'number' ? 'number' : 'text'}
@@ -974,7 +1054,7 @@ const CrearInmueble = () => {
                   Características personalizadas
                   <button 
                     type="button" 
-                    className="btn-secondary"
+                    className="btn-add"
                     onClick={handleAddCustomCharacteristic}
                   >
                     + Agregar
@@ -982,7 +1062,7 @@ const CrearInmueble = () => {
                 </h3>
                 
                 {formData.caracteristicasPersonalizadas.length === 0 ? (
-                  <p>No hay características personalizadas agregadas</p>
+                  <p className="no-custom-message">No hay características personalizadas agregadas</p>
                 ) : (
                   <div className="custom-caracteristicas-list">
                     {formData.caracteristicasPersonalizadas.map((carac) => (
@@ -1015,51 +1095,54 @@ const CrearInmueble = () => {
           </section>
         )}
 
+        {/* SECCIÓN: Multimedia */}
         {activeTab === 'multimedia' && (
           <section className="form-section">
             <h2>Multimedia</h2>
             
             <div className="multimedia-tabs">
               <button 
-                className={activeTab === 'multimedia' ? 'active' : ''}
-                onClick={() => setActiveTab('multimedia')}
+                type="button"
+                className={activeMultimediaTab === 'imagenes' ? 'active' : ''}
+                onClick={() => setActiveMultimediaTab('imagenes')}
               >
                 Imágenes
               </button>
               <button 
-                className={activeTab === 'documentos' ? 'active' : ''}
-                onClick={() => setActiveTab('documentos')}
+                type="button"
+                className={activeMultimediaTab === 'documentos' ? 'active' : ''}
+                onClick={() => setActiveMultimediaTab('documentos')}
               >
                 Documentos
               </button>
             </div>
             
             <div className="multimedia-content">
-              <h3>Imágenes del Inmueble</h3>
-              <p>Suba imágenes de alta calidad que muestren el inmueble. La primera imagen será la portada.</p>
-              <ImageGallery 
-                images={formData.imagenes} 
-                onChange={handleImagesChange} 
-                mode="edit" 
-              />
-              
-              <h3>Documentos Legales</h3>
-              <p>Suba documentos relacionados con el inmueble (escrituras, permisos, etc.)</p>
-              <DocumentList 
-                documents={formData.documentos} 
-                onChange={handleDocumentsChange} 
-                mode="edit" 
-                containerHeight="400px" 
-              />
+              {activeMultimediaTab === 'imagenes' ? (
+                <>
+                  <h3>Imágenes del Inmueble</h3>
+                  <p>Suba imágenes de alta calidad que muestren el inmueble. La primera imagen será la portada.</p>
+                  <ImageGallery 
+                    images={formData.imagenes} 
+                    onChange={handleImagesChange} 
+                    mode="edit" 
+                  />
+                </>
+              ) : (
+                <>
+                  <h3>Documentos Legales</h3>
+                  <p>Suba documentos relacionados con el inmueble (escrituras, permisos, etc.)</p>
+                  <DocumentList 
+                    documents={formData.documentos} 
+                    onChange={handleDocumentsChange} 
+                    mode="edit" 
+                    containerHeight="400px" 
+                  />
+                </>
+              )}
             </div>
           </section>
         )}
-
-        <div className="form-actions">
-          <button type="submit" className="btn-primary">
-            Guardar Inmueble
-          </button>
-        </div>
       </form>
 
       {/* Modal para nuevo propietario */}
@@ -1070,12 +1153,14 @@ const CrearInmueble = () => {
             
             <div className="modal-tabs">
               <button 
+                type="button"
                 className={newPropietario.tipo === 'persona' ? 'active' : ''}
                 onClick={() => setNewPropietario({...newPropietario, tipo: 'persona'})}
               >
                 Persona
               </button>
               <button 
+                type="button"
                 className={newPropietario.tipo === 'empresa' ? 'active' : ''}
                 onClick={() => setNewPropietario({...newPropietario, tipo: 'empresa'})}
               >
