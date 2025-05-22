@@ -36,12 +36,14 @@ import usuarioRoutes from './routes/usuarioRoutes.js';
 import asesorRoutes from './routes/asesorRoutes.js';
 import redesAsesorRoutes from './routes/redesAsesorRoutes.js';
 import redesSocialRoutes from './routes/redesSocialRoutes.js';
+import genericRoutes from './routes/genericRoutes.js';
 
 app.use('/api/sample', sampleRoutes);
 app.use('/api/usuario', usuarioRoutes);
 app.use('/api/asesor', asesorRoutes);
 app.use('/api/redesasesor', redesAsesorRoutes);
 app.use('/api/redessocial', redesSocialRoutes);
+app.use('/api/generic', genericRoutes);
 
 // Example route to test PostgreSQL connection
 app.get('/test-db', async (req, res) => {

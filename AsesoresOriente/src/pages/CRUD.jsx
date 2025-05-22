@@ -1,13 +1,16 @@
 import React from 'react';
 import { Menu } from '../components/Menu';
-import SearchBarCRUD from '../components/SearchBar(CRUD)';
+import DynamicCRUD from '../components/DynamicCRUD';
 
+/**
+ * CRUD page rendering menu and dynamic CRUD management component.
+ */
 const CRUD = () => {
   return (
     <div>
       <Menu />
       <div>
-        <SearchBarCRUD />
+        <DynamicCRUD />
       </div>
     </div>
   );
