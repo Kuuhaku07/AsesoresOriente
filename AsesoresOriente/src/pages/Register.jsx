@@ -35,7 +35,7 @@ const Register = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Verificar permisos al cargar la página
+  /* Verificar permisos al cargar la página
   useEffect(() => {
     const allowed = verifyPermissions(user, ['ADMINISTRADOR', 'GERENTE']);
     if (!allowed) {
@@ -45,6 +45,7 @@ const Register = () => {
       navigate('/');
     }
   }, [user, navigate]);
+*/
 
   // Cargar usuarios y limpiar formulario al iniciar
   useEffect(() => {

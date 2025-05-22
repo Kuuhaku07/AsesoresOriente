@@ -44,7 +44,6 @@ export function Menu() {
             </div>
           )}
         </div>
-
         {/* Conditional rendering based on user login status */}
         {!user ? (
           <>

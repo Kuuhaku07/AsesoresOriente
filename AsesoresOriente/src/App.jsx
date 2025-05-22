@@ -15,6 +15,7 @@ import Dashboard from './pages/Dashboard';
 import Register from './pages/Register';
 import Asesores from './pages/Asesores';
 import CrearInmueble from './pages/CrearInmueble';
+import CRUD from './pages/CRUD';
 
 export function App(){
     return (
@@ -35,6 +36,7 @@ export function App(){
                         <Route path="/register" element={<Register />} /> {/* Register route */}
                         <Route path="/asesores" element={<Asesores />} /> {/* Asesores route */}
                         <Route path="/nuevo" element={<CrearInmueble />} /> {/* Crear Inmueble route */}
+                        <Route path="/crud" element={<CRUD />} /> {/* CRUD route */}
                     </Routes>
                 </div>
             </AuthProvider>

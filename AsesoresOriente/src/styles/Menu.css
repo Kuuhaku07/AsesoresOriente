@@ -7,7 +7,7 @@
     border-bottom: var(--border-width) solid var(--color-primary);
     z-index: var(--z-index-menu);
 
-    position: fixed; /* Fix the position of the menu */
+    position:relative; /* Fix the position of the menu */
     width: 100%; /* Make the menu full width */
 }
 
