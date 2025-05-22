@@ -1,0 +1,26 @@
+/* About.css */
+
+
+.about-infobox {
+  transition: all 0.3s ease;
+}
+
+.about-infobox:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.about-infobox .custom-info-box-content p {
+  margin-bottom: 1.2rem;
+  line-height: 1.7;
+  text-align: justify;
+}
+
+.about-infobox .custom-info-box-content ul {
+  padding-left: 1.5rem;
+}
+
+.about-infobox .custom-info-box-content li {
+  margin-bottom: 0.8rem;
+  line-height: 1.6;
+}

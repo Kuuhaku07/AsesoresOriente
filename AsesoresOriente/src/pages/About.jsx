@@ -1,115 +1,121 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import PageTemplate from '../components/PageTemplate';
-import ToastContainer from '../components/ToastContainer';
-import FloatingContactButton from '../components/FloatingContactButton';
-import CopyButton from '../components/CopyButton';
-import { FaWhatsapp, FaCommentDots } from 'react-icons/fa';
-import ImageGallery from '../components/ImageGallery';
-import DocumentList from '../components/DocumentList';
-import Map from '../components/Map';
+import InfoBox from '../components/InfoBox';
+import '../styles/About.css';
+import '../styles/InfoBox.css';
 
 const About = () => {
-  const toastRef = useRef(null);
-
-  const showToast = (message, type) => {
-    if (toastRef.current) {
-      toastRef.current.addToast(message, type, 5000);
+  // Configuración compartida para todos los InfoBox
+  const sharedBoxProps = {
+    titleColor: "#000000",
+    textColor: "#333333",
+    titleFontSize: "1.5rem",
+    className: "about-infobox",
+    underlineWidth: "60px",
+    underlineColor: "#2a5c99",
+    style: {
+      borderLeft: '4px solid var(--color-primary)',
+      background: 'linear-gradient(to right, var(--color-white) 0%, var(--color-primary-light) 100%)'
     }
   };
 
-  const contacts = [
-    {
-      icon: <FaWhatsapp />,
-      color: '#25D366',
-      link: 'https://wa.me/1234567890',
-      action: 'link',
-    },
-    {
-      icon: <FaCommentDots />,
-      color: '#FF0000',
-      link: 'chat_identifier',
-      action: 'copy',
-    },
-  ];
-
-  // Sample images state for testing ImageGallery
-  const [images, setImages] = useState([
-    { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
-    { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BNTE1ZWRhOTItZWQwZS00NzY1LTgxMzQtM2I3MTBiYjIyMWQ2XkEyXkFqcGc@._V1_QL75_UX190_CR0,0,190,190_.jpg', es_portada: false, titulo: 'Imagen 2', descripcion: 'Descripción 2' },
-   ]);
-
-  // Sample documents state for testing DocumentList
-  const [documents, setDocuments] = useState([
-    { file: null, nombre: 'Documento 1.pdf' },
-    { file: null, nombre: 'Documento 2.docx' },
-  ]);
-
   return (
     <PageTemplate pageClass="about-layout" contentClass="about-content" title="Sobre Nosotros">
-      <p>Lalalalava chichichichicken.</p>
-      <ToastContainer ref={toastRef} />
-      <FloatingContactButton
-        contacts={contacts}
-        mainText="Contacto"
-        onCopy={(message) => showToast(message, 'info')}
-      />
-      <div style={{ marginTop: '20px' }}>
-        <button onClick={() => showToast('Este es un toast de alerta', 'error')} style={{ marginRight: '10px' }}>
-          Mostrar Toast de Alerta
-        </button>
-        <button onClick={() => showToast('Este es un toast de confirmación', 'success')}>
-          Mostrar Toast de Confirmación
-        </button>
+      <div className="about-container">
+        {/* Sección Quiénes Somos */}
+        <InfoBox 
+          {...sharedBoxProps}
+          title="Quiénes Somos"
+        >
+          <p>
+            En Asesores de Oriente Bienes Raíces, C.A., somos tu aliado estratégico para potenciar tu éxito como agente inmobiliario. Te brindamos todo el respaldo y la asesoría jurídica que necesitas, junto con herramientas esenciales como nuestra plataforma inmobiliaria, soporte técnico y marketing digital, manteniéndose siempre a la vanguardia tecnológica.
+          </p>
+          <p>
+            Con nosotros, obtendrás el servicio que necesitas para impulsar tu autonomía, creatividad y capacidad de forjar un futuro exitoso en la intermediación inmobiliaria.
+          </p>
+        </InfoBox>
+
+        {/* Sección Futuro de la Empresa */}
+        <InfoBox 
+          {...sharedBoxProps}
+          title="Futuro de la Empresa Inmobiliaria"
+        >
+          <p>
+            Se espera que la empresa se convierta en un referente a nivel nacional en el sector inmobiliario. Esto se logrará atrayendo a emprendedores inmobiliarios y ayudándolos a desarrollar carreras profesionales exitosas dentro de nuestras oficinas.
+          </p>
+          <p>
+            Para conseguirlo, la empresa se compromete a ofrecer a sus agentes:
+          </p>
+          <ul>
+            <li><strong>Herramientas:</strong> Para optimizar su trabajo diario.</li>
+            <li><strong>Apoyo jurídico:</strong> Para garantizar la legalidad y seguridad de las operaciones.</li>
+            <li><strong>Apoyo gerencial:</strong> Para guiar y potenciar el rendimiento de los agentes.</li>
+          </ul>
+          <p>
+            En resumen, la visión a futuro es ser una empresa reconocida por su respaldo integral a sus agentes, lo que a su vez impulsará su crecimiento y éxito en el mercado.
+          </p>
+        </InfoBox>
+
+        
+        {/* Sección ¿Cómo somos? */}
+        <InfoBox 
+          title="¿Cómo somos?"
+          {...sharedBoxProps}
+        >
+          <p className="highlight-text">
+            ¡Somos un equipo productivo, colaborativo, entusiasta y comprometido!
+          </p>
+        </InfoBox>
+
+        {/* Sección Valores */}
+        <InfoBox 
+          title="¿En qué creemos?"
+          {...sharedBoxProps}
+        >
+          <p>Creemos en los siguientes valores fundamentales:</p>
+          <ul className="values-list">
+            <li><strong>Confianza:</strong> Fomentamos un ambiente donde la honestidad y la fiabilidad son la base.</li>
+            <li><strong>Respeto:</strong> Valoramos la diversidad de ideas y perspectivas.</li>
+            <li><strong>Diversión:</strong> Ambiente positivo que impulsa creatividad y bienestar.</li>
+            <li><strong>Unión:</strong> Trabajamos juntos como equipo cohesionado.</li>
+            <li><strong>Excelencia:</strong> Buscamos superar expectativas constantemente.</li>
+            <li><strong>Resultados:</strong> Enfoque en eficiencia y efectividad.</li>
+            <li><strong>Aprendizaje:</strong> Compromiso con crecimiento continuo.</li>
+          </ul>
+        </InfoBox>
+
+        {/* Sección Misión */}
+        <InfoBox 
+          title="Nuestra Misión"
+          {...sharedBoxProps}
+        >
+          <p>
+            En Asesores de Oriente Bienes Raíces, C.A., nuestra misión es ser el aliado estratégico y productivo de cada agente inmobiliario, impulsando su éxito a través de un respaldo integral y colaborativo.
+          </p>
+          <p>
+            Ofrecemos herramientas de vanguardia, asesoría jurídica y gerencial de excelencia, y un ambiente de confianza y respeto que fomenta la autonomía, creatividad y el aprendizaje continuo.
+          </p>
+          <p>
+            Nos comprometemos con los resultados para que cada emprendedor forje un futuro exitoso y disfrute su camino al éxito.
+          </p>
+        </InfoBox>
+
+        {/* Sección Visión */}
+        <InfoBox 
+          title="Nuestra Visión"
+          {...sharedBoxProps}
+        >
+          <p>
+            Aspiramos a ser el referente nacional en el sector inmobiliario, atrayendo a los mejores emprendedores y ayudándolos a desarrollar carreras profesionales exitosas dentro de nuestras oficinas.
+          </p>
+          <p>
+            Visualizamos un futuro donde se nos permita ser reconocidos por el respaldo integral que brindamos a nuestros agentes, garantizando su crecimiento y maximizando sus captaciones y transacciones inmobiliarias.
+          </p>
+          <p>
+            Creemos que el profesionalismo y la excelencia en nuestro trabajo nos permitirán construir una comunidad vibrante y altamente productiva.
+          </p>
+        </InfoBox>
       </div>
-      <div style={{ marginTop: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span>Prueba de copia</span>
-        <CopyButton
-          textToCopy="Texto de prueba para copiar"
-          onCopy={(message) => showToast(message, 'info')}
-        />
-      </div>
-
-      <section style={{ marginTop: '40px' }}>
-        <h2>Prueba de ImageGallery (Edición)</h2>
-        <ImageGallery images={images} onChange={setImages} mode="edit" />
-      </section>
-
-      <section style={{ marginTop: '40px' }}>
-        <h2>Prueba de ImageGallery (Galería)</h2>
-        <ImageGallery images={images} onChange={setImages} mode="display" thumbnailSize={300} />
-      </section>
-
-      <section style={{ marginTop: '40px' }}>
-        <h2>Prueba de DocumentList</h2>
-        <DocumentList documents={documents} onChange={setDocuments} mode='list' />
-      </section>
-      <section style={{ marginTop: '40px' }}>
-        <h2>Prueba de DocumentList</h2>
-        <DocumentList documents={documents} onChange={setDocuments} mode='edit' containerHeight='600px'/>
-      </section>
-      <section style={{ marginTop: '40px' }}>
-        <h2>Prueba de DocumentList</h2>
-        <DocumentList documents={documents} onChange={setDocuments} mode='view' />
-      </section>
-
-
-
-
-
-      <section style={{ marginTop: '40px' }}>
-        <h2>Image Gallery - Alternate Display Mode</h2>
-              
-        <ImageGallery images={images} onChange={setImages} mode="display" labels={{ bannerSelector: true }}/>
-      </section>
-
-      <section style={{ marginTop: '40px' }}>
-        <h2>Prueba de Mapa Interactivo</h2>
-        <Map  
-          onChangeCoordinates={(coords) => console.log('Coordenadas seleccionadas:', coords)} 
-          height="400px" 
-        />
-      </section>
-
     </PageTemplate>
   );
 };

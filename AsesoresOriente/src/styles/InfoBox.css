@@ -1,0 +1,52 @@
+@import './variables.css';
+
+.custom-info-box {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+.custom-info-box-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-primary);
+  display: inline-block;
+  position: relative;
+  padding-bottom: 0.5rem; /* Espacio para la línea */
+}
+
+.custom-info-box-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: var(--underline-width, 50px);
+  height: var(--underline-thickness, 2px);
+  background-color: var(--underline-color, currentColor);
+  transition: width 0.3s ease;
+}
+
+/* Hover sólo afecta la línea */
+.custom-info-box-title:hover::after {
+  width: 100%; /* Se expande al hacer hover */
+}
+.custom-info-box-content {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.custom-info-box-content p {
+  margin-bottom: var(--spacing-md);
+}
+
+.custom-info-box-content ul {
+  padding-left: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.custom-info-box-content ul li {
+  margin-bottom: 0.5rem;
+}
