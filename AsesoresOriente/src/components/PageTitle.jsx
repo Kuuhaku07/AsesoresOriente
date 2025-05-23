@@ -4,7 +4,7 @@ import '../styles/PageTitle.css';
 const PageTitle = ({ children }) => {
   return (
     <h1 className="page-title">
-      {children}
+      <span className="page-title-text">{children}</span>
     </h1>
   );
 };
