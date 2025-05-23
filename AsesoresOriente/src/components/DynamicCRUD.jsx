@@ -1,10 +1,84 @@
 import React, { useState, useEffect } from 'react';
+import './Crud.css';
+
+/**
+ * Default CardList component to display records as cards in a list.
+ */
+const CardList = ({ records, schema, onEdit, onDelete, loading }) => {
+  return (
+    <div className="crud-card-list">
+      {records.map(record => (
+        <div className="crud-card" key={record.id || JSON.stringify(record)}>
+          <div className="crud-card-content">
+            {schema.columns.map(col => (
+              <div className="crud-card-field" key={col.column_name}>
+                <span className="crud-card-label">{col.column_name}:</span>{' '}
+                <span className="crud-card-value">
+                  {typeof record[col.column_name] === 'boolean'
+                    ? (record[col.column_name] ? 'Yes' : 'No')
+                    : record[col.column_name]}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="crud-card-actions">
+            <button onClick={() => onEdit(record)} disabled={loading}>Edit</button>
+            <button onClick={() => onDelete(record.id)} disabled={loading}>Delete</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+/**
+ * Default Form component to render the form based on schema and formData.
+ */
+const DefaultForm = ({ schema, formData, isEditing, loading, handleChange, handleSubmit, resetForm }) => (
+  <form onSubmit={handleSubmit} className="crud-form">
+    {schema.columns.map(col => {
+      // Skip serial primary key on create
+      if (!isEditing && col.column_default && col.column_default.includes('nextval')) {
+        return null;
+      }
+      const value = formData[col.column_name] || '';
+      const inputType = col.data_type.includes('int') ? 'number' :
+                        col.data_type === 'boolean' ? 'checkbox' :
+                        col.data_type === 'date' ? 'date' : 'text';
+      return (
+        <div className="crud-form-field" key={col.column_name}>
+          <label htmlFor={col.column_name}>{col.column_name}:</label>
+          <input
+            id={col.column_name}
+            name={col.column_name}
+            type={inputType}
+            value={inputType === 'checkbox' ? undefined : value}
+            checked={inputType === 'checkbox' ? value : undefined}
+            onChange={handleChange}
+            required={col.is_nullable === 'NO'}
+          />
+        </div>
+      );
+    })}
+    <div className="crud-form-buttons">
+      <button type="submit" disabled={loading}>
+        {isEditing ? 'Update' : 'Create'}
+      </button>
+      {isEditing && (
+        <button type="button" onClick={resetForm} disabled={loading}>
+          Cancel
+        </button>
+      )}
+    </div>
+  </form>
+);
 
 /**
  * Dynamic CRUD component to manage any table in the database.
  * Fetches tables and schemas from backend and renders dynamic forms and lists.
+ * Accepts optional renderList and renderForm props for customization.
  */
-const DynamicCRUD = () => {
+const DynamicCRUD = ({ renderList, renderForm }) => {
   const [tables, setTables] = useState([]);
   const [selectedTable, setSelectedTable] = useState(null);
   const [schema, setSchema] = useState(null);
@@ -124,10 +198,13 @@ const DynamicCRUD = () => {
     }
   };
 
+  const ListComponent = renderList || CardList;
+  const FormComponent = renderForm || DefaultForm;
+
   return (
-    <div>
+    <div className="crud-container">
       <h2>Dynamic CRUD</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="crud-error">{error}</p>}
       {loading && <p>Loading...</p>}
 
       <label htmlFor="table-select">Select Table:</label>
@@ -135,6 +212,7 @@ const DynamicCRUD = () => {
         id="table-select"
         value={selectedTable || ''}
         onChange={e => setSelectedTable(e.target.value)}
+        className="crud-table-select"
       >
         <option value="" disabled>Select a table</option>
         {tables.map(t => (
@@ -143,70 +221,25 @@ const DynamicCRUD = () => {
       </select>
 
       {schema && (
-        <form onSubmit={handleSubmit}>
-          {schema.columns.map(col => {
-            // Skip serial primary key on create
-            if (!isEditing && col.column_default && col.column_default.includes('nextval')) {
-              return null;
-            }
-            const value = formData[col.column_name] || '';
-            const inputType = col.data_type.includes('int') ? 'number' :
-                              col.data_type === 'boolean' ? 'checkbox' :
-                              col.data_type === 'date' ? 'date' : 'text';
-            return (
-              <div key={col.column_name}>
-                <label htmlFor={col.column_name}>{col.column_name}:</label>
-                <input
-                  id={col.column_name}
-                  name={col.column_name}
-                  type={inputType}
-                  value={inputType === 'checkbox' ? undefined : value}
-                  checked={inputType === 'checkbox' ? value : undefined}
-                  onChange={handleChange}
-                  required={col.is_nullable === 'NO'}
-                />
-              </div>
-            );
-          })}
-          <button type="submit" disabled={loading}>
-            {isEditing ? 'Update' : 'Create'}
-          </button>
-          {isEditing && (
-            <button type="button" onClick={resetForm} disabled={loading}>
-              Cancel
-            </button>
-          )}
-        </form>
+        <FormComponent
+          schema={schema}
+          formData={formData}
+          isEditing={isEditing}
+          loading={loading}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          resetForm={resetForm}
+        />
       )}
 
       {records.length > 0 && (
-        <table border="1" cellPadding="5" cellSpacing="0">
-          <thead>
-            <tr>
-              {schema.columns.map(col => (
-                <th key={col.column_name}>{col.column_name}</th>
-              ))}
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {records.map(record => (
-              <tr key={record.id || JSON.stringify(record)}>
-                {schema.columns.map(col => (
-                  <td key={col.column_name}>
-                    {typeof record[col.column_name] === 'boolean'
-                      ? (record[col.column_name] ? 'Yes' : 'No')
-                      : record[col.column_name]}
-                  </td>
-                ))}
-                <td>
-                  <button onClick={() => handleEdit(record)} disabled={loading}>Edit</button>
-                  <button onClick={() => handleDelete(record.id)} disabled={loading}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <ListComponent
+          records={records}
+          schema={schema}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          loading={loading}
+        />
       )}
     </div>
   );

@@ -1,0 +1,180 @@
+:root {
+  --primary-color: #3a86ff;
+  --secondary-color: #8338ec;
+  --color-sale: #ff006e;
+  --color-rent: #fb5607;
+  --text-color: #333;
+  --light-gray: #f8f9fa;
+  --border-color: #e9ecef;
+  --border-radius: 12px;
+  --image-border-radius: 8px;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --image-padding: 4px;
+  --font-family-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --border-radius-sm: 6px;
+  --font-size-normal: 1rem;
+  --color-primary-light: #5a9bff;
+  --color-text-light: #999;
+  --color-background: #fff;
+}
+
+/* Container */
+.crud-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  font-family: var(--font-family-primary);
+  color: var(--text-color);
+}
+
+/* Error message */
+.crud-error {
+  color: red;
+  margin-bottom: var(--spacing-md);
+}
+
+/* Table select */
+.crud-table-select {
+  margin: var(--spacing-md) 0;
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-normal);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+}
+
+/* Form styles */
+.crud-form {
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.crud-form-field {
+  flex: 1 1 45%;
+  display: flex;
+  flex-direction: column;
+}
+
+.crud-form-field label {
+  margin-bottom: var(--spacing-xs);
+  font-weight: 600;
+}
+
+.crud-form-field input[type="text"],
+.crud-form-field input[type="number"],
+.crud-form-field input[type="date"] {
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-normal);
+}
+
+.crud-form-field input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
+
+.crud-form-buttons {
+  flex-basis: 100%;
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.crud-form-buttons button {
+  cursor: pointer;
+  border: none;
+  background-color: var(--primary-color);
+  color: white;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-normal);
+  transition: background-color 0.3s ease;
+}
+
+.crud-form-buttons button:hover:not(:disabled) {
+  background-color: var(--secondary-color);
+}
+
+.crud-form-buttons button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Card list styles */
+.crud-card-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.crud-card {
+  background: var(--color-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.crud-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.crud-card-content {
+  margin-bottom: var(--spacing-md);
+}
+
+.crud-card-field {
+  margin-bottom: var(--spacing-xs);
+}
+
+.crud-card-label {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.crud-card-value {
+  color: var(--text-color);
+}
+
+.crud-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+}
+
+.crud-card-actions button {
+  cursor: pointer;
+  border: none;
+  background-color: var(--primary-color);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-normal);
+  transition: background-color 0.3s ease;
+}
+
+.crud-card-actions button:hover:not(:disabled) {
+  background-color: var(--secondary-color);
+}
+
+.crud-card-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .crud-form-field {
+    flex-basis: 100%;
+  }
+}
