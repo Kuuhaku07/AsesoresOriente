@@ -15,7 +15,6 @@ const About = () => {
     underlineColor: "#2a5c99",
     style: {
       borderLeft: '4px solid var(--color-primary)',
-      background: 'linear-gradient(to right, var(--color-white) 0%, var(--color-primary-light) 100%)'
     }
   };
 
