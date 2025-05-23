@@ -1,26 +1,232 @@
-/* About.css */
-
-
-.about-infobox {
-  transition: all 0.3s ease;
+.about-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+  color: #222;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.about-infobox:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+.about-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2rem;
 }
 
-.about-infobox .custom-info-box-content p {
-  margin-bottom: 1.2rem;
+.about-hero-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2rem;
+}
+
+.about-hero-section .about-image-container {
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 1rem;
+}
+
+.about-hero-section .about-text-container {
+  max-width: 800px;
+}
+
+.about-hero-section img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.about-section-2 {
+  justify-content: space-between;
+}
+
+.about-section-1 .about-image-container,
+.about-section-2 .about-image-container {
+  flex: 1 1 45%;
+  max-width: 45%;
+}
+
+.about-section-1 .about-text-container,
+.about-section-2 .about-text-container {
+  flex: 1 1 50%;
+  max-width: 50%;
+}
+
+.about-section-1 .about-image-container img,
+.about-section-2 .about-image-container img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.about-section-2 {
+  flex-direction: row-reverse;
+}
+
+.about-section h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: var(--color-primary, #2a5c99);
+}
+
+.about-section p,
+.about-section ul {
+  font-size: 1.05rem;
   line-height: 1.7;
-  text-align: justify;
+  color: #444;
 }
 
-.about-infobox .custom-info-box-content ul {
+.about-section ul {
   padding-left: 1.5rem;
+  list-style-type: disc;
 }
 
-.about-infobox .custom-info-box-content li {
+.about-section li {
+  margin-bottom: 0.5rem;
+}
+
+.core-values-section {
+  flex-direction: column;
+  text-align: center;
+}
+
+.core-values-intro {
+  font-style: italic;
+  margin-bottom: 1.5rem;
+  color: #555;
+  font-size: 1.1rem;
+}
+
+.core-values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.core-value-item {
+  background: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  text-align: left;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.core-value-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.core-value-icon {
+  font-size: 1.8rem;
+  color: var(--color-primary, #2a5c99);
+  margin-bottom: 1rem;
+  background: rgba(42, 92, 153, 0.1);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.core-value-item h3 {
+  color: var(--color-primary, #2a5c99);
   margin-bottom: 0.8rem;
-  line-height: 1.6;
+  font-size: 1.25rem;
+}
+
+.core-value-item p {
+  text-align: left;
+  margin: 0;
+}
+
+.mission-section,
+.vision-section {
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 0;
+  padding-right: 0;
+  border-top: 1px solid #eee;
+}
+
+.mission-section {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.vision-section {
+  margin-top: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-top: 1rem;
+  padding-bottom: 1.5rem;
+}
+
+.mission-section h2,
+.vision-section h2 {
+  color: var(--color-primary, #2a5c99);
+  font-size: 1.8rem;
+  margin-bottom: 0.8rem;
+  text-align: center;
+}
+
+.mission-section p,
+.vision-section p {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: #444;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  max-width: 700px;
+}
+.mission-section h2,
+.vision-section h2 {
+  margin-bottom: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .about-hero-section,
+  .about-section-2 {
+    flex-direction: column;
+  }
+
+  .about-section-1 .about-image-container,
+  .about-section-2 .about-image-container,
+  .about-section-1 .about-text-container,
+  .about-section-2 .about-text-container {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .core-values-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .core-value-item {
+    padding: 1.2rem;
+  }
+}
+
+/* Justify paragraphs except core values and mission/vision sections */
+.about-section:not(.core-values-section) p {
+  text-align: justify;
 }
