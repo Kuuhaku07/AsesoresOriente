@@ -5,6 +5,7 @@ import ImageGallery from '../components/ImageGallery';
 import DocumentList from '../components/DocumentList';
 import '../styles/Register.css';
 import '../styles/CrearInmueble.css';
+import Map from '../components/Map';
 
 const CrearInmueble = () => {
   // Referencia para mostrar notificaciones toast
@@ -841,14 +842,19 @@ const CrearInmueble = () => {
                       onChange={handleChange} 
                       placeholder="Ej: 10.123456, -66.987654"
                     />
-                    <button type="button" className="btn-secondary">
-                      Seleccionar en Mapa
-                    </button>
                   </div>
                 </label>
                 <div className="map-preview">
-                  {/* Aquí iría el componente de mapa */}
-                  <p>Mapa interactivo para seleccionar coordenadas (implementar componente)</p>
+                  <Map 
+                    coordinates={formData.coordenadas}
+                    onChangeCoordinates={(coords) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        coordenadas: coords
+                      }));
+                    }}
+                    height="400px"
+                  />
                 </div>
               </div>
             </div>
