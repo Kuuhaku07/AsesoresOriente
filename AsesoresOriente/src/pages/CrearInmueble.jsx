@@ -77,99 +77,109 @@ const CrearInmueble = () => {
   const [zonas, setZonas] = useState([]);
   const [tipoNegocios, setTipoNegocios] = useState([]);
   const [caracteristicas, setCaracteristicas] = useState([]);
-  const [filteredCaracteristicas, setFilteredCaracteristicas] = useState([]);
   const [caracteristicaSearch, setCaracteristicaSearch] = useState('');
+  const [filteredCaracteristicas, setFilteredCaracteristicas] = useState([]);
 
+  // Loading and error states for options fetching
+  const [loadingOptions, setLoadingOptions] = useState(false);
+  const [errorOptions, setErrorOptions] = useState(null);
   // ==============================================
   // EFECTOS SECUNDARIOS (useEffect)
   // ==============================================
 
-  // Cargar datos iniciales (simulación de API)
+  // Cargar datos iniciales 
   useEffect(() => {
-    // Simular llamadas API
-    setTipoInmuebles([
-      { id: 1, nombre: 'Casa' },
-      { id: 2, nombre: 'Apartamento' },
-      { id: 3, nombre: 'Local Comercial' },
-      { id: 4, nombre: 'Oficina' },
-      { id: 5, nombre: 'Terreno' },
-    ]);
-    
-    setEstadoInmuebles([
-      { id: 1, nombre: 'Disponible', color: '#4CAF50' },
-      { id: 2, nombre: 'Reservado', color: '#FFC107' },
-      { id: 3, nombre: 'Vendido', color: '#F44336' },
-    ]);
-    
-    setAsesores([
-      { id: 1, nombre: 'Juan Perez' },
-      { id: 2, nombre: 'Maria Gomez' },
-    ]);
-    
-    setPropietariosPersona([
-      { id: 1, nombre: 'Carlos Lopez', documento: 'V12345678' },
-      { id: 2, nombre: 'Ana Torres', documento: 'V87654321' },
-    ]);
-    
-    setPropietariosEmpresa([
-      { id: 1, nombre: 'Inmobiliaria XYZ', rif: 'J-123456789' },
-      { id: 2, nombre: 'Constructora ABC', rif: 'J-987654321' },
-    ]);
-    
-    setEstados([
-      { id: 1, nombre: 'Distrito Capital' },
-      { id: 2, nombre: 'Miranda' },
-    ]);
-    
-    setTipoNegocios([
-      { id: 1, nombre: 'Venta' },
-      { id: 2, nombre: 'Alquiler' },
-      { id: 3, nombre: 'Alquiler con opción a compra' },
-    ]);
-    
-    setCaracteristicas([
-      { id: 1, nombre: 'Piscina', tipo: 'boolean' },
-      { id: 2, nombre: 'Jardín', tipo: 'boolean' },
-      { id: 3, nombre: 'Área de juegos', tipo: 'boolean' },
-      { id: 4, nombre: 'Terraza', tipo: 'boolean' },
-      { id: 5, nombre: 'Vista al mar', tipo: 'boolean' },
-      { id: 6, nombre: 'Número de ascensores', tipo: 'number' },
-      { id: 7, nombre: 'Tamaño de piscina (m²)', tipo: 'number' },
-      { id: 8, nombre: 'Año de última remodelación', tipo: 'number' },
-    ]);
+    const fetchOptions = async () => {
+      setLoadingOptions(true);
+      setErrorOptions(null);
+      try {
+        const [
+          tipoInmueblesRes,
+          estadoInmueblesRes,
+          asesoresRes,
+          propietariosPersonaRes,
+          propietariosEmpresaRes,
+          estadosRes,
+          tipoNegociosRes,
+          caracteristicasRes
+        ] = await Promise.all([
+          fetch('/api/inmueble/tipos'),
+          fetch('/api/inmueble/estados'),
+          fetch('/api/inmueble/asesores'),
+          fetch('/api/inmueble/propietarios/persona'),
+          fetch('/api/inmueble/propietarios/empresa'),
+          fetch('/api/inmueble/ubicacion/estados'),
+          fetch('/api/inmueble/tiponegocios'),
+          fetch('/api/inmueble/caracteristicas')
+        ]);
+
+        if (!tipoInmueblesRes.ok) throw new Error('Failed to fetch tipoInmuebles');
+        if (!estadoInmueblesRes.ok) throw new Error('Failed to fetch estadoInmuebles');
+        if (!asesoresRes.ok) throw new Error('Failed to fetch asesores');
+        if (!propietariosPersonaRes.ok) throw new Error('Failed to fetch propietarios persona');
+        if (!propietariosEmpresaRes.ok) throw new Error('Failed to fetch propietarios empresa');
+        if (!estadosRes.ok) throw new Error('Failed to fetch estados');
+        if (!tipoNegociosRes.ok) throw new Error('Failed to fetch tipoNegocios');
+        if (!caracteristicasRes.ok) throw new Error('Failed to fetch caracteristicas');
+
+        setTipoInmuebles(await tipoInmueblesRes.json());
+        setEstadoInmuebles(await estadoInmueblesRes.json());
+        setAsesores(await asesoresRes.json());
+        setPropietariosPersona(await propietariosPersonaRes.json());
+        setPropietariosEmpresa(await propietariosEmpresaRes.json());
+        setEstados(await estadosRes.json());
+        setTipoNegocios(await tipoNegociosRes.json());
+        setCaracteristicas(await caracteristicasRes.json());
+      } catch (error) {
+        setErrorOptions(error.message);
+      } finally {
+        setLoadingOptions(false);
+      }
+    };
+
+    fetchOptions();
   }, []);
 
   // Filtrar ciudades cuando se selecciona estado
   useEffect(() => {
-    if (formData.estadoId) {
-      // Simular llamada API para ciudades
-      const ciudadesDelEstado = [
-        { id: 1, estado_id: 1, nombre: 'Caracas' },
-        { id: 2, estado_id: 1, nombre: 'El Hatillo' },
-        { id: 3, estado_id: 2, nombre: 'Baruta' },
-        { id: 4, estado_id: 2, nombre: 'Chacao' },
-      ].filter(ciudad => ciudad.estado_id == formData.estadoId);
-      
-      setCiudades(ciudadesDelEstado);
-      setFormData(prev => ({ ...prev, ciudadId: '', zonaId: '' }));
-    }
+    const fetchCiudades = async () => {
+      if (!formData.estadoId) {
+        setCiudades([]);
+        setFormData(prev => ({ ...prev, ciudadId: '', zonaId: '' }));
+        return;
+      }
+      try {
+        const res = await fetch(`/api/inmueble/ubicacion/ciudades/${formData.estadoId}`);
+        if (!res.ok) throw new Error('Failed to fetch ciudades');
+        setCiudades(await res.json());
+        setFormData(prev => ({ ...prev, ciudadId: '', zonaId: '' }));
+      } catch (error) {
+        setErrorOptions(error.message);
+      }
+    };
+    fetchCiudades();
   }, [formData.estadoId]);
 
   // Filtrar zonas cuando se selecciona ciudad
-  useEffect(() => {
-    if (formData.ciudadId) {
-      // Simular llamada API para zonas
-      const zonasDeLaCiudad = [
-        { id: 1, ciudad_id: 1, nombre: 'El Rosal', codigo_postal: '1060' },
-        { id: 2, ciudad_id: 1, nombre: 'La Candelaria', codigo_postal: '1010' },
-        { id: 3, ciudad_id: 3, nombre: 'Prados del Este', codigo_postal: '1080' },
-      ].filter(zona => zona.ciudad_id == formData.ciudadId);
-      
-      setZonas(zonasDeLaCiudad);
-      setFormData(prev => ({ ...prev, zonaId: '' }));
-    }
+   useEffect(() => {
+    const fetchZonas = async () => {
+      if (!formData.ciudadId) {
+        setZonas([]);
+        setFormData(prev => ({ ...prev, zonaId: '' }));
+        return;
+      }
+      try {
+        const res = await fetch(`/api/inmueble/ubicacion/zonas/${formData.ciudadId}`);
+        if (!res.ok) throw new Error('Failed to fetch zonas');
+        setZonas(await res.json());
+        setFormData(prev => ({ ...prev, zonaId: '' }));
+      } catch (error) {
+        setErrorOptions(error.message);
+      }
+    };
+    fetchZonas();
   }, [formData.ciudadId]);
-
+  
   // Filtrar características según búsqueda
   useEffect(() => {
     if (caracteristicaSearch) {
@@ -345,7 +355,7 @@ const CrearInmueble = () => {
    * Maneja el envío del formulario
    * @param {Object} e - Evento del formulario
    */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validación básica
@@ -353,7 +363,6 @@ const CrearInmueble = () => {
       toastRef.current?.addToast('Por favor complete los campos obligatorios marcados con *', 'error', 5000);
       return;
     }
-    
     if (!formData.zonaId || !formData.direccionExacta) {
       toastRef.current?.addToast('Por favor complete la información de ubicación', 'error', 5000);
       return;
@@ -372,12 +381,21 @@ const CrearInmueble = () => {
       return;
     }
     
-    // Aquí iría la llamada a la API para guardar el inmueble
-    console.log('Datos a enviar:', formData);
-    toastRef.current?.addToast('Inmueble creado correctamente', 'success', 5000);
-    
-    // Reset form after successful submission (opcional)
-    // setFormData({...initialFormState});
+    try {
+      const response = await fetch('/api/inmueble', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al crear el inmueble');
+      }
+      toastRef.current?.addToast('Inmueble creado correctamente', 'success', 5000);
+      // Optionally reset form here
+    } catch (error) {
+      toastRef.current?.addToast(error.message, 'error', 5000);
+    }
   };
 
   // ==============================================
