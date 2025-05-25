@@ -83,6 +83,47 @@ const CrearInmueble = () => {
   // Loading and error states for options fetching
   const [loadingOptions, setLoadingOptions] = useState(false);
   const [errorOptions, setErrorOptions] = useState(null);
+
+  // Mapping of estadoId to coordinates [lat, lng]
+  const estadoCoordinatesMap = {
+    // Example coordinates, replace with accurate ones as needed
+    '1': [3.4168, -67.8663],   // Amazonas
+    '2': [10.1333, -64.6833],  // Anzoátegui
+    '3': [7.55, -69.25],       // Apure
+    '4': [10.2333, -67.6],     // Aragua
+    '5': [8.6, -70.2167],      // Barinas
+    '6': [8.3, -62.75],        // Bolívar
+    '7': [10.2, -68],          // Carabobo
+    '8': [9.65, -68.35],       // Cojedes
+    '9': [8.3, -61.5],         // Delta Amacuro
+    '10': [11.4, -69.6667],    // Falcón
+    '11': [9.0, -66.5],        // Guárico
+    '12': [10.0667, -69.3333], // Lara
+    '13': [8.6, -71.15],       // Mérida
+    '14': [10.2333, -66.75],   // Miranda
+    '15': [9.55, -63.15],      // Monagas
+    '16': [10.9667, -63.85],   // Nueva Esparta
+    '17': [9.05, -69.25],      // Portuguesa
+    '18': [10.5, -63.25],      // Sucre
+    '19': [7.9, -72.25],       // Táchira
+    '20': [9.3333, -70.8],     // Trujillo
+    '21': [10.6, -66.95],      // Vargas
+    '22': [10.2, -68.3667],    // Yaracuy
+    '23': [10.65, -71.65],     // Zulia
+    '24': [10.5, -66.9167],    // Distrito Capital
+  };
+
+  // Update map coordinates when estadoId changes
+  useEffect(() => {
+    if (formData.estadoId && estadoCoordinatesMap[formData.estadoId]) {
+      const [lat, lng] = estadoCoordinatesMap[formData.estadoId];
+      setFormData(prev => ({
+        ...prev,
+        coordenadas: `${lat}, ${lng}`
+      }));
+    }
+  }, [formData.estadoId]);
+
   // ==============================================
   // EFECTOS SECUNDARIOS (useEffect)
   // ==============================================
