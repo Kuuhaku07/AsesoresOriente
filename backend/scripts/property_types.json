@@ -1,0 +1,37 @@
+[
+  {
+    "nombre": "Casa",
+    "descripcion": "Vivienda unifamiliar independiente",
+    "icono": "home"
+  },
+  {
+    "nombre": "Apartamento",
+    "descripcion": "Unidad habitacional en edificio",
+    "icono": "building"
+  },
+  {
+    "nombre": "Townhouse",
+    "descripcion": "Casa adosada en fila",
+    "icono": "house-user"
+  },
+  {
+    "nombre": "Penthouse",
+    "descripcion": "Apartamento de lujo en la última planta",
+    "icono": "star"
+  },
+  {
+    "nombre": "Local Comercial",
+    "descripcion": "Espacio para negocios o comercio",
+    "icono": "store"
+  },
+  {
+    "nombre": "Oficina",
+    "descripcion": "Espacio para oficinas",
+    "icono": "briefcase"
+  },
+  {
+    "nombre": "Terreno",
+    "descripcion": "Parcela de terreno sin construcción",
+    "icono": "tree"
+  }
+]
