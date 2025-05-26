@@ -168,3 +168,13 @@ export const updatePropietarioEmpresa = async (req, res) => {
     res.status(500).json({ error: 'Failed to update propietario empresa' });
   }
 };
+
+export const getEstadoCivil = async (req, res) => {
+  try {
+    const estados = await inmuebleService.getEstadoCivil();
+    res.json(estados);
+  } catch (error) {
+    console.error('Error getting estado civil:', error);
+    res.status(500).json({ error: 'Failed to get estado civil' });
+  }
+};

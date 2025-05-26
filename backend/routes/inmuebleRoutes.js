@@ -14,7 +14,8 @@ import {
   createPropietarioPersona,
   updatePropietarioPersona,
   createPropietarioEmpresa,
-  updatePropietarioEmpresa
+  updatePropietarioEmpresa,
+  getEstadoCivil
 } from '../controllers/inmuebleController.js';
 
 const router = express.Router();
@@ -39,5 +40,8 @@ router.put('/propietarios/persona/:id', updatePropietarioPersona);
 // New routes for propietario empresa
 router.post('/propietarios/empresa', createPropietarioEmpresa);
 router.put('/propietarios/empresa/:id', updatePropietarioEmpresa);
+
+// New route for estado civil
+router.get('/estadoCivil', getEstadoCivil);
 
 export default router;

@@ -39,7 +39,10 @@ const CrearInmueble = () => {
     direccion: '',
     empresaNombre: '',
     rif: '',
-    representanteLegal: ''
+    representanteLegal: '',
+    fechaNacimiento: '',
+    estadoCivilId: '',
+    notas: ''
   });
 
   // Estado principal del formulario
@@ -87,6 +90,7 @@ const CrearInmueble = () => {
   const [caracteristicas, setCaracteristicas] = useState([]);
   const [caracteristicaSearch, setCaracteristicaSearch] = useState('');
   const [filteredCaracteristicas, setFilteredCaracteristicas] = useState([]);
+  const [estadoCivilOptions, setEstadoCivilOptions] = useState([]);
 
   // Loading and error states for options fetching
   const [loadingOptions, setLoadingOptions] = useState(false);
@@ -150,7 +154,8 @@ const CrearInmueble = () => {
           propietariosEmpresaRes,
           estadosRes,
           tipoNegociosRes,
-          caracteristicasRes
+          caracteristicasRes,
+          estadoCivilRes
         ] = await Promise.all([
           fetch('/api/inmueble/tipos'),
           fetch('/api/inmueble/estados'),
@@ -159,7 +164,8 @@ const CrearInmueble = () => {
           fetch('/api/inmueble/propietarios/empresa'),
           fetch('/api/inmueble/ubicacion/estados'),
           fetch('/api/inmueble/tiponegocios'),
-          fetch('/api/inmueble/caracteristicas')
+          fetch('/api/inmueble/caracteristicas'),
+          fetch('/api/inmueble/estadoCivil')
         ]);
 
         if (!tipoInmueblesRes.ok) throw new Error('Failed to fetch tipoInmuebles');
@@ -170,6 +176,7 @@ const CrearInmueble = () => {
         if (!estadosRes.ok) throw new Error('Failed to fetch estados');
         if (!tipoNegociosRes.ok) throw new Error('Failed to fetch tipoNegocios');
         if (!caracteristicasRes.ok) throw new Error('Failed to fetch caracteristicas');
+        if (!estadoCivilRes.ok) throw new Error('Failed to fetch estado civil');
 
         setTipoInmuebles(await tipoInmueblesRes.json());
         setEstadoInmuebles(await estadoInmueblesRes.json());
@@ -224,11 +231,26 @@ const CrearInmueble = () => {
           setAsesores(asesoresData);
         }
 
-        setPropietariosPersona(await propietariosPersonaRes.json());
+        const propietariosPersonaData = await propietariosPersonaRes.json();
+        // Transform propietariosPersona to split nombre into nombre and apellido
+        const propietariosPersonaTransformed = propietariosPersonaData.map(p => {
+          const nameParts = p.nombre ? p.nombre.trim().split(' ') : [];
+          const nombre = nameParts.length > 0 ? nameParts[0] : '';
+          const apellido = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+          return {
+            ...p,
+            nombre,
+            apellido,
+            telefono: p.telefono || '',
+            correo: p.correo || ''
+          };
+        });
+        setPropietariosPersona(propietariosPersonaTransformed);
         setPropietariosEmpresa(await propietariosEmpresaRes.json());
         setEstados(await estadosRes.json());
         setTipoNegocios(await tipoNegociosRes.json());
         setCaracteristicas(await caracteristicasRes.json());
+        setEstadoCivilOptions(await estadoCivilRes.json());
       } catch (error) {
         setErrorOptions(error.message);
       } finally {
@@ -358,21 +380,24 @@ const CrearInmueble = () => {
   const fetchPropietarios = async (searchTerm) => {
     const tipo = formData.propietarioTipo;
     let data = [];
+    const lowerSearchTerm = searchTerm.toLowerCase();
     if (tipo === 'persona') {
-      data = propietariosPersona.filter(p =>
-        p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (p.documento && p.documento.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
+      data = propietariosPersona.filter(p => {
+        const fullName = (p.nombre + ' ' + (p.apellido || '')).toLowerCase();
+        const documento = p.documento ? p.documento.toLowerCase() : '';
+        return fullName.includes(lowerSearchTerm) || documento.includes(lowerSearchTerm);
+      });
       return data.map(p => ({
         id: p.id,
-        label: `${p.nombre} (${p.documento || ''})`,
+        label: `${p.nombre} ${p.apellido || ''} (${p.documento || ''})`,
         ...p
       }));
     } else if (tipo === 'empresa') {
-      data = propietariosEmpresa.filter(e =>
-        e.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (e.rif && e.rif.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
+      data = propietariosEmpresa.filter(e => {
+        const nombre = e.nombre.toLowerCase();
+        const rif = e.rif ? e.rif.toLowerCase() : '';
+        return nombre.includes(lowerSearchTerm) || rif.includes(lowerSearchTerm);
+      });
       return data.map(e => ({
         id: e.id,
         label: `${e.nombre} (${e.rif || ''})`,
@@ -392,15 +417,18 @@ const CrearInmueble = () => {
     if (formData.propietarioTipo === 'persona') {
       setNewPropietario({
         tipo: 'persona',
-        nombre: selectedPropietario.nombre.split(' ')[0] || '',
-        apellido: selectedPropietario.nombre.split(' ').slice(1).join(' ') || '',
+        nombre: selectedPropietario.nombre || '',
+        apellido: selectedPropietario.apellido || '',
         documento: selectedPropietario.documento || '',
         telefono: selectedPropietario.telefono || '',
         correo: selectedPropietario.correo || '',
         direccion: selectedPropietario.direccion || '',
         empresaNombre: '',
         rif: '',
-        representanteLegal: ''
+        representanteLegal: '',
+        fechaNacimiento: selectedPropietario.fechaNacimiento || '',
+        estadoCivilId: selectedPropietario.estadoCivilId || '',
+        notas: selectedPropietario.notas || ''
       });
     } else {
       setNewPropietario({
@@ -413,7 +441,8 @@ const CrearInmueble = () => {
         direccion: selectedPropietario.direccion || '',
         empresaNombre: selectedPropietario.nombre || '',
         rif: selectedPropietario.rif || '',
-        representanteLegal: selectedPropietario.representante || ''
+        representanteLegal: selectedPropietario.representante || '',
+        notas: selectedPropietario.notas || ''
       });
     }
   };
@@ -435,7 +464,10 @@ const CrearInmueble = () => {
               documento: newPropietario.documento,
               telefono: newPropietario.telefono,
               correo: newPropietario.correo,
-              direccion: newPropietario.direccion
+              direccion: newPropietario.direccion,
+              fechaNacimiento: newPropietario.fechaNacimiento,
+              estadoCivilId: newPropietario.estadoCivilId,
+              notas: newPropietario.notas
             })
           });
           if (!response.ok) throw new Error('Error updating propietario persona');
@@ -443,11 +475,15 @@ const CrearInmueble = () => {
           setPropietariosPersona(prev => prev.map(p => 
             p.id === selectedPropietario.id ? { 
               ...p, 
-              nombre: `${updatedProp.nombre} ${updatedProp.apellido}`, 
+              nombre: updatedProp.nombre, 
+              apellido: updatedProp.apellido,
               documento: updatedProp.documento, 
               telefono: updatedProp.telefono, 
               correo: updatedProp.correo,
-              direccion: updatedProp.direccion
+              direccion: updatedProp.direccion,
+              fechaNacimiento: updatedProp.fechaNacimiento,
+              estadoCivilId: updatedProp.estadoCivilId,
+              notas: updatedProp.notas
             } : p
           ));
           setFormData(prev => ({
@@ -464,7 +500,8 @@ const CrearInmueble = () => {
               representanteLegal: newPropietario.representanteLegal,
               telefono: newPropietario.telefono,
               correo: newPropietario.correo,
-              direccion: newPropietario.direccion
+              direccion: newPropietario.direccion,
+              notas: newPropietario.notas
             })
           });
           if (!response.ok) throw new Error('Error updating propietario empresa');
@@ -477,7 +514,8 @@ const CrearInmueble = () => {
               representante: newPropietario.representanteLegal,
               telefono: newPropietario.telefono,
               correo: newPropietario.correo,
-              direccion: newPropietario.direccion
+              direccion: newPropietario.direccion,
+              notas: newPropietario.notas
             } : e
           ));
           setFormData(prev => ({
@@ -505,7 +543,8 @@ const CrearInmueble = () => {
           const newProp = await response.json();
           setPropietariosPersona([...propietariosPersona, {
             id: newProp.id,
-            nombre: `${newProp.nombre} ${newProp.apellido}`,
+            nombre: newProp.nombre,
+            apellido: newProp.apellido,
             documento: newProp.documento,
             telefono: newProp.telefono,
             correo: newProp.correo,
@@ -525,7 +564,8 @@ const CrearInmueble = () => {
               representanteLegal: newPropietario.representanteLegal,
               telefono: newPropietario.telefono,
               correo: newPropietario.correo,
-              direccion: newPropietario.direccion
+              direccion: newPropietario.direccion,
+              notas: newPropietario.notas
             })
           });
           if (!response.ok) throw new Error('Error creating propietario empresa');
@@ -537,7 +577,8 @@ const CrearInmueble = () => {
             representante: newProp.representanteLegal,
             telefono: newProp.telefono,
             correo: newProp.correo,
-            direccion: newProp.direccion
+            direccion: newProp.direccion,
+            notas: newProp.notas
           }]);
           setFormData(prev => ({
             ...prev,
@@ -559,7 +600,10 @@ const CrearInmueble = () => {
         direccion: '',
         empresaNombre: '',
         rif: '',
-        representanteLegal: ''
+        representanteLegal: '',
+        fechaNacimiento: '',
+        estadoCivilId: '',
+        notas: ''
       });
     } catch (error) {
       toastRef.current?.addToast(error.message, 'error', 5000);
@@ -917,7 +961,7 @@ const CrearInmueble = () => {
                     </button>
                   </div>
                   <Autocomplete
-                    value={selectedPropietario ? (formData.propietarioTipo === 'persona' ? `${selectedPropietario.nombre} (${selectedPropietario.documento})` : `${selectedPropietario.nombre} (${selectedPropietario.rif})`) : ''}
+                  value={selectedPropietario ? (formData.propietarioTipo === 'persona' ? `${selectedPropietario.nombre} ${selectedPropietario.apellido} (${selectedPropietario.documento})` : `${selectedPropietario.nombre} (${selectedPropietario.rif})`) : ''}
                     onChange={handlePropietarioInputChange}
                     onSelect={handleSelectPropietario}
                     fetchOptions={fetchPropietarios}
@@ -1471,158 +1515,208 @@ const CrearInmueble = () => {
       {showPropietarioForm && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h2>Registrar Nuevo Propietario</h2>
+            <h2>{isEditingPropietario ? 'Editar Propietario' : 'Registrar Nuevo Propietario'}</h2>
             
-            <div className="modal-tabs">
-              <button 
-                type="button"
-                className={newPropietario.tipo === 'persona' ? 'active' : ''}
-                onClick={() => setNewPropietario({...newPropietario, tipo: 'persona'})}
-              >
-                Persona
-              </button>
-              <button 
-                type="button"
-                className={newPropietario.tipo === 'empresa' ? 'active' : ''}
-                onClick={() => setNewPropietario({...newPropietario, tipo: 'empresa'})}
-              >
-                Empresa
-              </button>
-            </div>
+            {!isEditingPropietario ? (
+              <div className="modal-tabs">
+                <button 
+                  type="button"
+                  className={newPropietario.tipo === 'persona' ? 'active' : ''}
+                  onClick={() => setNewPropietario({...newPropietario, tipo: 'persona'})}
+                  disabled={isEditingPropietario}
+                >
+                  Persona
+                </button>
+                <button 
+                  type="button"
+                  className={newPropietario.tipo === 'empresa' ? 'active' : ''}
+                  onClick={() => setNewPropietario({...newPropietario, tipo: 'empresa'})}
+                  disabled={isEditingPropietario}
+                >
+                  Empresa
+                </button>
+              </div>
+            ) : (
+              <div className="modal-edit-type-label">
+                <label>Tipo de Propietario: {newPropietario.tipo === 'persona' ? 'Persona' : 'Empresa'}</label>
+              </div>
+            )}
             
             {newPropietario.tipo === 'persona' ? (
               <div className="persona-form">
-                <div className="form-group">
-                  <label>Nombre*:</label>
-                  <input 
-                    type="text" 
-                    name="nombre" 
-                    value={newPropietario.nombre} 
-                    onChange={handleNewPropietarioChange} 
-                    required 
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Apellido*:</label>
-                  <input 
-                    type="text" 
-                    name="apellido" 
-                    value={newPropietario.apellido} 
-                    onChange={handleNewPropietarioChange} 
-                    required 
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Documento de Identidad*:</label>
-                  <input 
-                    type="text" 
-                    name="documento" 
-                    value={newPropietario.documento} 
-                    onChange={handleNewPropietarioChange} 
-                    required 
-                    placeholder="Ej: V12345678"
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Teléfono*:</label>
-                  <input 
-                    type="text" 
-                    name="telefono" 
-                    value={newPropietario.telefono} 
-                    onChange={handleNewPropietarioChange} 
-                    required 
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Correo Electrónico:</label>
-                  <input 
-                    type="email" 
-                    name="correo" 
-                    value={newPropietario.correo} 
-                    onChange={handleNewPropietarioChange} 
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Dirección:</label>
-                  <textarea 
-                    name="direccion" 
-                    value={newPropietario.direccion} 
-                    onChange={handleNewPropietarioChange} 
-                    rows="3"
-                  />
-                </div>
+              <div className="form-group">
+                <label>Nombre*:</label>
+                <input 
+                  type="text" 
+                  name="nombre" 
+                  value={newPropietario.nombre} 
+                  onChange={handleNewPropietarioChange} 
+                  required 
+                />
               </div>
+              
+              <div className="form-group">
+                <label>Apellido*:</label>
+                <input 
+                  type="text" 
+                  name="apellido" 
+                  value={newPropietario.apellido} 
+                  onChange={handleNewPropietarioChange} 
+                  required 
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Documento de Identidad*:</label>
+                <input 
+                  type="text" 
+                  name="documento" 
+                  value={newPropietario.documento} 
+                  onChange={handleNewPropietarioChange} 
+                  required 
+                  placeholder="Ej: V12345678"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Teléfono*:</label>
+                <input 
+                  type="text" 
+                  name="telefono" 
+                  value={newPropietario.telefono} 
+                  onChange={handleNewPropietarioChange} 
+                  required 
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Correo Electrónico:</label>
+                <input 
+                  type="email" 
+                  name="correo" 
+                  value={newPropietario.correo} 
+                  onChange={handleNewPropietarioChange} 
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Dirección:</label>
+                <textarea 
+                  name="direccion" 
+                  value={newPropietario.direccion} 
+                  onChange={handleNewPropietarioChange} 
+                  rows="3"
+                />
+              </div>
+              <div className="form-group">
+                <label>Fecha de Nacimiento:</label>
+                <input
+                  type="date"
+                  name="fechaNacimiento"
+                  value={newPropietario.fechaNacimiento}
+                  onChange={handleNewPropietarioChange}
+                />
+              </div>
+              <div className="form-group">
+                <label>Estado Civil:</label>
+                <select
+                  name="estadoCivilId"
+                  value={newPropietario.estadoCivilId}
+                  onChange={handleNewPropietarioChange}
+                >
+                  <option value="">Seleccione...</option>
+                  {estadoCivilOptions.map((estadoCivil) => (
+                    <option key={estadoCivil.id} value={estadoCivil.id}>
+                      {estadoCivil.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Notas:</label>
+                <textarea
+                  name="notas"
+                  value={newPropietario.notas}
+                  onChange={handleNewPropietarioChange}
+                  rows="3"
+                />
+              </div>
+            </div>
             ) : (
               <div className="empresa-form">
-                <div className="form-group">
-                  <label>Nombre de la Empresa*:</label>
-                  <input 
-                    type="text" 
-                    name="empresaNombre" 
-                    value={newPropietario.empresaNombre} 
-                    onChange={handleNewPropietarioChange} 
-                    required 
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>RIF*:</label>
-                  <input 
-                    type="text" 
-                    name="rif" 
-                    value={newPropietario.rif} 
-                    onChange={handleNewPropietarioChange} 
-                    required 
-                    placeholder="Ej: J-123456789"
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Representante Legal:</label>
-                  <input 
-                    type="text" 
-                    name="representanteLegal" 
-                    value={newPropietario.representanteLegal} 
-                    onChange={handleNewPropietarioChange} 
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Teléfono*:</label>
-                  <input 
-                    type="text" 
-                    name="telefono" 
-                    value={newPropietario.telefono} 
-                    onChange={handleNewPropietarioChange} 
-                    required 
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Correo Electrónico:</label>
-                  <input 
-                    type="email" 
-                    name="correo" 
-                    value={newPropietario.correo} 
-                    onChange={handleNewPropietarioChange} 
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label>Dirección:</label>
-                  <textarea 
-                    name="direccion" 
-                    value={newPropietario.direccion} 
-                    onChange={handleNewPropietarioChange} 
-                    rows="3"
-                  />
-                </div>
+              <div className="form-group">
+                <label>Nombre de la Empresa*:</label>
+                <input 
+                  type="text" 
+                  name="empresaNombre" 
+                  value={newPropietario.empresaNombre} 
+                  onChange={handleNewPropietarioChange} 
+                  required 
+                />
               </div>
+              
+              <div className="form-group">
+                <label>RIF*:</label>
+                <input 
+                  type="text" 
+                  name="rif" 
+                  value={newPropietario.rif} 
+                  onChange={handleNewPropietarioChange} 
+                  required 
+                  placeholder="Ej: J-123456789"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Representante Legal:</label>
+                <input 
+                  type="text" 
+                  name="representanteLegal" 
+                  value={newPropietario.representanteLegal} 
+                  onChange={handleNewPropietarioChange} 
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Teléfono*:</label>
+                <input 
+                  type="text" 
+                  name="telefono" 
+                  value={newPropietario.telefono} 
+                  onChange={handleNewPropietarioChange} 
+                  required 
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Correo Electrónico:</label>
+                <input 
+                  type="email" 
+                  name="correo" 
+                  value={newPropietario.correo} 
+                  onChange={handleNewPropietarioChange} 
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Dirección:</label>
+                <textarea 
+                  name="direccion" 
+                  value={newPropietario.direccion} 
+                  onChange={handleNewPropietarioChange} 
+                  rows="3"
+                />
+              </div>
+              <div className="form-group">
+                <label>Notas:</label>
+                <textarea
+                  name="notas"
+                  value={newPropietario.notas}
+                  onChange={handleNewPropietarioChange}
+                  rows="3"
+                />
+              </div>
+            </div>
             )}
             
             <div className="modal-actions">
