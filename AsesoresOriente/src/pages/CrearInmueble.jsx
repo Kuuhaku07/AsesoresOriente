@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../context/AuthContext';
 import PageTemplate from '../components/PageTemplate';
 import ToastContainer from '../components/ToastContainer';
 import ImageGallery from '../components/ImageGallery';
@@ -8,6 +9,7 @@ import '../styles/CrearInmueble.css';
 import Map from '../components/Map';
 
 const CrearInmueble = () => {
+  const { user } = useAuth();
   // Referencia para mostrar notificaciones toast
   const toastRef = useRef(null);
   
@@ -165,7 +167,57 @@ const CrearInmueble = () => {
 
         setTipoInmuebles(await tipoInmueblesRes.json());
         setEstadoInmuebles(await estadoInmueblesRes.json());
-        setAsesores(await asesoresRes.json());
+        
+        // Filter asesores based on user role
+        const asesoresData = await asesoresRes.json();
+        if (user && user.role === 'ASESOR') {
+          if (user.id) {
+            // Try filtering by user.id
+            const filteredAsesores = asesoresData.filter(a => a.id.toString() === user.id.toString());
+            if (filteredAsesores.length > 0) {
+              setAsesores(filteredAsesores);
+              setFormData(prev => ({
+                ...prev,
+                asesorId: user.id.toString()
+              }));
+            } else if (user.name) {
+              // Try filtering by user.name in asesor.nombre (case insensitive)
+              const filteredByName = asesoresData.filter(a => a.nombre.toLowerCase().includes(user.name.toLowerCase()));
+              if (filteredByName.length > 0) {
+                setAsesores(filteredByName);
+                setFormData(prev => ({
+                  ...prev,
+                  asesorId: filteredByName[0].id.toString()
+                }));
+              } else {
+                // No match, show all asesores
+                setAsesores(asesoresData);
+                setFormData(prev => ({
+                  ...prev,
+                  asesorId: ''
+                }));
+              }
+            } else {
+              // No match, show all asesores
+              setAsesores(asesoresData);
+              setFormData(prev => ({
+                ...prev,
+                asesorId: ''
+              }));
+            }
+          } else {
+            // No id, show all asesores
+            setAsesores(asesoresData);
+            setFormData(prev => ({
+              ...prev,
+              asesorId: ''
+            }));
+          }
+        } else {
+          // For GERENTE or ADMINISTRADOR, set all asesores
+          setAsesores(asesoresData);
+        }
+
         setPropietariosPersona(await propietariosPersonaRes.json());
         setPropietariosEmpresa(await propietariosEmpresaRes.json());
         setEstados(await estadosRes.json());
@@ -179,7 +231,7 @@ const CrearInmueble = () => {
     };
 
     fetchOptions();
-  }, []);
+  }, [user]);
 
   // Filtrar ciudades cuando se selecciona estado
   useEffect(() => {
@@ -596,6 +648,8 @@ const CrearInmueble = () => {
                     value={formData.asesorId} 
                     onChange={handleChange} 
                     required
+                    disabled={user && user.role === 'ASESOR'}
+
                   >
                     <option value="">Seleccione...</option>
                     {asesores.map((asesor) => (
