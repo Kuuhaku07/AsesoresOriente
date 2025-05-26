@@ -118,3 +118,53 @@ export const getCaracteristicas = async (req, res) => {
     res.status(500).json({ error: 'Failed to get caracteristicas' });
   }
 };
+
+/**
+ * Controladores para crear y actualizar propietarios persona y empresa
+ */
+
+export const createPropietarioPersona = async (req, res) => {
+  try {
+    const propietarioData = req.body;
+    const newPropietario = await inmuebleService.createPropietarioPersona(propietarioData);
+    res.status(201).json(newPropietario);
+  } catch (error) {
+    console.error('Error creating propietario persona:', error);
+    res.status(500).json({ error: 'Failed to create propietario persona' });
+  }
+};
+
+export const updatePropietarioPersona = async (req, res) => {
+  try {
+    const propietarioId = req.params.id;
+    const propietarioData = req.body;
+    const updatedPropietario = await inmuebleService.updatePropietarioPersona(propietarioId, propietarioData);
+    res.json(updatedPropietario);
+  } catch (error) {
+    console.error('Error updating propietario persona:', error);
+    res.status(500).json({ error: 'Failed to update propietario persona' });
+  }
+};
+
+export const createPropietarioEmpresa = async (req, res) => {
+  try {
+    const propietarioData = req.body;
+    const newPropietario = await inmuebleService.createPropietarioEmpresa(propietarioData);
+    res.status(201).json(newPropietario);
+  } catch (error) {
+    console.error('Error creating propietario empresa:', error);
+    res.status(500).json({ error: 'Failed to create propietario empresa' });
+  }
+};
+
+export const updatePropietarioEmpresa = async (req, res) => {
+  try {
+    const propietarioId = req.params.id;
+    const propietarioData = req.body;
+    const updatedPropietario = await inmuebleService.updatePropietarioEmpresa(propietarioId, propietarioData);
+    res.json(updatedPropietario);
+  } catch (error) {
+    console.error('Error updating propietario empresa:', error);
+    res.status(500).json({ error: 'Failed to update propietario empresa' });
+  }
+};

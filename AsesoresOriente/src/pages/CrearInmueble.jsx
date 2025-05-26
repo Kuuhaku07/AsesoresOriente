@@ -7,6 +7,8 @@ import DocumentList from '../components/DocumentList';
 import '../styles/Register.css';
 import '../styles/CrearInmueble.css';
 import Map from '../components/Map';
+import Autocomplete from '../components/Autocomplete';
+
 
 const CrearInmueble = () => {
   const { user } = useAuth();
@@ -22,6 +24,10 @@ const CrearInmueble = () => {
   // Estado para mostrar/ocultar el formulario de nuevo propietario
   const [showPropietarioForm, setShowPropietarioForm] = useState(false);
   
+  // Add state to track selected propietario object for editing
+  const [selectedPropietario, setSelectedPropietario] = useState(null);
+  const [isEditingPropietario, setIsEditingPropietario] = useState(false);
+
   // Estado para el nuevo propietario
   const [newPropietario, setNewPropietario] = useState({
     tipo: 'persona',
@@ -327,57 +333,243 @@ const CrearInmueble = () => {
   };
 
   /**
-   * Guarda un nuevo propietario en el estado correspondiente
+   * Maneja el cambio en el input de propietario (autocomplete)
+   * @param {string} inputValue - Valor del input
    */
-  const handleSaveNewPropietario = () => {
-    // Simular guardado en API
-    const newId = Math.max(...propietariosPersona.map(p => p.id), 0) + 1;
-    
-    if (newPropietario.tipo === 'persona') {
-      const newProp = {
-        id: newId,
-        nombre: `${newPropietario.nombre} ${newPropietario.apellido}`,
-        documento: newPropietario.documento,
-        telefono: newPropietario.telefono,
-        correo: newPropietario.correo
-      };
-      
-      setPropietariosPersona([...propietariosPersona, newProp]);
-      setFormData(prev => ({
-        ...prev,
-        propietarioId: newId.toString()
+  const handlePropietarioInputChange = (inputValue) => {
+    setSelectedPropietario(null);
+    setFormData(prev => ({ ...prev, propietarioId: '' }));
+  };
+
+  /**
+   * Maneja la selección de un propietario desde el autocomplete
+   * @param {Object} propietario - Propietario seleccionado
+   */
+  const handleSelectPropietario = (propietario) => {
+    setSelectedPropietario(propietario);
+    setFormData(prev => ({ ...prev, propietarioId: propietario.id.toString() }));
+  };
+
+  /**
+   * Función para obtener propietarios según el tipo y término de búsqueda
+   * @param {string} searchTerm - Término de búsqueda
+   * @returns {Promise<Array>} - Lista de propietarios
+   */
+  const fetchPropietarios = async (searchTerm) => {
+    const tipo = formData.propietarioTipo;
+    let data = [];
+    if (tipo === 'persona') {
+      data = propietariosPersona.filter(p =>
+        p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (p.documento && p.documento.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      return data.map(p => ({
+        id: p.id,
+        label: `${p.nombre} (${p.documento || ''})`,
+        ...p
       }));
-    } else {
-      const newProp = {
-        id: newId,
-        nombre: newPropietario.empresaNombre,
-        rif: newPropietario.rif,
-        representante: newPropietario.representanteLegal
-      };
-      
-      setPropietariosEmpresa([...propietariosEmpresa, newProp]);
-      setFormData(prev => ({
-        ...prev,
-        propietarioId: newId.toString()
+    } else if (tipo === 'empresa') {
+      data = propietariosEmpresa.filter(e =>
+        e.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (e.rif && e.rif.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      return data.map(e => ({
+        id: e.id,
+        label: `${e.nombre} (${e.rif || ''})`,
+        ...e
       }));
     }
-    
-    setShowPropietarioForm(false);
-    setNewPropietario({
-      tipo: 'persona',
-      nombre: '',
-      apellido: '',
-      documento: '',
-      telefono: '',
-      correo: '',
-      direccion: '',
-      empresaNombre: '',
-      rif: '',
-      representanteLegal: ''
-    });
-    
-    toastRef.current?.addToast('Propietario registrado correctamente', 'success', 3000);
+    return [];
   };
+
+  /**
+   * Maneja el clic en el botón de editar propietario
+   */
+  const handleEditPropietarioClick = () => {
+    if (!selectedPropietario) return;
+    setIsEditingPropietario(true);
+    setShowPropietarioForm(true);
+    if (formData.propietarioTipo === 'persona') {
+      setNewPropietario({
+        tipo: 'persona',
+        nombre: selectedPropietario.nombre.split(' ')[0] || '',
+        apellido: selectedPropietario.nombre.split(' ').slice(1).join(' ') || '',
+        documento: selectedPropietario.documento || '',
+        telefono: selectedPropietario.telefono || '',
+        correo: selectedPropietario.correo || '',
+        direccion: selectedPropietario.direccion || '',
+        empresaNombre: '',
+        rif: '',
+        representanteLegal: ''
+      });
+    } else {
+      setNewPropietario({
+        tipo: 'empresa',
+        nombre: '',
+        apellido: '',
+        documento: '',
+        telefono: selectedPropietario.telefono || '',
+        correo: selectedPropietario.correo || '',
+        direccion: selectedPropietario.direccion || '',
+        empresaNombre: selectedPropietario.nombre || '',
+        rif: selectedPropietario.rif || '',
+        representanteLegal: selectedPropietario.representante || ''
+      });
+    }
+  };
+
+  /**
+   * Guarda un nuevo propietario o actualiza uno existente
+   */
+  const handleSaveNewPropietario = async () => {
+    try {
+      if (isEditingPropietario && selectedPropietario) {
+        // Actualizar propietario existente
+        if (newPropietario.tipo === 'persona') {
+          const response = await fetch(`/api/inmueble/propietarios/persona/${selectedPropietario.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nombre: newPropietario.nombre,
+              apellido: newPropietario.apellido,
+              documento: newPropietario.documento,
+              telefono: newPropietario.telefono,
+              correo: newPropietario.correo,
+              direccion: newPropietario.direccion
+            })
+          });
+          if (!response.ok) throw new Error('Error updating propietario persona');
+          const updatedProp = await response.json();
+          setPropietariosPersona(prev => prev.map(p => 
+            p.id === selectedPropietario.id ? { 
+              ...p, 
+              nombre: `${updatedProp.nombre} ${updatedProp.apellido}`, 
+              documento: updatedProp.documento, 
+              telefono: updatedProp.telefono, 
+              correo: updatedProp.correo,
+              direccion: updatedProp.direccion
+            } : p
+          ));
+          setFormData(prev => ({
+            ...prev,
+            propietarioId: updatedProp.id.toString()
+          }));
+        } else {
+          const response = await fetch(`/api/inmueble/propietarios/empresa/${selectedPropietario.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              empresaNombre: newPropietario.empresaNombre,
+              rif: newPropietario.rif,
+              representanteLegal: newPropietario.representanteLegal,
+              telefono: newPropietario.telefono,
+              correo: newPropietario.correo,
+              direccion: newPropietario.direccion
+            })
+          });
+          if (!response.ok) throw new Error('Error updating propietario empresa');
+          const updatedProp = await response.json();
+          setPropietariosEmpresa(prev => prev.map(e => 
+            e.id === selectedPropietario.id ? { 
+              ...e, 
+              nombre: newPropietario.empresaNombre, 
+              rif: newPropietario.rif, 
+              representante: newPropietario.representanteLegal,
+              telefono: newPropietario.telefono,
+              correo: newPropietario.correo,
+              direccion: newPropietario.direccion
+            } : e
+          ));
+          setFormData(prev => ({
+            ...prev,
+            propietarioId: updatedProp.id.toString()
+          }));
+        }
+        toastRef.current?.addToast('Propietario actualizado correctamente', 'success', 3000);
+      } else {
+        // Crear nuevo propietario
+        if (newPropietario.tipo === 'persona') {
+          const response = await fetch('/api/inmueble/propietarios/persona', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nombre: newPropietario.nombre,
+              apellido: newPropietario.apellido,
+              documento: newPropietario.documento,
+              telefono: newPropietario.telefono,
+              correo: newPropietario.correo,
+              direccion: newPropietario.direccion
+            })
+          });
+          if (!response.ok) throw new Error('Error creating propietario persona');
+          const newProp = await response.json();
+          setPropietariosPersona([...propietariosPersona, {
+            id: newProp.id,
+            nombre: `${newProp.nombre} ${newProp.apellido}`,
+            documento: newProp.documento,
+            telefono: newProp.telefono,
+            correo: newProp.correo,
+            direccion: newProp.direccion
+          }]);
+          setFormData(prev => ({
+            ...prev,
+            propietarioId: newProp.id.toString()
+          }));
+        } else {
+          const response = await fetch('/api/inmueble/propietarios/empresa', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              empresaNombre: newPropietario.empresaNombre,
+              rif: newPropietario.rif,
+              representanteLegal: newPropietario.representanteLegal,
+              telefono: newPropietario.telefono,
+              correo: newPropietario.correo,
+              direccion: newPropietario.direccion
+            })
+          });
+          if (!response.ok) throw new Error('Error creating propietario empresa');
+          const newProp = await response.json();
+          setPropietariosEmpresa([...propietariosEmpresa, {
+            id: newProp.id,
+            nombre: newProp.empresaNombre,
+            rif: newProp.rif,
+            representante: newProp.representanteLegal,
+            telefono: newProp.telefono,
+            correo: newProp.correo,
+            direccion: newProp.direccion
+          }]);
+          setFormData(prev => ({
+            ...prev,
+            propietarioId: newProp.id.toString()
+          }));
+        }
+        toastRef.current?.addToast('Propietario registrado correctamente', 'success', 3000);
+      }
+      setShowPropietarioForm(false);
+      setIsEditingPropietario(false);
+      setSelectedPropietario(null);
+      setNewPropietario({
+        tipo: 'persona',
+        nombre: '',
+        apellido: '',
+        documento: '',
+        telefono: '',
+        correo: '',
+        direccion: '',
+        empresaNombre: '',
+        rif: '',
+        representanteLegal: ''
+      });
+    } catch (error) {
+      toastRef.current?.addToast(error.message, 'error', 5000);
+    }
+  };
+
+  /**
+   * Guarda un nuevo propietario en el estado correspondiente
+   */
+  
 
   /**
    * Maneja cambios en las imágenes del inmueble
@@ -669,7 +861,11 @@ const CrearInmueble = () => {
                         name="propietarioTipo"
                         value="persona"
                         checked={formData.propietarioTipo === 'persona'}
-                        onChange={handlePropietarioTipoChange}
+                        onChange={(e) => {
+                          handlePropietarioTipoChange(e);
+                          setSelectedPropietario(null);
+                          setFormData(prev => ({ ...prev, propietarioId: '' }));
+                        }}
                       />
                       Persona
                     </label>
@@ -679,48 +875,55 @@ const CrearInmueble = () => {
                         name="propietarioTipo"
                         value="empresa"
                         checked={formData.propietarioTipo === 'empresa'}
-                        onChange={handlePropietarioTipoChange}
+                        onChange={(e) => {
+                          handlePropietarioTipoChange(e);
+                          setSelectedPropietario(null);
+                          setFormData(prev => ({ ...prev, propietarioId: '' }));
+                        }}
                       />
                       Empresa
                     </label>
                     <button 
                       type="button" 
                       className="btn-add"
-                      onClick={() => setShowPropietarioForm(true)}
+                      onClick={() => {
+                        setShowPropietarioForm(true);
+                        setIsEditingPropietario(false);
+                        setSelectedPropietario(null);
+                        setNewPropietario({
+                          tipo: formData.propietarioTipo,
+                          nombre: '',
+                          apellido: '',
+                          documento: '',
+                          telefono: '',
+                          correo: '',
+                          direccion: '',
+                          empresaNombre: '',
+                          rif: '',
+                          representanteLegal: ''
+                        });
+                      }}
                     >
                       + Registrar Nuevo
                     </button>
+                    <button
+                      type="button"
+                      className="btn-edit"
+                      onClick={handleEditPropietarioClick}
+                      disabled={!selectedPropietario}
+                      style={{ marginLeft: '8px' }}
+                    >
+                      Editar
+                    </button>
                   </div>
-                  
-                  {formData.propietarioTipo === 'persona' ? (
-                    <select 
-                      name="propietarioId" 
-                      value={formData.propietarioId} 
-                      onChange={handleChange} 
-                      required
-                    >
-                      <option value="">Seleccione Persona</option>
-                      {propietariosPersona.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.nombre} ({p.documento})
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <select 
-                      name="propietarioId" 
-                      value={formData.propietarioId} 
-                      onChange={handleChange} 
-                      required
-                    >
-                      <option value="">Seleccione Empresa</option>
-                      {propietariosEmpresa.map((e) => (
-                        <option key={e.id} value={e.id}>
-                          {e.nombre} ({e.rif})
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                  <Autocomplete
+                    value={selectedPropietario ? (formData.propietarioTipo === 'persona' ? `${selectedPropietario.nombre} (${selectedPropietario.documento})` : `${selectedPropietario.nombre} (${selectedPropietario.rif})`) : ''}
+                    onChange={handlePropietarioInputChange}
+                    onSelect={handleSelectPropietario}
+                    fetchOptions={fetchPropietarios}
+                    placeholder={formData.propietarioTipo === 'persona' ? 'Buscar persona...' : 'Buscar empresa...'}
+                    disabled={false}
+                  />
                 </fieldset>
               </div>
             </div>

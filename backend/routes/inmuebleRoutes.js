@@ -10,7 +10,11 @@ import {
   getCiudades,
   getZonas,
   getTipoNegocios,
-  getCaracteristicas
+  getCaracteristicas,
+  createPropietarioPersona,
+  updatePropietarioPersona,
+  createPropietarioEmpresa,
+  updatePropietarioEmpresa
 } from '../controllers/inmuebleController.js';
 
 const router = express.Router();
@@ -27,5 +31,13 @@ router.get('/ubicacion/ciudades/:estadoId', getCiudades);
 router.get('/ubicacion/zonas/:ciudadId', getZonas);
 router.get('/tiponegocios', getTipoNegocios);
 router.get('/caracteristicas', getCaracteristicas);
+
+// New routes for propietario persona
+router.post('/propietarios/persona', createPropietarioPersona);
+router.put('/propietarios/persona/:id', updatePropietarioPersona);
+
+// New routes for propietario empresa
+router.post('/propietarios/empresa', createPropietarioEmpresa);
+router.put('/propietarios/empresa/:id', updatePropietarioEmpresa);
 
 export default router;

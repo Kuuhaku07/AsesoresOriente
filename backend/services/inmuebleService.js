@@ -232,3 +232,124 @@ export const getCaracteristicas = async () => {
   const result = await pool.query('SELECT c.id, c.nombre, tc.nombre AS tipo FROM "Caracteristica" c JOIN "TipoCaracteristica" tc ON c.tipo_id = tc.id ORDER BY c.nombre');
   return result.rows.map(c => ({ id: c.id, nombre: c.nombre, tipo: c.tipo }));
 };
+
+/**
+ * Funciones para crear y actualizar propietarios persona y empresa
+ */
+
+export const createPropietarioPersona = async (propietarioData) => {
+  const { nombre, apellido, documento, telefono, correo, direccion } = propietarioData;
+  const client = await pool.connect();
+  try {
+    const insertQuery = `
+      INSERT INTO "PropietarioPersona" (nombre, apellido, documento_identidad, telefono, correo, direccion)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id, nombre, apellido, documento_identidad AS documento, telefono, correo, direccion
+    `;
+    const result = await client.query(insertQuery, [nombre, apellido, documento, telefono, correo, direccion]);
+    return result.rows[0];
+  } catch (error) {
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const updatePropietarioPersona = async (id, propietarioData) => {
+  const { nombre, apellido, documento, telefono, correo, direccion } = propietarioData;
+  const client = await pool.connect();
+  try {
+    const updateQuery = `
+      UPDATE "PropietarioPersona"
+      SET nombre = $1, apellido = $2, documento_identidad = $3, telefono = $4, correo = $5, direccion = $6
+      WHERE id = $7
+      RETURNING id, nombre, apellido, documento_identidad AS documento, telefono, correo, direccion
+    `;
+    const result = await client.query(updateQuery, [nombre, apellido, documento, telefono, correo, direccion, id]);
+    return result.rows[0];
+  } catch (error) {
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const createPropietarioEmpresa = async (propietarioData) => {
+  const { empresaNombre, rif, representanteLegal, documentoRepresentante, telefono, correo, direccion } = propietarioData;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    // Insertar en tabla Empresa
+    const insertEmpresaQuery = `
+      INSERT INTO "Empresa" (nombre, rif, telefono, correo, direccion)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id
+    `;
+    const empresaResult = await client.query(insertEmpresaQuery, [empresaNombre, rif, telefono, correo, direccion]);
+    const empresaId = empresaResult.rows[0].id;
+
+    // Insertar en tabla PropietarioEmpresa
+    const insertPropietarioEmpresaQuery = `
+      INSERT INTO "PropietarioEmpresa" (empresa_id, representante_legal, documento_representante)
+      VALUES ($1, $2, $3)
+      RETURNING id, empresa_id, representante_legal, documento_representante
+    `;
+    const propietarioEmpresaResult = await client.query(insertPropietarioEmpresaQuery, [empresaId, representanteLegal, documentoRepresentante]);
+    await client.query('COMMIT');
+    return {
+      id: propietarioEmpresaResult.rows[0].id,
+      empresa_id: empresaId,
+      representante_legal: representanteLegal,
+      documento_representante: documentoRepresentante
+    };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const updatePropietarioEmpresa = async (id, propietarioData) => {
+  const { empresaNombre, rif, representanteLegal, documentoRepresentante, telefono, correo, direccion } = propietarioData;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    // Obtener empresa_id desde PropietarioEmpresa
+    const empresaIdResult = await client.query('SELECT empresa_id FROM "PropietarioEmpresa" WHERE id = $1', [id]);
+    if (empresaIdResult.rowCount === 0) {
+      throw new Error('PropietarioEmpresa not found');
+    }
+    const empresaId = empresaIdResult.rows[0].empresa_id;
+
+    // Actualizar tabla Empresa
+    const updateEmpresaQuery = `
+      UPDATE "Empresa"
+      SET nombre = $1, rif = $2, telefono = $3, correo = $4, direccion = $5
+      WHERE id = $6
+    `;
+    await client.query(updateEmpresaQuery, [empresaNombre, rif, telefono, correo, direccion, empresaId]);
+
+    // Actualizar tabla PropietarioEmpresa
+    const updatePropietarioEmpresaQuery = `
+      UPDATE "PropietarioEmpresa"
+      SET representante_legal = $1, documento_representante = $2
+      WHERE id = $3
+      RETURNING id, empresa_id, representante_legal, documento_representante
+    `;
+    const propietarioEmpresaResult = await client.query(updatePropietarioEmpresaQuery, [representanteLegal, documentoRepresentante, id]);
+
+    await client.query('COMMIT');
+    return {
+      id: propietarioEmpresaResult.rows[0].id,
+      empresa_id: empresaId,
+      representante_legal: representanteLegal,
+      documento_representante: documentoRepresentante
+    };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
