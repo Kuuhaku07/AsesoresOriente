@@ -199,13 +199,44 @@ export const getAsesores = async () => {
 };
 
 export const getPropietariosPersona = async () => {
-  const result = await pool.query('SELECT id, nombre, apellido, documento_identidad FROM "PropietarioPersona" ORDER BY nombre, apellido');
-  return result.rows.map(p => ({ id: p.id, nombre: p.nombre + " " + p.apellido, documento: p.documento_identidad }));
+  const result = await pool.query(`
+    SELECT id, nombre, apellido, documento_identidad, telefono, correo, direccion, fecha_nacimiento, estado_civil_id, fecha_registro, notas
+    FROM "PropietarioPersona"
+    ORDER BY nombre, apellido
+  `);
+  return result.rows.map(p => ({
+    id: p.id,
+    nombre: p.nombre + " " + p.apellido,
+    documento: p.documento_identidad,
+    telefono: p.telefono || '',
+    correo: p.correo || '',
+    direccion: p.direccion || '',
+    fechaNacimiento: p.fecha_nacimiento,
+    estadoCivilId: p.estado_civil_id,
+    fechaRegistro: p.fecha_registro,
+    notas: p.notas || ''
+  }));
 };
 
 export const getPropietariosEmpresa = async () => {
-  const result = await pool.query('SELECT pe.id, e.nombre, e.rif FROM "PropietarioEmpresa" pe JOIN "Empresa" e ON pe.empresa_id = e.id ORDER BY e.nombre');
-  return result.rows.map(p => ({ id: p.id, nombre: p.nombre, rif: p.rif }));
+  const result = await pool.query(`
+    SELECT pe.id, e.nombre, e.rif, e.telefono, e.correo, e.direccion, pe.representante_legal, pe.documento_representante, pe.fecha_registro, pe.notas
+    FROM "PropietarioEmpresa" pe
+    JOIN "Empresa" e ON pe.empresa_id = e.id
+    ORDER BY e.nombre
+  `);
+  return result.rows.map(p => ({
+    id: p.id,
+    nombre: p.nombre,
+    rif: p.rif,
+    telefono: p.telefono || '',
+    correo: p.correo || '',
+    direccion: p.direccion || '',
+    representanteLegal: p.representante_legal || '',
+    documentoRepresentante: p.documento_representante || '',
+    fechaRegistro: p.fecha_registro,
+    notas: p.notas || ''
+  }));
 };
 
 export const getEstados = async () => {

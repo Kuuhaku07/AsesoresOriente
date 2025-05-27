@@ -412,8 +412,21 @@ const CrearInmueble = () => {
    */
   const handleEditPropietarioClick = () => {
     if (!selectedPropietario) return;
+    console.log('Editing propietario:', selectedPropietario);
     setIsEditingPropietario(true);
     setShowPropietarioForm(true);
+
+    // Helper to format ISO date string to yyyy-MM-dd
+    const formatDateForInput = (isoDate) => {
+      if (!isoDate) return '';
+      const date = new Date(isoDate);
+      if (isNaN(date.getTime())) return '';
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
     if (formData.propietarioTipo === 'persona') {
       setNewPropietario({
         tipo: 'persona',
@@ -426,8 +439,8 @@ const CrearInmueble = () => {
         empresaNombre: '',
         rif: '',
         representanteLegal: '',
-        fechaNacimiento: selectedPropietario.fechaNacimiento || '',
-        estadoCivilId: selectedPropietario.estadoCivilId || '',
+        fechaNacimiento: selectedPropietario.fechaNacimiento ? formatDateForInput(selectedPropietario.fechaNacimiento) : '',
+        estadoCivilId: selectedPropietario.estadoCivilId ? selectedPropietario.estadoCivilId : '',
         notas: selectedPropietario.notas || ''
       });
     } else {
@@ -441,7 +454,7 @@ const CrearInmueble = () => {
         direccion: selectedPropietario.direccion || '',
         empresaNombre: selectedPropietario.nombre || '',
         rif: selectedPropietario.rif || '',
-        representanteLegal: selectedPropietario.representante || '',
+        representanteLegal: selectedPropietario.representanteLegal || '',
         notas: selectedPropietario.notas || ''
       });
     }
@@ -478,14 +491,43 @@ const CrearInmueble = () => {
               nombre: updatedProp.nombre, 
               apellido: updatedProp.apellido,
               documento: updatedProp.documento, 
-              telefono: updatedProp.telefono, 
-              correo: updatedProp.correo,
-              direccion: updatedProp.direccion,
-              fechaNacimiento: updatedProp.fechaNacimiento,
-              estadoCivilId: updatedProp.estadoCivilId,
-              notas: updatedProp.notas
+              telefono: updatedProp.telefono || '',
+              correo: updatedProp.correo || '',
+              direccion: updatedProp.direccion || '',
+              fechaNacimiento: updatedProp.fechaNacimiento || '',
+              estadoCivilId: updatedProp.estadoCivilId || '',
+              notas: updatedProp.notas || ''
             } : p
           ));
+          // Helper to format ISO date string to yyyy-MM-dd
+          const formatDateForInput = (isoDate) => {
+            if (!isoDate) return '';
+            const date = new Date(isoDate);
+            if (isNaN(date.getTime())) return '';
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+          };
+
+          const newLabel = formData.propietarioTipo === 'persona'
+            ? `${updatedProp.nombre || ''} ${updatedProp.apellido || ''} (${updatedProp.documento || ''})`
+            : `${updatedProp.empresaNombre || updatedProp.nombre || ''} (${updatedProp.rif || ''})`;
+
+          console.log('Updated propietario persona from API:', updatedProp);
+          setSelectedPropietario({
+            ...selectedPropietario,
+            nombre: updatedProp.nombre || '',
+            apellido: updatedProp.apellido || '',
+            documento: updatedProp.documento || '',
+            telefono: updatedProp.telefono || '',
+            correo: updatedProp.correo || '',
+            direccion: updatedProp.direccion || '',
+            fechaNacimiento: updatedProp.fechaNacimiento ? formatDateForInput(updatedProp.fechaNacimiento) : '',
+            estadoCivilId: updatedProp.estadoCivilId ? updatedProp.estadoCivilId : '',
+            notas: updatedProp.notas || '',
+            label: newLabel
+          });
           setFormData(prev => ({
             ...prev,
             propietarioId: updatedProp.id.toString()
@@ -512,12 +554,22 @@ const CrearInmueble = () => {
               nombre: newPropietario.empresaNombre, 
               rif: newPropietario.rif, 
               representante: newPropietario.representanteLegal,
-              telefono: newPropietario.telefono,
-              correo: newPropietario.correo,
-              direccion: newPropietario.direccion,
-              notas: newPropietario.notas
+              telefono: newPropietario.telefono || '',
+              correo: newPropietario.correo || '',
+              direccion: newPropietario.direccion || '',
+              notas: newPropietario.notas || ''
             } : e
           ));
+          setSelectedPropietario({
+            ...selectedPropietario,
+            nombre: newPropietario.empresaNombre,
+            rif: newPropietario.rif,
+            representante: newPropietario.representanteLegal,
+            telefono: newPropietario.telefono,
+            correo: newPropietario.correo,
+            direccion: newPropietario.direccion,
+            notas: newPropietario.notas
+          });
           setFormData(prev => ({
             ...prev,
             propietarioId: updatedProp.id.toString()
@@ -526,7 +578,7 @@ const CrearInmueble = () => {
         toastRef.current?.addToast('Propietario actualizado correctamente', 'success', 3000);
       } else {
         // Crear nuevo propietario
-        if (newPropietario.tipo === 'persona') {
+          if (newPropietario.tipo === 'persona') {
           const response = await fetch('/api/inmueble/propietarios/persona', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -536,20 +588,25 @@ const CrearInmueble = () => {
               documento: newPropietario.documento,
               telefono: newPropietario.telefono,
               correo: newPropietario.correo,
-              direccion: newPropietario.direccion
+              direccion: newPropietario.direccion,
+              fechaNacimiento: newPropietario.fechaNacimiento === '' ? null : newPropietario.fechaNacimiento,
+              estadoCivilId: newPropietario.estadoCivilId === '' ? null : newPropietario.estadoCivilId
             })
           });
           if (!response.ok) throw new Error('Error creating propietario persona');
           const newProp = await response.json();
-          setPropietariosPersona([...propietariosPersona, {
-            id: newProp.id,
-            nombre: newProp.nombre,
-            apellido: newProp.apellido,
-            documento: newProp.documento,
-            telefono: newProp.telefono,
-            correo: newProp.correo,
-            direccion: newProp.direccion
-          }]);
+// Map null or undefined fechaNacimiento and estadoCivilId to empty string for frontend display
+setPropietariosPersona([...propietariosPersona, {
+  id: newProp.id,
+  nombre: newProp.nombre,
+  apellido: newProp.apellido,
+  documento: newProp.documento,
+  telefono: newProp.telefono,
+  correo: newProp.correo,
+  direccion: newProp.direccion,
+  fechaNacimiento: newProp.fechaNacimiento || '',
+  estadoCivilId: newProp.estadoCivilId || ''
+}]);
           setFormData(prev => ({
             ...prev,
             propietarioId: newProp.id.toString()
