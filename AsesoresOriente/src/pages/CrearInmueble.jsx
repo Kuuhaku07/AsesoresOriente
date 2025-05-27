@@ -465,118 +465,122 @@ const CrearInmueble = () => {
    */
   const handleSaveNewPropietario = async () => {
     try {
-      if (isEditingPropietario && selectedPropietario) {
-        // Actualizar propietario existente
-        if (newPropietario.tipo === 'persona') {
-          const response = await fetch(`/api/inmueble/propietarios/persona/${selectedPropietario.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              nombre: newPropietario.nombre,
-              apellido: newPropietario.apellido,
-              documento: newPropietario.documento,
-              telefono: newPropietario.telefono,
-              correo: newPropietario.correo,
-              direccion: newPropietario.direccion,
-              fechaNacimiento: newPropietario.fechaNacimiento,
-              estadoCivilId: newPropietario.estadoCivilId,
-              notas: newPropietario.notas
-            })
-          });
-          if (!response.ok) throw new Error('Error updating propietario persona');
-          const updatedProp = await response.json();
-          setPropietariosPersona(prev => prev.map(p => 
-            p.id === selectedPropietario.id ? { 
-              ...p, 
-              nombre: updatedProp.nombre, 
-              apellido: updatedProp.apellido,
-              documento: updatedProp.documento, 
-              telefono: updatedProp.telefono || '',
-              correo: updatedProp.correo || '',
-              direccion: updatedProp.direccion || '',
-              fechaNacimiento: updatedProp.fechaNacimiento || '',
-              estadoCivilId: updatedProp.estadoCivilId || '',
-              notas: updatedProp.notas || ''
-            } : p
-          ));
-          // Helper to format ISO date string to yyyy-MM-dd
-          const formatDateForInput = (isoDate) => {
-            if (!isoDate) return '';
-            const date = new Date(isoDate);
-            if (isNaN(date.getTime())) return '';
-            const year = date.getFullYear();
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const day = date.getDate().toString().padStart(2, '0');
-            return `${year}-${month}-${day}`;
-          };
+          if (isEditingPropietario && selectedPropietario) {
+            // Actualizar propietario existente
+            if (newPropietario.tipo === 'persona') {
+              const response = await fetch(`/api/inmueble/propietarios/persona/${selectedPropietario.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  nombre: newPropietario.nombre,
+                  apellido: newPropietario.apellido,
+                  documento: newPropietario.documento,
+                  telefono: newPropietario.telefono,
+                  correo: newPropietario.correo,
+                  direccion: newPropietario.direccion,
+                  fechaNacimiento: newPropietario.fechaNacimiento,
+                  estadoCivilId: newPropietario.estadoCivilId,
+                  notas: newPropietario.notas
+                })
+              });
+              if (!response.ok) throw new Error('Error updating propietario persona');
+              const updatedProp = await response.json();
 
-          const newLabel = formData.propietarioTipo === 'persona'
-            ? `${updatedProp.nombre || ''} ${updatedProp.apellido || ''} (${updatedProp.documento || ''})`
-            : `${updatedProp.empresaNombre || updatedProp.nombre || ''} (${updatedProp.rif || ''})`;
+              // Refetch propietariosPersona list after update
+              const propietariosPersonaRes = await fetch('/api/inmueble/propietarios/persona');
+              if (!propietariosPersonaRes.ok) throw new Error('Error fetching propietarios persona after update');
+              let propietariosPersonaData = await propietariosPersonaRes.json();
 
-          console.log('Updated propietario persona from API:', updatedProp);
-          setSelectedPropietario({
-            ...selectedPropietario,
-            nombre: updatedProp.nombre || '',
-            apellido: updatedProp.apellido || '',
-            documento: updatedProp.documento || '',
-            telefono: updatedProp.telefono || '',
-            correo: updatedProp.correo || '',
-            direccion: updatedProp.direccion || '',
-            fechaNacimiento: updatedProp.fechaNacimiento ? formatDateForInput(updatedProp.fechaNacimiento) : '',
-            estadoCivilId: updatedProp.estadoCivilId ? updatedProp.estadoCivilId : '',
-            notas: updatedProp.notas || '',
-            label: newLabel
-          });
-          setFormData(prev => ({
-            ...prev,
-            propietarioId: updatedProp.id.toString()
-          }));
-        } else {
-          const response = await fetch(`/api/inmueble/propietarios/empresa/${selectedPropietario.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              empresaNombre: newPropietario.empresaNombre,
-              rif: newPropietario.rif,
-              representanteLegal: newPropietario.representanteLegal,
-              telefono: newPropietario.telefono,
-              correo: newPropietario.correo,
-              direccion: newPropietario.direccion,
-              notas: newPropietario.notas
-            })
-          });
-          if (!response.ok) throw new Error('Error updating propietario empresa');
-          const updatedProp = await response.json();
-          setPropietariosEmpresa(prev => prev.map(e => 
-            e.id === selectedPropietario.id ? { 
-              ...e, 
-              nombre: newPropietario.empresaNombre, 
-              rif: newPropietario.rif, 
-              representante: newPropietario.representanteLegal,
-              telefono: newPropietario.telefono || '',
-              correo: newPropietario.correo || '',
-              direccion: newPropietario.direccion || '',
-              notas: newPropietario.notas || ''
-            } : e
-          ));
-          setSelectedPropietario({
-            ...selectedPropietario,
-            nombre: newPropietario.empresaNombre,
-            rif: newPropietario.rif,
-            representante: newPropietario.representanteLegal,
-            telefono: newPropietario.telefono,
-            correo: newPropietario.correo,
-            direccion: newPropietario.direccion,
-            notas: newPropietario.notas
-          });
-          setFormData(prev => ({
-            ...prev,
-            propietarioId: updatedProp.id.toString()
-          }));
-        }
-        toastRef.current?.addToast('Propietario actualizado correctamente', 'success', 3000);
-      } else {
+              // Transform propietariosPersona to split nombre into nombre and apellido
+              propietariosPersonaData = propietariosPersonaData.map(p => {
+                const nameParts = p.nombre ? p.nombre.trim().split(' ') : [];
+                const nombre = nameParts.length > 0 ? nameParts[0] : '';
+                const apellido = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+                return {
+                  ...p,
+                  nombre,
+                  apellido,
+                  telefono: p.telefono || '',
+                  correo: p.correo || ''
+                };
+              });
+
+              setPropietariosPersona(propietariosPersonaData);
+
+              // Helper to format ISO date string to yyyy-MM-dd
+              const formatDateForInput = (isoDate) => {
+                if (!isoDate) return '';
+                const date = new Date(isoDate);
+                if (isNaN(date.getTime())) return '';
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const day = date.getDate().toString().padStart(2, '0');
+                return `${year}-${month}-${day}`;
+              };
+
+              const newLabel = formData.propietarioTipo === 'persona'
+                ? `${updatedProp.nombre || ''} ${updatedProp.apellido || ''} (${updatedProp.documento || ''})`
+                : `${updatedProp.empresaNombre || updatedProp.nombre || ''} (${updatedProp.rif || ''})`;
+
+              console.log('Updated propietario persona from API:', updatedProp);
+              setSelectedPropietario({
+                ...selectedPropietario,
+                nombre: updatedProp.nombre || '',
+                apellido: updatedProp.apellido || '',
+                documento: updatedProp.documento || '',
+                telefono: updatedProp.telefono || '',
+                correo: updatedProp.correo || '',
+                direccion: updatedProp.direccion || '',
+                fechaNacimiento: updatedProp.fechaNacimiento ? formatDateForInput(updatedProp.fechaNacimiento) : '',
+                estadoCivilId: updatedProp.estadoCivilId ? updatedProp.estadoCivilId : '',
+                notas: updatedProp.notas || '',
+                label: newLabel
+              });
+              setFormData(prev => ({
+                ...prev,
+                propietarioId: updatedProp.id.toString()
+              }));
+            } else {
+              const response = await fetch(`/api/inmueble/propietarios/empresa/${selectedPropietario.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  empresaNombre: newPropietario.empresaNombre,
+                  rif: newPropietario.rif,
+                  representanteLegal: newPropietario.representanteLegal,
+                  telefono: newPropietario.telefono,
+                  correo: newPropietario.correo,
+                  direccion: newPropietario.direccion,
+                  notas: newPropietario.notas
+                })
+              });
+              if (!response.ok) throw new Error('Error updating propietario empresa');
+              const updatedProp = await response.json();
+
+              // Refetch propietariosEmpresa list after update
+              const propietariosEmpresaRes = await fetch('/api/inmueble/propietarios/empresa');
+              if (!propietariosEmpresaRes.ok) throw new Error('Error fetching propietarios empresa after update');
+              const propietariosEmpresaData = await propietariosEmpresaRes.json();
+
+              setPropietariosEmpresa(propietariosEmpresaData);
+
+              setSelectedPropietario({
+                ...selectedPropietario,
+                nombre: newPropietario.empresaNombre,
+                rif: newPropietario.rif,
+                representante: newPropietario.representanteLegal,
+                telefono: newPropietario.telefono,
+                correo: newPropietario.correo,
+                direccion: newPropietario.direccion,
+                notas: newPropietario.notas
+              });
+              setFormData(prev => ({
+                ...prev,
+                propietarioId: updatedProp.id.toString()
+              }));
+            }
+            toastRef.current?.addToast('Propietario actualizado correctamente', 'success', 3000);
+          } else {
         // Crear nuevo propietario
           if (newPropietario.tipo === 'persona') {
           const response = await fetch('/api/inmueble/propietarios/persona', {
