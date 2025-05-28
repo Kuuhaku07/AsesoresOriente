@@ -8,7 +8,7 @@ import '../styles/Register.css';
 import '../styles/CrearInmueble.css';
 import Map from '../components/Map';
 import Autocomplete from '../components/Autocomplete';
-
+import { formatDateForInput } from '../utils/dateUtils'; 
 
 const CrearInmueble = () => {
   const { user } = useAuth();
@@ -410,23 +410,15 @@ const CrearInmueble = () => {
   /**
    * Maneja el clic en el botón de editar propietario
    */
+
+
   const handleEditPropietarioClick = () => {
     if (!selectedPropietario) return;
     console.log('Editing propietario:', selectedPropietario);
     setIsEditingPropietario(true);
     setShowPropietarioForm(true);
 
-    // Helper to format ISO date string to yyyy-MM-dd
-    const formatDateForInput = (isoDate) => {
-      if (!isoDate) return '';
-      const date = new Date(isoDate);
-      if (isNaN(date.getTime())) return '';
-      const year = date.getFullYear();
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const day = date.getDate().toString().padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-
+    // Usar la función importada para formatear la fecha
     if (formData.propietarioTipo === 'persona') {
       setNewPropietario({
         tipo: 'persona',
@@ -507,16 +499,6 @@ const CrearInmueble = () => {
 
               setPropietariosPersona(propietariosPersonaData);
 
-              // Helper to format ISO date string to yyyy-MM-dd
-              const formatDateForInput = (isoDate) => {
-                if (!isoDate) return '';
-                const date = new Date(isoDate);
-                if (isNaN(date.getTime())) return '';
-                const year = date.getFullYear();
-                const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                const day = date.getDate().toString().padStart(2, '0');
-                return `${year}-${month}-${day}`;
-              };
 
               const newLabel = formData.propietarioTipo === 'persona'
                 ? `${updatedProp.nombre || ''} ${updatedProp.apellido || ''} (${updatedProp.documento || ''})`
@@ -782,7 +764,58 @@ setPropietariosPersona([...propietariosPersona, {
         throw new Error(errorData.error || 'Error al crear el inmueble');
       }
       toastRef.current?.addToast('Inmueble creado correctamente', 'success', 5000);
-      // Optionally reset form here
+
+      // Reiniciar el formulario después de crear el inmueble correctamente
+      setFormData({
+        codigo: '',
+        titulo: '',
+        descripcion: '',
+        tipoInmuebleId: '',
+        estadoInmuebleId: '',
+        asesorId: '',
+        propietarioTipo: 'persona',
+        propietarioId: '',
+        areaConstruida: '',
+        areaTerreno: '',
+        habitaciones: 0,
+        banos: 0,
+        estacionamientos: 0,
+        niveles: 1,
+        anoConstruccion: '',
+        amueblado: false,
+        climatizado: false,
+        estadoId: '',
+        ciudadId: '',
+        zonaId: '',
+        direccionExacta: '',
+        referencia: '',
+        coordenadas: '',
+        tipoNegocios: [],
+        caracteristicas: [],
+        caracteristicasPersonalizadas: [],
+        imagenes: [],
+        documentos: [],
+      });
+      // También limpiar propietario seleccionado y formulario de propietario
+      setSelectedPropietario(null);
+      setShowPropietarioForm(false);
+      setIsEditingPropietario(false);
+      setNewPropietario({
+        tipo: 'persona',
+        nombre: '',
+        apellido: '',
+        documento: '',
+        telefono: '',
+        correo: '',
+        direccion: '',
+        empresaNombre: '',
+        rif: '',
+        representanteLegal: '',
+        fechaNacimiento: '',
+        estadoCivilId: '',
+        notas: ''
+      });
+
     } catch (error) {
       toastRef.current?.addToast(error.message, 'error', 5000);
     }
