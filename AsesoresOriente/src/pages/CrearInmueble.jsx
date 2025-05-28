@@ -724,12 +724,83 @@ setPropietariosPersona([...propietariosPersona, {
   };
 
   /**
+   * Función para subir imágenes al backend y obtener las rutas guardadas.
+   * @param {Array} images - Array de objetos de imagen con archivo y metadatos.
+   * @returns {Array} - Array de objetos con rutas y metadatos para guardar en inmueble.
+   */
+  const uploadImagesToServer = async (images) => {
+    const formData = new FormData();
+    images.forEach((img) => {
+      if (img.file) {
+        formData.append('images', img.file);
+      }
+    });
+    try {
+      const response = await fetch('/api/inmueble/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error('Error al subir imágenes');
+      }
+      const data = await response.json();
+      // Mapear las rutas devueltas con los metadatos originales
+      return data.archivos.map((fileInfo, index) => ({
+        ruta: fileInfo.ruta,
+        titulo: images[index].titulo || '',
+        descripcion: images[index].descripcion || '',
+        // Asumir que el usuario está logueado, enviar id o nombre de usuario
+        subidoPor: user?.id || 'usuario_desconocido',
+      }));
+    } catch (error) {
+      toastRef.current?.addToast(error.message, 'error', 5000);
+      return [];
+    }
+  };
+
+  /**
+   * Función para subir documentos al backend y obtener las rutas guardadas.
+   * @param {Array} documents - Array de objetos de documento con archivo y metadatos.
+   * @returns {Array} - Array de objetos con rutas y metadatos para guardar en inmueble.
+   */
+  const uploadDocumentsToServer = async (documents) => {
+    const formData = new FormData();
+    documents.forEach((doc) => {
+      if (doc.file) {
+        formData.append('documents', doc.file);
+      }
+    });
+    try {
+      const response = await fetch('/api/inmueble/upload/document', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error('Error al subir documentos');
+      }
+      const data = await response.json();
+      // Mapear las rutas devueltas con los metadatos originales
+      return data.archivos.map((fileInfo, index) => ({
+        tipoId: documents[index].tipoId || null,
+        nombreArchivo: documents[index].nombreArchivo || '',
+        ruta: fileInfo.ruta,
+        tamano: fileInfo.tamaño || 0,
+        // Asumir que el usuario está logueado, enviar id o nombre de usuario
+        subidoPor: user?.id || 'usuario_desconocido',
+      }));
+    } catch (error) {
+      toastRef.current?.addToast(error.message, 'error', 5000);
+      return [];
+    }
+  };
+
+  /**
    * Maneja el envío del formulario
    * @param {Object} e - Evento del formulario
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validación básica
     if (!formData.codigo || !formData.titulo || !formData.tipoInmuebleId || !formData.asesorId || !formData.propietarioId) {
       toastRef.current?.addToast('Por favor complete los campos obligatorios marcados con *', 'error', 5000);
@@ -739,25 +810,37 @@ setPropietariosPersona([...propietariosPersona, {
       toastRef.current?.addToast('Por favor complete la información de ubicación', 'error', 5000);
       return;
     }
-    
+
     // Validar al menos un tipo de negocio
     if (formData.tipoNegocios.length === 0) {
       toastRef.current?.addToast('Seleccione al menos un tipo de negocio', 'error', 5000);
       return;
     }
-    
+
     // Validar precios en tipos de negocio
     const hasInvalidPrices = formData.tipoNegocios.some(tn => !tn.precio || isNaN(tn.precio) || tn.precio <= 0);
     if (hasInvalidPrices) {
       toastRef.current?.addToast('Ingrese precios válidos para los tipos de negocio seleccionados', 'error', 5000);
       return;
     }
-    
+
     try {
+      // Subir imágenes y obtener rutas
+      const uploadedImages = await uploadImagesToServer(formData.imagenes);
+      // Subir documentos y obtener rutas
+      const uploadedDocuments = await uploadDocumentsToServer(formData.documentos);
+
+      // Preparar datos para enviar al backend, reemplazando imágenes y documentos con rutas
+      const inmuebleDataToSend = {
+        ...formData,
+        imagenes: uploadedImages,
+        documentos: uploadedDocuments,
+      };
+
       const response = await fetch('/api/inmueble', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(inmuebleDataToSend)
       });
       if (!response.ok) {
         const errorData = await response.json();

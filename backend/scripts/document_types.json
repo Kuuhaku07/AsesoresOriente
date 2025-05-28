@@ -1,0 +1,30 @@
+[
+  {
+    "nombre": "Documento de Propiedad",
+    "descripcion": "Documento que acredita la propiedad del inmueble",
+    "requerido": true,
+    "aplica_inmueble": true,
+    "aplica_propietario": false
+  },
+  {
+    "nombre": "Cédula de Identidad del Propietario",
+    "descripcion": "Documento de identidad oficial del propietario",
+    "requerido": true,
+    "aplica_inmueble": false,
+    "aplica_propietario": true
+  },
+  {
+    "nombre": "Permiso de Construcción",
+    "descripcion": "Permiso oficial para la construcción del inmueble",
+    "requerido": false,
+    "aplica_inmueble": true,
+    "aplica_propietario": false
+  },
+  {
+    "nombre": "Contrato de Arrendamiento",
+    "descripcion": "Contrato de alquiler del inmueble",
+    "requerido": false,
+    "aplica_inmueble": true,
+    "aplica_propietario": false
+  }
+]

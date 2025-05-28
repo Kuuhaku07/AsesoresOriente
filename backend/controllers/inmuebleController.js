@@ -1,4 +1,23 @@
 import * as inmuebleService from '../services/inmuebleService.js';
+import fs from 'fs';
+import path from 'path';
+
+/**
+ * Función utilitaria para eliminar archivos de forma segura.
+ * @param {Array} filePaths - Array de rutas de archivos a eliminar.
+ */
+const deleteFiles = (filePaths) => {
+  filePaths.forEach((filePath) => {
+    const fullPath = path.join(process.cwd(), 'backend', filePath);
+    fs.unlink(fullPath, (err) => {
+      if (err) {
+        console.error(`Error eliminando archivo ${fullPath}:`, err);
+      } else {
+        console.log(`Archivo eliminado: ${fullPath}`);
+      }
+    });
+  });
+};
 
 /**
  * Controlador para crear un nuevo inmueble.
@@ -6,11 +25,93 @@ import * as inmuebleService from '../services/inmuebleService.js';
 export const createInmueble = async (req, res) => {
   try {
     const inmuebleData = req.body;
+
+    // Asignar un valor por defecto para subidoPor en imágenes y documentos si no existe
+    if (inmuebleData.imagenes && Array.isArray(inmuebleData.imagenes)) {
+      inmuebleData.imagenes = inmuebleData.imagenes.map(img => ({
+        ...img,
+        subidoPor: img.subidoPor || (req.user ? req.user.id : null) // Asumir que req.user tiene info del usuario autenticado
+      }));
+    }
+    if (inmuebleData.documentos && Array.isArray(inmuebleData.documentos)) {
+      inmuebleData.documentos = inmuebleData.documentos.map(doc => ({
+        ...doc,
+        subidoPor: doc.subidoPor || (req.user ? req.user.id : null)
+      }));
+    }
+
     const newInmueble = await inmuebleService.createInmueble(inmuebleData);
     res.status(201).json(newInmueble);
   } catch (error) {
     console.error('Error creating inmueble:', error);
+
+    // En caso de error, eliminar archivos subidos para evitar archivos huérfanos
+    if (req.body) {
+      const imagenes = req.body.imagenes || [];
+      const documentos = req.body.documentos || [];
+      const filePathsToDelete = [];
+
+      imagenes.forEach(img => {
+        if (img.ruta) {
+          filePathsToDelete.push(img.ruta);
+        }
+      });
+      documentos.forEach(doc => {
+        if (doc.ruta) {
+          filePathsToDelete.push(doc.ruta);
+        }
+      });
+
+      if (filePathsToDelete.length > 0) {
+        deleteFiles(filePathsToDelete);
+      }
+    }
+
     res.status(500).json({ error: 'Failed to create inmueble' });
+  }
+};
+
+/**
+ * Controlador para subir imágenes de inmueble.
+ * Recibe archivos en 'images' y devuelve las rutas guardadas.
+ */
+export const uploadInmuebleImage = (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'No se subieron imágenes' });
+    }
+    // Mapear archivos subidos a rutas accesibles
+    const fileInfos = req.files.map(file => ({
+      ruta: `/uploads/inmuebles/images/${file.filename}`,
+      nombreOriginal: file.originalname,
+      tamaño: file.size
+    }));
+    res.status(200).json({ archivos: fileInfos });
+  } catch (error) {
+    console.error('Error subiendo imágenes de inmueble:', error);
+    res.status(500).json({ error: 'Error al subir imágenes' });
+  }
+};
+
+/**
+ * Controlador para subir documentos de inmueble.
+ * Recibe archivos en 'documents' y devuelve las rutas guardadas.
+ */
+export const uploadInmuebleDocument = (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'No se subieron documentos' });
+    }
+    // Mapear archivos subidos a rutas accesibles
+    const fileInfos = req.files.map(file => ({
+      ruta: `/uploads/inmuebles/documents/${file.filename}`,
+      nombreOriginal: file.originalname,
+      tamaño: file.size
+    }));
+    res.status(200).json({ archivos: fileInfos });
+  } catch (error) {
+    console.error('Error subiendo documentos de inmueble:', error);
+    res.status(500).json({ error: 'Error al subir documentos' });
   }
 };
 
