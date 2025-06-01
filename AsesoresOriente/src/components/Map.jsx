@@ -37,7 +37,7 @@
  */
 
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Map, Marker } from 'pigeon-maps';
 
@@ -98,20 +98,54 @@ const MapComponent = ({
     setZoom(zoom);
   }, []);
 
+  // Parse height prop to number for pigeon-maps Map component
+  const parseHeightToNumber = (h) => {
+    if (typeof h === 'number') return h;
+    if (typeof h === 'string') {
+      const parsed = parseInt(h, 10);
+      if (!isNaN(parsed)) return parsed;
+    }
+    return 400; // default fallback
+  };
+
+  const mapHeight = parseHeightToNumber(height);
+
+  // Ref and state for container width
+  const containerRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  // Effect to measure container width on mount and resize
+  useEffect(() => {
+    const measureWidth = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
+    };
+
+    measureWidth();
+    window.addEventListener('resize', measureWidth);
+    return () => {
+      window.removeEventListener('resize', measureWidth);
+    };
+  }, []);
+
   return (
-    <div style={{ 
-      height, 
-      width: '100%',
-      borderRadius: '8px',
-      overflow: 'hidden'
-    }}>
+    <div 
+      ref={containerRef}
+      style={{ 
+        height, 
+        width: '100%',
+        borderRadius: '8px',
+        overflow: 'hidden'
+      }}
+    >
       <Map
         center={center}
         zoom={zoom}
         onBoundsChanged={handleBoundsChanged}
         onClick={interactive ? handleMapClick : undefined}
-        height={height}
-        width="100%"
+        height={mapHeight}
+        width={containerWidth || 400} 
         attribution={false}
       >
         {marker && (

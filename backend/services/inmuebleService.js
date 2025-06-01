@@ -391,3 +391,22 @@ export const updatePropietarioEmpresa = async (id, propietarioData) => {
     client.release();
   }
 };
+/**
+ * Obtiene los tipos de documento disponibles
+ */
+export const getTiposDocumento = async () => {
+  const result = await pool.query(`
+    SELECT id, nombre, descripcion, requerido, 
+           aplica_inmueble, aplica_propietario 
+    FROM "TipoDocumento" 
+    ORDER BY nombre
+  `);
+  return result.rows.map(t => ({
+    id: t.id,
+    nombre: t.nombre,
+    descripcion: t.descripcion || '',
+    requerido: t.requerido,
+    aplicaInmueble: t.aplica_inmueble,
+    aplicaPropietario: t.aplica_propietario
+  }));
+};

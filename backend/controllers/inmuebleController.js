@@ -279,3 +279,16 @@ export const getEstadoCivil = async (req, res) => {
     res.status(500).json({ error: 'Failed to get estado civil' });
   }
 };
+
+/**
+ * Obtiene los tipos de documento disponibles
+ */
+export const getTiposDocumento = async (req, res) => {
+  try {
+    const tipos = await inmuebleService.getTiposDocumento();
+    res.json(tipos);
+  } catch (error) {
+    console.error('Error getting tipos documento:', error);
+    res.status(500).json({ error: 'Failed to get tipos documento' });
+  }
+};

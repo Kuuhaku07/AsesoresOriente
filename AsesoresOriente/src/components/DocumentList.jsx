@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { FaTrashAlt, FaUpload, FaFileAlt, FaDownload } from 'react-icons/fa';
+import { FaTrashAlt, FaUpload, FaFileAlt, FaDownload, FaInfoCircle } from 'react-icons/fa';
 import './DocumentList.css';
 
 const DocumentList = ({
@@ -15,25 +15,51 @@ const DocumentList = ({
   },
   onSelect,
   onPreview,
+    tiposDocumento = [],
+  documentosInmueble = [],
+  documentosPropietario = [],
+  onChangeInmueble,
+  onChangePropietario,
 }) => {
   const [dragOver, setDragOver] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [focusedIndex, setFocusedIndex] = useState(null);
+  const [activeTab, setActiveTab] = useState('inmueble'); // 'inmueble' | 'propietario'
   const fileInputRef = useRef(null);
   const previewUrlRef = useRef(null);
   const itemsRef = useRef([]);
 
+    // Determinar si estamos en el modo especial
+  const isDocumentosConTipos = mode === 'documentos-con-tipos';
+  
+    // Documentos activos según la pestaña seleccionada
+  const activeDocuments = isDocumentosConTipos 
+    ? (activeTab === 'inmueble' ? documentosInmueble : documentosPropietario)
+    : documents;
+
+  const activeOnChange = isDocumentosConTipos
+    ? (activeTab === 'inmueble' ? onChangeInmueble : onChangePropietario)
+    : onChange;
+
+  // Filtrar tipos de documento por pestaña activa
+  const filteredTiposDocumento = tiposDocumento.filter(tipo => 
+    activeTab === 'inmueble' ? tipo.aplicaInmueble : tipo.aplicaPropietario
+  );
+  
   const handleRemove = (index) => {
-    const newDocuments = documents.filter((_, i) => i !== index);
-    onChange(newDocuments);
+    const newDocuments = activeDocuments.filter((_, i) => i !== index);
+    activeOnChange(newDocuments);
+    
+    // Ajustar índices seleccionados
     if (selectedIndex === index) {
       setSelectedIndex(null);
     } else if (selectedIndex > index) {
       setSelectedIndex(selectedIndex - 1);
     }
-    // Mover el foco al elemento anterior o siguiente
+    
+    // Mover foco si es necesario
     if (focusedIndex === index) {
-      const newFocusedIndex = Math.min(index, documents.length - 2);
+      const newFocusedIndex = Math.min(index, activeDocuments.length - 2);
       setFocusedIndex(newFocusedIndex >= 0 ? newFocusedIndex : null);
       setTimeout(() => {
         if (itemsRef.current[newFocusedIndex]) {
@@ -41,24 +67,33 @@ const DocumentList = ({
         }
       }, 0);
     }
-  };
+  };  
 
   const handleNameChange = (index, nombre) => {
-    const newDocuments = documents.map((doc, i) =>
+    const newDocuments = activeDocuments.map((doc, i) =>
       i === index ? { ...doc, nombre } : doc
     );
-    onChange(newDocuments);
+    activeOnChange(newDocuments);
+  };
+  const handleTipoChange = (index, tipoId) => {
+    const newDocuments = activeDocuments.map((doc, i) =>
+      i === index ? { ...doc, tipoId } : doc
+    );
+    activeOnChange(newDocuments);
   };
 
   const onFilesAdded = (files) => {
     const newFiles = Array.from(files).map(file => ({
       file,
       nombre: file.name,
+      tipoId: filteredTiposDocumento.length === 1 ? filteredTiposDocumento[0].id : null,
     }));
-    onChange([...documents, ...newFiles]);
+    
+    activeOnChange([...activeDocuments, ...newFiles]);
+    
     // Enfocar el último elemento añadido
     setTimeout(() => {
-      const newIndex = documents.length + newFiles.length - 1;
+      const newIndex = activeDocuments.length + newFiles.length - 1;
       if (itemsRef.current[newIndex]) {
         itemsRef.current[newIndex].focus();
         setFocusedIndex(newIndex);
@@ -104,7 +139,7 @@ const DocumentList = ({
   };
 
   const handleKeyDown = (e, index) => {
-    if (!documents.length) return;
+    if (!activeDocuments || !activeDocuments.length) return;
 
     switch (e.key) {
       case 'ArrowUp':
@@ -117,7 +152,7 @@ const DocumentList = ({
         break;
       case 'ArrowDown':
         e.preventDefault();
-        if (index < documents.length - 1) {
+        if (index < activeDocuments.length - 1) {
           const newIndex = index + 1;
           setFocusedIndex(newIndex);
           itemsRef.current[newIndex]?.focus();
@@ -130,8 +165,8 @@ const DocumentList = ({
         break;
       case 'End':
         e.preventDefault();
-        setFocusedIndex(documents.length - 1);
-        itemsRef.current[documents.length - 1]?.focus();
+        setFocusedIndex(activeDocuments.length - 1);
+        itemsRef.current[activeDocuments.length - 1]?.focus();
         break;
       case 'Enter':
       case ' ':
@@ -167,11 +202,11 @@ const DocumentList = ({
   }, [documents]);
 
   const renderPreview = () => {
-    if (selectedIndex === null || !documents[selectedIndex]) {
+    if (selectedIndex === null || !activeDocuments[selectedIndex]) {
       return <div className="document-preview-empty">Seleccione un documento para previsualizar</div>;
     }
 
-    const doc = documents[selectedIndex];
+    const doc = activeDocuments[selectedIndex];
     const file = doc.file;
 
     if (onPreview) {
@@ -197,6 +232,89 @@ const DocumentList = ({
 
     return renderPreviewContent(previewUrlRef.current, doc, file);
   };
+
+   const renderDocumentItem = (doc, index) => {
+    const isSelected = selectedIndex === index;
+    const isFocused = focusedIndex === index;
+    
+    return (
+      <div
+        key={index}
+        className={`document-item ${isSelected ? 'selected' : ''}`}
+        role="option"
+        aria-selected={isSelected}
+        tabIndex={isFocused ? 0 : -1}
+        ref={el => itemsRef.current[index] = el}
+        onClick={() => handleSelect(index)}
+        onKeyDown={(e) => handleKeyDown(e, index)}
+        onFocus={() => setFocusedIndex(index)}
+        title={doc.file ? doc.file.name : doc.nombre_archivo}
+      >
+        {isDocumentosConTipos && (
+          <select
+            value={doc.tipoId || ''}
+            onChange={(e) => handleTipoChange(index, e.target.value ? parseInt(e.target.value) : null)}
+            onClick={(e) => e.stopPropagation()}
+            className="document-type-select"
+          >
+            <option value="">Seleccionar tipo...</option>
+            {filteredTiposDocumento.map(tipo => (
+              <option key={tipo.id} value={tipo.id}>
+                {tipo.nombre} {tipo.requerido ? '*' : ''}
+              </option>
+            ))}
+          </select>
+        )}
+
+        <input
+          type="text"
+          placeholder={labels.nombrePlaceholder}
+          value={doc.nombre || ''}
+          onChange={(e) => handleNameChange(index, e.target.value)}
+          aria-label={`Nombre del documento ${index + 1}`}
+          onClick={(e) => e.stopPropagation()}
+          className="document-name-input"
+        />
+
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); handleRemove(index); }}
+          aria-label={`${labels.eliminar} documento ${index + 1}`}
+          className="remove-button"
+        >
+          <FaTrashAlt />
+        </button>
+
+        {isDocumentosConTipos && doc.tipoId && (
+          <span className="required-badge">
+            {filteredTiposDocumento.find(t => t.id === doc.tipoId)?.requerido && (
+              <FaInfoCircle title="Documento requerido" />
+            )}
+          </span>
+        )}
+      </div>
+    );
+  };
+
+  const renderTabs = () => (
+    <div className="document-tabs">
+      <button
+        type="button"
+        className={activeTab === 'inmueble' ? 'active' : ''}
+        onClick={() => setActiveTab('inmueble')}
+      >
+        📄 Inmueble
+      </button>
+      <button
+        type="button"
+        className={activeTab === 'propietario' ? 'active' : ''}
+        onClick={() => setActiveTab('propietario')}
+      >
+        👤 Propietario
+      </button>
+    </div>
+  );
+
 
   const renderPreviewContent = (url, doc, file) => {
     if (file.type === 'application/pdf') {
@@ -348,117 +466,184 @@ const DocumentList = ({
     );
   }
 
-  // Edit mode
   return (
-    <div 
-      className={`document-list-edit-container ${dragOver ? 'drag-over' : ''}`} 
-      style={{ 
-        maxHeight: containerHeight, 
-        minHeight: containerHeight, 
-        height: containerHeight, 
-        display: 'flex' 
-      }}
-    >
-      <div
-        className="document-list"
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        role="listbox"
-        aria-multiselectable="false"
-        style={{ 
-          maxHeight: containerHeight, 
-          minHeight: containerHeight, 
-          height: containerHeight, 
-          overflowY: 'auto' 
-        }}
-      >
-        {documents.map((doc, index) => (
-          <div
-            key={index}
-            className={`document-item ${selectedIndex === index ? 'selected' : ''}`}
-            role="option"
-            aria-selected={selectedIndex === index}
-            tabIndex={focusedIndex === index ? 0 : -1}
-            ref={el => itemsRef.current[index] = el}
-            onClick={() => handleSelect(index)}
-            onKeyDown={(e) => handleKeyDown(e, index)}
-            onFocus={() => setFocusedIndex(index)}
-            title={doc.file ? doc.file.name : doc.nombre_archivo}
+    <>
+      {mode === 'documentos-con-tipos' ? (
+        <div className={`document-list-container ${dragOver ? 'drag-over' : ''}`}>
+          {renderTabs()}
+          <div 
+            className="document-list-edit-container"
+            style={{ 
+              maxHeight: containerHeight, 
+              minHeight: containerHeight, 
+              height: containerHeight 
+            }}
           >
-            <span className="document-filename">
-              {doc.file ? doc.file.name : doc.nombre_archivo}
-            </span>
-            <input
-              type="text"
-              placeholder={labels.nombrePlaceholder}
-              value={doc.nombre || ''}
-              onChange={(e) => handleNameChange(index, e.target.value)}
-              aria-label={`Nombre del documento ${index + 1}`}
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => e.stopPropagation()}
-            />
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); handleRemove(index); }}
-              aria-label={`${labels.eliminar} documento ${index + 1}`}
-              className="remove-button"
+            <div
+              className="document-list"
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              role="listbox"
+              aria-multiselectable="false"
             >
-              <FaTrashAlt />
-            </button>
+              {activeDocuments.map((doc, index) => renderDocumentItem(doc, index))}
+              <div 
+                className="document-upload-area" 
+                onClick={() => fileInputRef.current?.click()}
+                tabIndex={0}
+                onKeyDown={(e) => { 
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                }}
+                role="button"
+                aria-label={labels.upload}
+              >
+                <FaUpload size={32} />
+                <span>{labels.upload}</span>
+                <input
+                  type="file"
+                  multiple
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  onChange={handleFileInputChange}
+                />
+              </div>
+            </div>
+            <div className="document-preview-container">
+              {renderPreview()}
+            </div>
           </div>
-        ))}
-        <div
-          className="document-upload-area"
-          onClick={() => fileInputRef.current?.click()}
-          tabIndex={0}
-          onKeyDown={(e) => { 
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              fileInputRef.current?.click();
-            }
-          }}
-          role="button"
-          aria-label={labels.upload}
-        >
-          <FaUpload size={32} />
-          <span>{labels.upload}</span>
-          <input
-            type="file"
-            multiple
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            onChange={handleFileInputChange}
-          />
         </div>
-      </div>
-      <div 
-        className="document-preview-container" 
-        style={{ 
-          maxHeight: containerHeight, 
-          minHeight: containerHeight, 
-          height: containerHeight, 
-          flexShrink: 0, 
-          flexGrow: 1 
-        }}
-      >
-        {renderPreview()}
-      </div>
-    </div>
+      ) : (
+        <div 
+          className={`document-list-edit-container ${dragOver ? 'drag-over' : ''}`} 
+          style={{ 
+            maxHeight: containerHeight, 
+            minHeight: containerHeight, 
+            height: containerHeight, 
+            display: 'flex' 
+          }}
+        >
+          <div
+            className="document-list"
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            role="listbox"
+            aria-multiselectable="false"
+            style={{ 
+              maxHeight: containerHeight, 
+              minHeight: containerHeight, 
+              height: containerHeight, 
+              overflowY: 'auto' 
+            }}
+          >
+            {documents.map((doc, index) => (
+              <div
+                key={index}
+                className={`document-item ${selectedIndex === index ? 'selected' : ''}`}
+                role="option"
+                aria-selected={selectedIndex === index}
+                tabIndex={focusedIndex === index ? 0 : -1}
+                ref={el => itemsRef.current[index] = el}
+                onClick={() => handleSelect(index)}
+                onKeyDown={(e) => handleKeyDown(e, index)}
+                onFocus={() => setFocusedIndex(index)}
+                title={doc.file ? doc.file.name : doc.nombre_archivo}
+              >
+                <span className="document-filename">
+                  {doc.file ? doc.file.name : doc.nombre_archivo}
+                </span>
+                <input
+                  type="text"
+                  placeholder={labels.nombrePlaceholder}
+                  value={doc.nombre || ''}
+                  onChange={(e) => handleNameChange(index, e.target.value)}
+                  aria-label={`Nombre del documento ${index + 1}`}
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
+                />
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handleRemove(index); }}
+                  aria-label={`${labels.eliminar} documento ${index + 1}`}
+                  className="remove-button"
+                >
+                  <FaTrashAlt />
+                </button>
+              </div>
+            ))}
+            <div
+              className="document-upload-area"
+              onClick={() => fileInputRef.current?.click()}
+              tabIndex={0}
+              onKeyDown={(e) => { 
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
+              role="button"
+              aria-label={labels.upload}
+            >
+              <FaUpload size={32} />
+              <span>{labels.upload}</span>
+              <input
+                type="file"
+                multiple
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                onChange={handleFileInputChange}
+              />
+            </div>
+          </div>
+          <div 
+            className="document-preview-container" 
+            style={{ 
+              maxHeight: containerHeight, 
+              minHeight: containerHeight, 
+              height: containerHeight, 
+              flexShrink: 0, 
+              flexGrow: 1 
+            }}
+          >
+            {renderPreview()}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
 DocumentList.propTypes = {
-  documents: PropTypes.arrayOf(
-    PropTypes.shape({
-      file: PropTypes.object,
-      nombre: PropTypes.string,
-      nombre_archivo: PropTypes.string,
-      preview: PropTypes.string,
-    })
-  ).isRequired,
-  onChange: PropTypes.func.isRequired,
-  mode: PropTypes.oneOf(['edit', 'view', 'list']),
+  // Props originales (requeridas para modos antiguos)
+  documents: (props, propName, componentName) => {
+    if (props.mode !== 'documentos-con-tipos' && !props[propName]) {
+      return new Error(`Prop '${propName}' is required in mode '${props.mode}'`);
+    }
+  },
+  onChange: (props, propName, componentName) => {
+    if (props.mode !== 'documentos-con-tipos' && !props[propName]) {
+      return new Error(`Prop '${propName}' is required in mode '${props.mode}'`);
+    }
+  },
+  
+  // Nuevas props (opcionales excepto en modo documentos-con-tipos)
+  tiposDocumento: (props, propName, componentName) => {
+    if (props.mode === 'documentos-con-tipos' && !props[propName]) {
+      return new Error(`Prop '${propName}' is required in mode 'documentos-con-tipos'`);
+    }
+  },
+  documentosInmueble: PropTypes.array,
+  documentosPropietario: PropTypes.array,
+  onChangeInmueble: PropTypes.func,
+  onChangePropietario: PropTypes.func,
+  
+  // Props comunes
+  mode: PropTypes.oneOf(['edit', 'view', 'list', 'documentos-con-tipos']),
   labels: PropTypes.shape({
     upload: PropTypes.string,
     eliminar: PropTypes.string,

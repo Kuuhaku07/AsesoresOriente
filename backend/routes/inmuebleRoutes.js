@@ -18,6 +18,7 @@ import {
   createPropietarioEmpresa,
   updatePropietarioEmpresa,
   getEstadoCivil,
+  getTiposDocumento,
   uploadInmuebleImage,
   uploadInmuebleDocument
 } from '../controllers/inmuebleController.js';
@@ -102,5 +103,8 @@ router.put('/propietarios/empresa/:id', updatePropietarioEmpresa);
 
 // New route for estado civil
 router.get('/estadoCivil', getEstadoCivil);
+
+// Nueva ruta para tipos de documento
+router.get('/tiposdocumento', getTiposDocumento);
 
 export default router;

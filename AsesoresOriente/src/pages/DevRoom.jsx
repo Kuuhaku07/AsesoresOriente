@@ -44,6 +44,25 @@ const Devroom = () => {
     { file: null, nombre: 'Documento 2.docx' },
   ]);
 
+
+
+  const [tiposDocumento] = useState([
+    { id: 1, nombre: "Escritura", requerido: true, aplicaInmueble: true, aplicaPropietario: false },
+    { id: 2, nombre: "Permiso de Ocupación", requerido: true, aplicaInmueble: true, aplicaPropietario: false },
+    { id: 3, nombre: "Cédula del Propietario", requerido: true, aplicaInmueble: false, aplicaPropietario: true },
+    { id: 4, nombre: "RIF", requerido: false, aplicaInmueble: false, aplicaPropietario: true },
+    { id: 5, nombre: "Planos", requerido: false, aplicaInmueble: true, aplicaPropietario: false }
+  ]);
+
+  
+  const [documentosInmueble, setDocumentosInmueble] = useState([
+    { file: null, nombre: "Escritura.pdf", tipoId: 1 },
+    { file: null, nombre: "Planos.pdf", tipoId: 5 }
+  ]);
+
+  const [documentosPropietario, setDocumentosPropietario] = useState([
+    { file: null, nombre: "Cédula.pdf", tipoId: 3 }
+  ]);
   return (
     <PageTemplate pageClass="about-layout" contentClass="about-content" title="Devroom">
       <p>Lalalalava chichichichicken.</p>
@@ -110,6 +129,30 @@ const Devroom = () => {
         />
       </section>
 
+
+
+      {/* Sección para probar el nuevo modo documentos-con-tipos */}
+      <section style={{ marginTop: '40px', border: '2px solid #007bff', padding: '20px', borderRadius: '8px' }}>
+
+
+        <div style={{ backgroundColor: '#f8f9fa', padding: '15px', borderRadius: '6px' }}>
+          <DocumentList 
+            mode="documentos-con-tipos"
+            tiposDocumento={tiposDocumento}
+            documentosInmueble={documentosInmueble}
+            documentosPropietario={documentosPropietario}
+            onChangeInmueble={setDocumentosInmueble}
+            onChangePropietario={setDocumentosPropietario}
+            containerHeight="500px"
+            labels={{
+              upload: 'Agregar documento',
+              eliminar: 'Quitar',
+              nombrePlaceholder: 'Descripción del documento'
+            }}
+          />
+        </div>
+
+      </section>
     </PageTemplate>
   );
 };
