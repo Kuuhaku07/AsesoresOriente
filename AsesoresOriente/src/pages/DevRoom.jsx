@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import PageTemplate from '../components/PageTemplate';
 import ToastContainer from '../components/ToastContainer';
 import FloatingContactButton from '../components/FloatingContactButton';
@@ -8,8 +8,43 @@ import ImageGallery from '../components/ImageGallery';
 import DocumentList from '../components/DocumentList';
 import Map from '../components/Map';
 
+
+
 const Devroom = () => {
   const toastRef = useRef(null);
+
+  // Sample images state for testing ImageGallery
+  const [images, setImages] = useState([
+    { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
+    { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BNTE1ZWRhOTItZWQwZS00NzY1LTgxMzQtM2I3MTBiYjIyMWQ2XkEyXkFqcGc@._V1_QL75_UX190_CR0,0,190,190_.jpg', es_portada: false, titulo: 'Imagen 2', descripcion: 'Descripción 2' },
+   ]);
+
+  const [tiposDocumento, setTiposDocumento] = useState([]);
+
+  useEffect(() => {
+    const fetchTiposDocumento = async () => {
+      try {
+        const response = await fetch('/api/inmueble/tiposdocumento');
+        if (!response.ok) throw new Error('Failed to fetch tiposDocumento');
+        const tipos = await response.json();
+        setTiposDocumento(tipos);
+      } catch (error) {
+        console.error('Error fetching tiposDocumento:', error);
+      }
+    };
+    fetchTiposDocumento();
+  }, []);
+  const [documentosInmueble, setDocumentosInmueble] = useState([
+    { file: null, nombre: "Escritura.pdf", tipoId: 1 },
+    { file: null, nombre: "Planos.pdf", tipoId: 5 }
+  ]);
+  const [documentosPropietario, setDocumentosPropietario] = useState([
+    { file: null, nombre: "Cédula.pdf", tipoId: 3 }
+  ]);
+  const [documents, setDocuments] = useState([
+    { file: null, nombre: 'Documento 1.pdf' },
+    { file: null, nombre: 'Documento 2.docx' },
+  ]);
 
   const showToast = (message, type) => {
     if (toastRef.current) {
@@ -32,37 +67,6 @@ const Devroom = () => {
     },
   ];
 
-  // Sample images state for testing ImageGallery
-  const [images, setImages] = useState([
-    { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BYTI3ZGM1MGUtM2NiOC00ODNlLWE2ZTQtZWMwYWJiMGI0MTJhXkEyXkFqcGc@._V1_.jpg', es_portada: true, titulo: 'Imagen 1', descripcion: 'Descripción 1' },
-    { file: null, preview: 'https://m.media-amazon.com/images/M/MV5BNTE1ZWRhOTItZWQwZS00NzY1LTgxMzQtM2I3MTBiYjIyMWQ2XkEyXkFqcGc@._V1_QL75_UX190_CR0,0,190,190_.jpg', es_portada: false, titulo: 'Imagen 2', descripcion: 'Descripción 2' },
-   ]);
-
-  // Sample documents state for testing DocumentList
-  const [documents, setDocuments] = useState([
-    { file: null, nombre: 'Documento 1.pdf' },
-    { file: null, nombre: 'Documento 2.docx' },
-  ]);
-
-
-
-  const [tiposDocumento] = useState([
-    { id: 1, nombre: "Escritura", requerido: true, aplicaInmueble: true, aplicaPropietario: false },
-    { id: 2, nombre: "Permiso de Ocupación", requerido: true, aplicaInmueble: true, aplicaPropietario: false },
-    { id: 3, nombre: "Cédula del Propietario", requerido: true, aplicaInmueble: false, aplicaPropietario: true },
-    { id: 4, nombre: "RIF", requerido: false, aplicaInmueble: false, aplicaPropietario: true },
-    { id: 5, nombre: "Planos", requerido: false, aplicaInmueble: true, aplicaPropietario: false }
-  ]);
-
-  
-  const [documentosInmueble, setDocumentosInmueble] = useState([
-    { file: null, nombre: "Escritura.pdf", tipoId: 1 },
-    { file: null, nombre: "Planos.pdf", tipoId: 5 }
-  ]);
-
-  const [documentosPropietario, setDocumentosPropietario] = useState([
-    { file: null, nombre: "Cédula.pdf", tipoId: 3 }
-  ]);
   return (
     <PageTemplate pageClass="about-layout" contentClass="about-content" title="Devroom">
       <p>Lalalalava chichichichicken.</p>
@@ -111,10 +115,6 @@ const Devroom = () => {
         <DocumentList documents={documents} onChange={setDocuments} mode='view' />
       </section>
 
-
-
-
-
       <section style={{ marginTop: '40px' }}>
         <h2>Image Gallery - Alternate Display Mode</h2>
               
@@ -129,12 +129,8 @@ const Devroom = () => {
         />
       </section>
 
-
-
       {/* Sección para probar el nuevo modo documentos-con-tipos */}
       <section style={{ marginTop: '40px', border: '2px solid #007bff', padding: '20px', borderRadius: '8px' }}>
-
-
         <div style={{ backgroundColor: '#f8f9fa', padding: '15px', borderRadius: '6px' }}>
           <DocumentList 
             mode="documentos-con-tipos"
@@ -151,7 +147,6 @@ const Devroom = () => {
             }}
           />
         </div>
-
       </section>
     </PageTemplate>
   );
