@@ -80,7 +80,9 @@ router.post('/', createInmueble);
 router.post('/upload/image', uploadImages.array('images', 10), uploadInmuebleImage);
 
 // Ruta para subir documentos de inmueble
-router.post('/upload/document', uploadDocuments.array('documents', 10), uploadInmuebleDocument);
+import { multerErrorHandler } from '../middlewares/validationMiddleware.js';
+
+router.post('/upload/document', uploadDocuments.array('documents', 10), uploadInmuebleDocument, multerErrorHandler);
 
 router.get('/tipos', getTipoInmuebles);
 router.get('/estados', getEstadoInmuebles);

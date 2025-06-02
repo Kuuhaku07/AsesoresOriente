@@ -9,6 +9,7 @@ import '../styles/CrearInmueble.css';
 import Map from '../components/Map';
 import Autocomplete from '../components/Autocomplete';
 import { formatDateForInput } from '../utils/dateUtils'; 
+import { validateData } from '../utils/validationUtils';
 
 const CrearInmueble = () => {
   const { user } = useAuth();
@@ -821,26 +822,33 @@ setPropietariosPersona([...propietariosPersona, {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validación básica
-    if (!formData.codigo || !formData.titulo || !formData.tipoInmuebleId || !formData.asesorId || !formData.propietarioId) {
-      toastRef.current?.addToast('Por favor complete los campos obligatorios marcados con *', 'error', 5000);
-      return;
-    }
-    if (!formData.zonaId || !formData.direccionExacta) {
-      toastRef.current?.addToast('Por favor complete la información de ubicación', 'error', 5000);
-      return;
-    }
+    // Define validation rules
+    const rules = {
+      codigo: { required: true },
+      titulo: { required: true },
+      tipoInmuebleId: { required: true },
+      asesorId: { required: true },
+      propietarioId: { required: true },
+      zonaId: { required: true },
+      direccionExacta: { required: true },
+    };
 
-    // Validar al menos un tipo de negocio
+    // Validate formData against rules
+    const errors = validateData(formData, rules);
+
+    // Additional custom validations
     if (formData.tipoNegocios.length === 0) {
-      toastRef.current?.addToast('Seleccione al menos un tipo de negocio', 'error', 5000);
-      return;
+      errors.push('Seleccione al menos un tipo de negocio');
     }
-
-    // Validar precios en tipos de negocio
     const hasInvalidPrices = formData.tipoNegocios.some(tn => !tn.precio || isNaN(tn.precio) || tn.precio <= 0);
     if (hasInvalidPrices) {
-      toastRef.current?.addToast('Ingrese precios válidos para los tipos de negocio seleccionados', 'error', 5000);
+      errors.push('Ingrese precios válidos para los tipos de negocio seleccionados');
+    }
+
+    if (errors.length > 0) {
+      errors.forEach(err => {
+        toastRef.current?.addToast(err, 'error', 5000);
+      });
       return;
     }
 
