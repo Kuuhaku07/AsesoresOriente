@@ -74,8 +74,12 @@ const CrearInmueble = () => {
     caracteristicas: [],
     caracteristicasPersonalizadas: [],
     imagenes: [],
-    documentos: [],
+    // Remove documentos from formData, manage separately
   });
+
+  // Add separate states for documentosInmueble and documentosPropietario
+  const [documentosInmueble, setDocumentosInmueble] = useState([]);
+  const [documentosPropietario, setDocumentosPropietario] = useState([]);
 
   // Estados para las opciones de los dropdowns
   const [tipoInmuebles, setTipoInmuebles] = useState([]);
@@ -91,10 +95,26 @@ const CrearInmueble = () => {
   const [caracteristicaSearch, setCaracteristicaSearch] = useState('');
   const [filteredCaracteristicas, setFilteredCaracteristicas] = useState([]);
   const [estadoCivilOptions, setEstadoCivilOptions] = useState([]);
+  const [tiposDocumento, setTiposDocumento] = useState([]);
 
   // Loading and error states for options fetching
   const [loadingOptions, setLoadingOptions] = useState(false);
   const [errorOptions, setErrorOptions] = useState(null);
+
+  // Fetch tiposDocumento from backend
+  useEffect(() => {
+    const fetchTiposDocumento = async () => {
+      try {
+        const res = await fetch('/api/inmueble/tiposdocumento');
+        if (!res.ok) throw new Error('Failed to fetch tiposDocumento');
+        const tipos = await res.json();
+        setTiposDocumento(tipos);
+      } catch (error) {
+        console.error('Error fetching tiposDocumento:', error);
+      }
+    };
+    fetchTiposDocumento();
+  }, []);
 
   // Mapping of estadoId to coordinates [lat, lng]
   const estadoCoordinatesMap = {
@@ -782,7 +802,7 @@ setPropietariosPersona([...propietariosPersona, {
       // Mapear las rutas devueltas con los metadatos originales
       return data.archivos.map((fileInfo, index) => ({
         tipoId: documents[index].tipoId || null,
-        nombreArchivo: documents[index].nombreArchivo || '',
+        nombreArchivo: documents[index].nombre || '',
         ruta: fileInfo.ruta,
         tamano: fileInfo.tamaño || 0,
         // Asumir que el usuario está logueado, enviar id o nombre de usuario
@@ -827,8 +847,12 @@ setPropietariosPersona([...propietariosPersona, {
     try {
       // Subir imágenes y obtener rutas
       const uploadedImages = await uploadImagesToServer(formData.imagenes);
-      // Subir documentos y obtener rutas
-      const uploadedDocuments = await uploadDocumentsToServer(formData.documentos);
+      // Subir documentos y obtener rutas de ambos tipos
+      const uploadedDocumentsInmueble = await uploadDocumentsToServer(documentosInmueble);
+      const uploadedDocumentsPropietario = await uploadDocumentsToServer(documentosPropietario);
+
+      // Combinar documentos subidos
+      const uploadedDocuments = [...uploadedDocumentsInmueble, ...uploadedDocumentsPropietario];
 
       // Preparar datos para enviar al backend, reemplazando imágenes y documentos con rutas
       const inmuebleDataToSend = {
@@ -877,7 +901,7 @@ setPropietariosPersona([...propietariosPersona, {
         caracteristicas: [],
         caracteristicasPersonalizadas: [],
         imagenes: [],
-        documentos: [],
+        // Remove documentos from formData reset
       });
       // También limpiar propietario seleccionado y formulario de propietario
       setSelectedPropietario(null);
@@ -1675,12 +1699,15 @@ setPropietariosPersona([...propietariosPersona, {
                 <>
                   <h3>Documentos Legales</h3>
                   <p>Suba documentos relacionados con el inmueble (escrituras, permisos, etc.)</p>
-                  <DocumentList 
-                    documents={formData.documentos} 
-                    onChange={handleDocumentsChange} 
-                    mode="edit" 
-                    containerHeight="400px" 
-                  />
+            <DocumentList 
+              mode="documentos-con-tipos"
+              tiposDocumento={tiposDocumento}
+              documentosInmueble={documentosInmueble}
+              documentosPropietario={documentosPropietario}
+              onChangeInmueble={setDocumentosInmueble}
+              onChangePropietario={setDocumentosPropietario}
+              containerHeight="400px" 
+            />
                 </>
               )}
             </div>

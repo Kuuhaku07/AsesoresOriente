@@ -35,11 +35,8 @@ const Devroom = () => {
     fetchTiposDocumento();
   }, []);
   const [documentosInmueble, setDocumentosInmueble] = useState([
-    { file: null, nombre: "Escritura.pdf", tipoId: 1 },
-    { file: null, nombre: "Planos.pdf", tipoId: 5 }
   ]);
-  const [documentosPropietario, setDocumentosPropietario] = useState([
-    { file: null, nombre: "Cédula.pdf", tipoId: 3 }
+  const [documentosPropietario, setDocumentosPropietario] = useState([  
   ]);
   const [documents, setDocuments] = useState([
     { file: null, nombre: 'Documento 1.pdf' },
