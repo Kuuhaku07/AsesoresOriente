@@ -1706,7 +1706,9 @@ setPropietariosPersona([...propietariosPersona, {
               documentosPropietario={documentosPropietario}
               onChangeInmueble={setDocumentosInmueble}
               onChangePropietario={setDocumentosPropietario}
-              containerHeight="400px" 
+              containerHeight="400px"
+              allowedFileTypes={['pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt']}
+              toastRef={toastRef}
             />
                 </>
               )}

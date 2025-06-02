@@ -15,11 +15,13 @@ const DocumentList = ({
   },
   onSelect,
   onPreview,
-    tiposDocumento = [],
+  tiposDocumento = [],
   documentosInmueble = [],
   documentosPropietario = [],
   onChangeInmueble,
   onChangePropietario,
+  allowedFileTypes = null, // optional array of allowed file extensions (e.g. ['pdf', 'doc', 'docx'])
+  toastRef = null, // optional ref to toast container for showing error messages
 }) => {
   const [dragOver, setDragOver] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
@@ -83,14 +85,43 @@ const DocumentList = ({
   };
 
   const onFilesAdded = (files) => {
-    const newFiles = Array.from(files).map(file => ({
+    const filesArray = Array.from(files);
+    let validFiles = [];
+    let invalidFiles = [];
+
+    if (allowedFileTypes && allowedFileTypes.length > 0) {
+      filesArray.forEach(file => {
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (allowedFileTypes.includes(ext)) {
+          validFiles.push(file);
+        } else {
+          invalidFiles.push(file.name);
+        }
+      });
+    } else {
+      validFiles = filesArray;
+    }
+
+    if (invalidFiles.length > 0 && toastRef && toastRef.current) {
+      toastRef.current.addToast(
+        `Archivos no permitidos: ${invalidFiles.join(', ')}. Solo se permiten: ${allowedFileTypes.join(', ')}`,
+        'error',
+        5000
+      );
+    }
+
+    if (validFiles.length === 0) {
+      return;
+    }
+
+    const newFiles = validFiles.map(file => ({
       file,
       nombre: file.name,
       tipoId: filteredTiposDocumento.length === 1 ? filteredTiposDocumento[0].id : null,
     }));
-    
+
     activeOnChange([...activeDocuments, ...newFiles]);
-    
+
     // Enfocar el último elemento añadido
     setTimeout(() => {
       const newIndex = activeDocuments.length + newFiles.length - 1;
