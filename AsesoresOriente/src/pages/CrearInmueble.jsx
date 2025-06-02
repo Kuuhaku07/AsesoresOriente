@@ -2,18 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import PageTemplate from '../components/PageTemplate';
 import ToastContainer from '../components/ToastContainer';
-import ImageGallery from '../components/ImageGallery';
-import DocumentList from '../components/DocumentList';
+
 import BasicInfoSection from '../components/CrearInmuebleSections/BasicInfoSection';
 import PhysicalAttributesSection from '../components/CrearInmuebleSections/PhysicalAttributesSection';
 import LocationSection from '../components/CrearInmuebleSections/LocationSection';
 import BusinessTypesSection from '../components/CrearInmuebleSections/BusinessTypesSection';
 import CharacteristicsSection from '../components/CrearInmuebleSections/CharacteristicsSection';
 import MultimediaSection from '../components/CrearInmuebleSections/MultimediaSection';
+import NuevoPropietarioModal from '../components/CrearInmuebleSections/NuevoPropietarioModal';
 import '../styles/Register.css';
 import '../styles/CrearInmueble.css';
-import Map from '../components/Map';
-import Autocomplete from '../components/Autocomplete';
+
 import { formatDateForInput } from '../utils/dateUtils'; 
 import { validateData } from '../utils/validationUtils';
 
@@ -1092,238 +1091,15 @@ setPropietariosPersona([...propietariosPersona, {
         )}
       </form>
 
-      {/* Modal para nuevo propietario */}
-      {showPropietarioForm && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>{isEditingPropietario ? 'Editar Propietario' : 'Registrar Nuevo Propietario'}</h2>
-            
-            {!isEditingPropietario ? (
-              <div className="modal-tabs">
-                <button 
-                  type="button"
-                  className={newPropietario.tipo === 'persona' ? 'active' : ''}
-                  onClick={() => setNewPropietario({...newPropietario, tipo: 'persona'})}
-                  disabled={isEditingPropietario}
-                >
-                  Persona
-                </button>
-                <button 
-                  type="button"
-                  className={newPropietario.tipo === 'empresa' ? 'active' : ''}
-                  onClick={() => setNewPropietario({...newPropietario, tipo: 'empresa'})}
-                  disabled={isEditingPropietario}
-                >
-                  Empresa
-                </button>
-              </div>
-            ) : (
-              <div className="modal-edit-type-label">
-                <label>Tipo de Propietario: {newPropietario.tipo === 'persona' ? 'Persona' : 'Empresa'}</label>
-              </div>
-            )}
-            
-            {newPropietario.tipo === 'persona' ? (
-              <div className="persona-form">
-              <div className="form-group">
-                <label>Nombre*:</label>
-                <input 
-                  type="text" 
-                  name="nombre" 
-                  value={newPropietario.nombre} 
-                  onChange={handleNewPropietarioChange} 
-                  required 
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Apellido*:</label>
-                <input 
-                  type="text" 
-                  name="apellido" 
-                  value={newPropietario.apellido} 
-                  onChange={handleNewPropietarioChange} 
-                  required 
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Documento de Identidad*:</label>
-                <input 
-                  type="text" 
-                  name="documento" 
-                  value={newPropietario.documento} 
-                  onChange={handleNewPropietarioChange} 
-                  required 
-                  placeholder="Ej: V12345678"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Teléfono*:</label>
-                <input 
-                  type="text" 
-                  name="telefono" 
-                  value={newPropietario.telefono} 
-                  onChange={handleNewPropietarioChange} 
-                  required 
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Correo Electrónico:</label>
-                <input 
-                  type="email" 
-                  name="correo" 
-                  value={newPropietario.correo} 
-                  onChange={handleNewPropietarioChange} 
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Dirección:</label>
-                <textarea 
-                  name="direccion" 
-                  value={newPropietario.direccion} 
-                  onChange={handleNewPropietarioChange} 
-                  rows="3"
-                />
-              </div>
-              <div className="form-group">
-                <label>Fecha de Nacimiento:</label>
-                <input
-                  type="date"
-                  name="fechaNacimiento"
-                  value={newPropietario.fechaNacimiento}
-                  onChange={handleNewPropietarioChange}
-                />
-              </div>
-              <div className="form-group">
-                <label>Estado Civil:</label>
-                <select
-                  name="estadoCivilId"
-                  value={newPropietario.estadoCivilId}
-                  onChange={handleNewPropietarioChange}
-                >
-                  <option value="">Seleccione...</option>
-                  {estadoCivilOptions.map((estadoCivil) => (
-                    <option key={estadoCivil.id} value={estadoCivil.id}>
-                      {estadoCivil.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Notas:</label>
-                <textarea
-                  name="notas"
-                  value={newPropietario.notas}
-                  onChange={handleNewPropietarioChange}
-                  rows="3"
-                />
-              </div>
-            </div>
-            ) : (
-              <div className="empresa-form">
-              <div className="form-group">
-                <label>Nombre de la Empresa*:</label>
-                <input 
-                  type="text" 
-                  name="empresaNombre" 
-                  value={newPropietario.empresaNombre} 
-                  onChange={handleNewPropietarioChange} 
-                  required 
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>RIF*:</label>
-                <input 
-                  type="text" 
-                  name="rif" 
-                  value={newPropietario.rif} 
-                  onChange={handleNewPropietarioChange} 
-                  required 
-                  placeholder="Ej: J-123456789"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Representante Legal:</label>
-                <input 
-                  type="text" 
-                  name="representanteLegal" 
-                  value={newPropietario.representanteLegal} 
-                  onChange={handleNewPropietarioChange} 
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Teléfono*:</label>
-                <input 
-                  type="text" 
-                  name="telefono" 
-                  value={newPropietario.telefono} 
-                  onChange={handleNewPropietarioChange} 
-                  required 
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Correo Electrónico:</label>
-                <input 
-                  type="email" 
-                  name="correo" 
-                  value={newPropietario.correo} 
-                  onChange={handleNewPropietarioChange} 
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Dirección:</label>
-                <textarea 
-                  name="direccion" 
-                  value={newPropietario.direccion} 
-                  onChange={handleNewPropietarioChange} 
-                  rows="3"
-                />
-              </div>
-              <div className="form-group">
-                <label>Notas:</label>
-                <textarea
-                  name="notas"
-                  value={newPropietario.notas}
-                  onChange={handleNewPropietarioChange}
-                  rows="3"
-                />
-              </div>
-            </div>
-            )}
-            
-            <div className="modal-actions">
-              <button 
-                type="button" 
-                className="btn-secondary"
-                onClick={() => setShowPropietarioForm(false)}
-              >
-                Cancelar
-              </button>
-              <button 
-                type="button" 
-                className="btn-primary"
-                onClick={handleSaveNewPropietario}
-                disabled={
-                  newPropietario.tipo === 'persona' 
-                    ? !newPropietario.nombre || !newPropietario.apellido || !newPropietario.documento || !newPropietario.telefono
-                    : !newPropietario.empresaNombre || !newPropietario.rif || !newPropietario.telefono
-                }
-              >
-                Guardar Propietario
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <NuevoPropietarioModal
+        isOpen={showPropietarioForm}
+        onClose={() => setShowPropietarioForm(false)}
+        isEditing={isEditingPropietario}
+        newPropietario={newPropietario}
+        handleNewPropietarioChange={handleNewPropietarioChange}
+        handleSaveNewPropietario={handleSaveNewPropietario}
+        estadoCivilOptions={estadoCivilOptions}
+      />
 
       <ToastContainer ref={toastRef} />
     </PageTemplate>
