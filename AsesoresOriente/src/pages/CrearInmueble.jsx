@@ -4,6 +4,12 @@ import PageTemplate from '../components/PageTemplate';
 import ToastContainer from '../components/ToastContainer';
 import ImageGallery from '../components/ImageGallery';
 import DocumentList from '../components/DocumentList';
+import BasicInfoSection from '../components/CrearInmuebleSections/BasicInfoSection';
+import PhysicalAttributesSection from '../components/CrearInmuebleSections/PhysicalAttributesSection';
+import LocationSection from '../components/CrearInmuebleSections/LocationSection';
+import BusinessTypesSection from '../components/CrearInmuebleSections/BusinessTypesSection';
+import CharacteristicsSection from '../components/CrearInmuebleSections/CharacteristicsSection';
+import MultimediaSection from '../components/CrearInmuebleSections/MultimediaSection';
 import '../styles/Register.css';
 import '../styles/CrearInmueble.css';
 import Map from '../components/Map';
@@ -1004,724 +1010,85 @@ setPropietariosPersona([...propietariosPersona, {
 
         {/* SECCIÓN: Información Básica */}
         {activeTab === 'basica' && (
-          <section className="form-section">
-            <h2>Información Básica</h2>
-            <div className="form-grid">
-              <div className="form-group">
-                <label>
-                  Código*:
-                  <input 
-                    type="text" 
-                    name="codigo" 
-                    value={formData.codigo} 
-                    onChange={handleChange} 
-                    required 
-                    placeholder="Ej: PRO-001"
-                  />
-                </label>
-              </div>
-              
-              <div className="form-group">
-                <label>
-                  Título*:
-                  <input 
-                    type="text" 
-                    name="titulo" 
-                    value={formData.titulo} 
-                    onChange={handleChange} 
-                    required 
-                    placeholder="Ej: Hermosa casa en zona residencial"
-                  />
-                </label>
-              </div>
-              
-              <div className="form-group span-2">
-                <label>
-                  Descripción*:
-                  <textarea 
-                    name="descripcion" 
-                    value={formData.descripcion} 
-                    onChange={handleChange} 
-                    required 
-                    rows="4"
-                    placeholder="Describa el inmueble en detalle..."
-                  />
-                </label>
-              </div>
-              
-              <div className="form-group">
-                <label>
-                  Tipo de Inmueble*:
-                  <select 
-                    name="tipoInmuebleId" 
-                    value={formData.tipoInmuebleId} 
-                    onChange={handleChange} 
-                    required
-                  >
-                    <option value="">Seleccione...</option>
-                    {tipoInmuebles.map((tipo) => (
-                      <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-              
-              <div className="form-group">
-                <label>
-                  Estado del Inmueble*:
-                  <select 
-                    name="estadoInmuebleId" 
-                    value={formData.estadoInmuebleId} 
-                    onChange={handleChange} 
-                    required
-                  >
-                    <option value="">Seleccione...</option>
-                    {estadoInmuebles.map((estado) => (
-                      <option key={estado.id} value={estado.id} style={{ color: estado.color }}>
-                        {estado.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-              
-              <div className="form-group">
-                <label>
-                  Asesor*:
-                  <select 
-                    name="asesorId" 
-                    value={formData.asesorId} 
-                    onChange={handleChange} 
-                    required
-                    disabled={user && user.role === 'ASESOR'}
-
-                  >
-                    <option value="">Seleccione...</option>
-                    {asesores.map((asesor) => (
-                      <option key={asesor.id} value={asesor.id}>{asesor.nombre}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-              
-              <div className="form-group span-2">
-                <fieldset className="propietario-fieldset">
-                  <legend>Propietario*</legend>
-                  <div className="propietario-type">
-                    <label>
-                      <input
-                        type="radio"
-                        name="propietarioTipo"
-                        value="persona"
-                        checked={formData.propietarioTipo === 'persona'}
-                        onChange={(e) => {
-                          handlePropietarioTipoChange(e);
-                          setSelectedPropietario(null);
-                          setFormData(prev => ({ ...prev, propietarioId: '' }));
-                        }}
-                      />
-                      Persona
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="propietarioTipo"
-                        value="empresa"
-                        checked={formData.propietarioTipo === 'empresa'}
-                        onChange={(e) => {
-                          handlePropietarioTipoChange(e);
-                          setSelectedPropietario(null);
-                          setFormData(prev => ({ ...prev, propietarioId: '' }));
-                        }}
-                      />
-                      Empresa
-                    </label>
-                    <button 
-                      type="button" 
-                      className="btn-add"
-                      onClick={() => {
-                        setShowPropietarioForm(true);
-                        setIsEditingPropietario(false);
-                        setSelectedPropietario(null);
-                        setNewPropietario({
-                          tipo: formData.propietarioTipo,
-                          nombre: '',
-                          apellido: '',
-                          documento: '',
-                          telefono: '',
-                          correo: '',
-                          direccion: '',
-                          empresaNombre: '',
-                          rif: '',
-                          representanteLegal: ''
-                        });
-                      }}
-                    >
-                      + Registrar Nuevo
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-edit"
-                      onClick={handleEditPropietarioClick}
-                      disabled={!selectedPropietario}
-                      style={{ marginLeft: '8px' }}
-                    >
-                      Editar
-                    </button>
-                  </div>
-                  <Autocomplete
-                  value={selectedPropietario ? (formData.propietarioTipo === 'persona' ? `${selectedPropietario.nombre} ${selectedPropietario.apellido} (${selectedPropietario.documento})` : `${selectedPropietario.nombre} (${selectedPropietario.rif})`) : ''}
-                    onChange={handlePropietarioInputChange}
-                    onSelect={handleSelectPropietario}
-                    fetchOptions={fetchPropietarios}
-                    placeholder={formData.propietarioTipo === 'persona' ? 'Buscar persona...' : 'Buscar empresa...'}
-                    disabled={false}
-                  />
-                </fieldset>
-              </div>
-            </div>
-          </section>
+          <BasicInfoSection 
+            formData={formData} 
+            handleChange={handleChange} 
+            tipoInmuebles={tipoInmuebles} 
+            estadoInmuebles={estadoInmuebles} 
+            asesores={asesores} 
+            user={user} 
+            handlePropietarioTipoChange={handlePropietarioTipoChange}
+            selectedPropietario={selectedPropietario}
+            setSelectedPropietario={setSelectedPropietario}
+            setShowPropietarioForm={setShowPropietarioForm}
+            setIsEditingPropietario={setIsEditingPropietario}
+            newPropietario={newPropietario}
+            setNewPropietario={setNewPropietario}
+            handleEditPropietarioClick={handleEditPropietarioClick}
+            handlePropietarioInputChange={handlePropietarioInputChange}
+            handleSelectPropietario={handleSelectPropietario}
+            fetchPropietarios={fetchPropietarios}
+          />
         )}
 
         {/* SECCIÓN: Atributos Físicos */}
         {activeTab === 'fisica' && (
-          <section className="form-section">
-            <h2>Atributos Físicos</h2>
-            <div className="form-grid">
-              <div className="form-group">
-                <label>
-                  Área Construida* (m²):
-                  <input 
-                    type="number" 
-                    name="areaConstruida" 
-                    value={formData.areaConstruida} 
-                    onChange={handleChange} 
-                    min="0" 
-                    step="0.01" 
-                    required 
-                  />
-                </label>
-              </div>
-              
-              <div className="form-group">
-                <label>
-                  Área Terreno* (m²):
-                  <input 
-                    type="number" 
-                    name="areaTerreno" 
-                    value={formData.areaTerreno} 
-                    onChange={handleChange} 
-                    min="0" 
-                    step="0.01" 
-                    required 
-                  />
-                </label>
-              </div>
-              
-              <div className="form-group">
-                <label>
-                  Habitaciones:
-                  <input 
-                    type="number" 
-                    name="habitaciones" 
-                    value={formData.habitaciones} 
-                    onChange={handleChange} 
-                    min="0" 
-                  />
-                </label>
-              </div>
-              
-              <div className="form-group">
-                <label>
-                  Baños:
-                  <input 
-                    type="number" 
-                    name="banos" 
-                    value={formData.banos} 
-                    onChange={handleChange} 
-                    min="0" 
-                  />
-                </label>
-              </div>
-              
-              <div className="form-group">
-                <label>
-                  Estacionamientos:
-                  <input 
-                    type="number" 
-                    name="estacionamientos" 
-                    value={formData.estacionamientos} 
-                    onChange={handleChange} 
-                    min="0" 
-                  />
-                </label>
-              </div>
-              
-              <div className="form-group">
-                <label>
-                  Niveles:
-                  <input 
-                    type="number" 
-                    name="niveles" 
-                    value={formData.niveles} 
-                    onChange={handleChange} 
-                    min="1" 
-                  />
-                </label>
-              </div>
-              
-              <div className="form-group">
-                <label>
-                  Año de Construcción:
-                  <input 
-                    type="number" 
-                    name="anoConstruccion" 
-                    value={formData.anoConstruccion} 
-                    onChange={handleChange} 
-                    min="1800" 
-                    max={new Date().getFullYear()} 
-                  />
-                </label>
-              </div>
-              
-              <div className="form-group checkbox-group">
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    name="amueblado" 
-                    checked={formData.amueblado} 
-                    onChange={handleChange} 
-                  />
-                  <span className="checkbox-custom"></span>
-                  Amueblado
-                </label>
-              </div>
-              
-              <div className="form-group checkbox-group">
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    name="climatizado" 
-                    checked={formData.climatizado} 
-                    onChange={handleChange} 
-                  />
-                  <span className="checkbox-custom"></span>
-                  Climatizado
-                </label>
-              </div>
-            </div>
-          </section>
+          <PhysicalAttributesSection 
+            formData={formData} 
+            handleChange={handleChange} 
+          />
         )}
 
         {/* SECCIÓN: Ubicación */}
         {activeTab === 'ubicacion' && (
-          <section className="form-section">
-            <h2>Ubicación</h2>
-            <div className="form-grid">
-              <div className="form-group">
-                <label>
-                  Estado*:
-                  <select 
-                    name="estadoId" 
-                    value={formData.estadoId} 
-                    onChange={handleChange} 
-                    required
-                  >
-                    <option value="">Seleccione...</option>
-                    {estados.map((estado) => (
-                      <option key={estado.id} value={estado.id}>{estado.nombre}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-              
-              <div className="form-group">
-                <label>
-                  Ciudad*:
-                  <select 
-                    name="ciudadId" 
-                    value={formData.ciudadId} 
-                    onChange={handleChange} 
-                    required
-                    disabled={!formData.estadoId}
-                  >
-                    <option value="">Seleccione...</option>
-                    {ciudades.map((ciudad) => (
-                      <option key={ciudad.id} value={ciudad.id}>{ciudad.nombre}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-              
-              <div className="form-group">
-                <label>
-                  Zona*:
-                  <select 
-                    name="zonaId" 
-                    value={formData.zonaId} 
-                    onChange={handleChange} 
-                    required
-                    disabled={!formData.ciudadId}
-                  >
-                    <option value="">Seleccione...</option>
-                    {zonas.map((zona) => (
-                      <option key={zona.id} value={zona.id}>
-                        {zona.nombre} {zona.codigo_postal ? `(${zona.codigo_postal})` : ''}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-              
-              <div className="form-group span-2">
-                <label>
-                  Dirección Exacta*:
-                  <input 
-                    type="text" 
-                    name="direccionExacta" 
-                    value={formData.direccionExacta} 
-                    onChange={handleChange} 
-                    required 
-                    placeholder="Ej: Calle Principal #123, Edificio XYZ, Piso 4"
-                  />
-                </label>
-              </div>
-              
-              <div className="form-group span-2">
-                <label>
-                  Referencia:
-                  <input 
-                    type="text" 
-                    name="referencia" 
-                    value={formData.referencia} 
-                    onChange={handleChange} 
-                    placeholder="Ej: Frente a la plaza principal, al lado del supermercado"
-                  />
-                </label>
-              </div>
-              
-              <div className="form-group span-2">
-                <label>
-                  Coordenadas (opcional):
-                  <div className="coordenadas-input">
-                    <input 
-                      type="text" 
-                      name="coordenadas" 
-                      value={formData.coordenadas} 
-                      onChange={handleChange} 
-                      placeholder="Ej: 10.123456, -66.987654"
-                    />
-                  </div>
-                </label>
-                <div className="map-preview">
-                  <Map 
-                    coordinates={formData.coordenadas}
-                    onChangeCoordinates={(coords) => {
-                      setFormData(prev => ({
-                        ...prev,
-                        coordenadas: coords
-                      }));
-                    }}
-                    height="400px"
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
+          <LocationSection 
+            formData={formData} 
+            handleChange={handleChange} 
+            estados={estados}
+            ciudades={ciudades}
+            zonas={zonas}
+            setFormData={setFormData}
+          />
         )}
 
         {/* SECCIÓN: Tipos de Negocio */}
         {activeTab === 'negocios' && (
-          <section className="form-section">
-            <h2>Tipos de Negocio y Precios</h2>
-            <div className="negocios-container">
-              {tipoNegocios.map((tipo) => (
-                <div key={tipo.id} className="tipo-negocio-item">
-                  <div className="tipo-negocio-header">
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={formData.tipoNegocios.some((tn) => tn.tipoNegocioId === tipo.id)}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setFormData((prev) => {
-                            let newTipoNegocios = [...prev.tipoNegocios];
-                            if (checked) {
-                              newTipoNegocios.push({ 
-                                tipoNegocioId: tipo.id, 
-                                precio: '', 
-                                moneda: 'USD',
-                                disponible: true
-                              });
-                            } else {
-                              newTipoNegocios = newTipoNegocios.filter((tn) => tn.tipoNegocioId !== tipo.id);
-                            }
-                            return { ...prev, tipoNegocios: newTipoNegocios };
-                          });
-                        }}
-                      />
-                      <span className="checkbox-custom"></span>
-                      {tipo.nombre}
-                    </label>
-                  </div>
-                  
-                  {formData.tipoNegocios.some((tn) => tn.tipoNegocioId === tipo.id) && (
-                    <div className="tipo-negocio-details">
-                      <div className="precio-input">
-                        <label>Precio*:</label>
-                        <input
-                          type="number"
-                          placeholder="0.00"
-                          value={formData.tipoNegocios.find((tn) => tn.tipoNegocioId === tipo.id)?.precio || ''}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            setFormData((prev) => {
-                              const newTipoNegocios = prev.tipoNegocios.map((tn) =>
-                                tn.tipoNegocioId === tipo.id ? { ...tn, precio: value } : tn
-                              );
-                              return { ...prev, tipoNegocios: newTipoNegocios };
-                            });
-                          }}
-                          min="0"
-                          step="0.01"
-                          required
-                        />
-                      </div>
-                      
-                      <div className="moneda-select">
-                        <label>Moneda*:</label>
-                        <select
-                          value={formData.tipoNegocios.find((tn) => tn.tipoNegocioId === tipo.id)?.moneda || 'USD'}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            setFormData((prev) => {
-                              const newTipoNegocios = prev.tipoNegocios.map((tn) =>
-                                tn.tipoNegocioId === tipo.id ? { ...tn, moneda: value } : tn
-                              );
-                              return { ...prev, tipoNegocios: newTipoNegocios };
-                            });
-                          }}
-                        >
-                          <option value="USD">USD</option>
-                          <option value="EUR">EUR</option>
-                          <option value="BS">BS</option>
-                        </select>
-                      </div>
-                      
-                      <div className="disponible-checkbox">
-                        <label className="checkbox-label">
-                          <input
-                            type="checkbox"
-                            checked={formData.tipoNegocios.find((tn) => tn.tipoNegocioId === tipo.id)?.disponible !== false}
-                            onChange={(e) => {
-                              const checked = e.target.checked;
-                              setFormData((prev) => {
-                                const newTipoNegocios = prev.tipoNegocios.map((tn) =>
-                                  tn.tipoNegocioId === tipo.id ? { ...tn, disponible: checked } : tn
-                                );
-                                return { ...prev, tipoNegocios: newTipoNegocios };
-                              });
-                            }}
-                          />
-                          <span className="checkbox-custom"></span>
-                          Disponible
-                        </label>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
+          <BusinessTypesSection 
+            tipoNegocios={tipoNegocios} 
+            formData={formData} 
+            setFormData={setFormData} 
+          />
         )}
 
         {/* SECCIÓN: Características */}
         {activeTab === 'caracteristicas' && (
-          <section className="form-section">
-            <h2>Características</h2>
-            
-            <div className="caracteristicas-search">
-              <input
-                type="text"
-                placeholder="Buscar características..."
-                value={caracteristicaSearch}
-                onChange={(e) => setCaracteristicaSearch(e.target.value)}
-              />
-            </div>
-            
-            <div className="caracteristicas-container">
-              <h3>Características predefinidas</h3>
-              <div className="caracteristicas-grid">
-                {filteredCaracteristicas.map((carac) => (
-                  <div key={carac.id} className="caracteristica-item">
-                    <label className="caracteristica-label">{carac.nombre}:</label>
-                    {carac.tipo === 'boolean' ? (
-                      <label className="checkbox-label caracteristica-checkbox">
-                        <input
-                          type="checkbox"
-                          checked={formData.caracteristicas.some(c => c.caracteristicaId === carac.id && c.valor === 'true')}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            setFormData((prev) => {
-                              const exists = prev.caracteristicas.find((c) => c.caracteristicaId === carac.id);
-                              let newCaracteristicas;
-                              
-                              if (exists) {
-                                if (checked) {
-                                  newCaracteristicas = prev.caracteristicas.map((c) =>
-                                    c.caracteristicaId === carac.id ? { ...c, valor: 'true' } : c
-                                  );
-                                } else {
-                                  newCaracteristicas = prev.caracteristicas.filter(c => c.caracteristicaId !== carac.id);
-                                }
-                              } else {
-                                newCaracteristicas = [...prev.caracteristicas, { 
-                                  caracteristicaId: carac.id, 
-                                  valor: 'true', 
-                                  cantidad: null 
-                                }];
-                              }
-                              
-                              return { ...prev, caracteristicas: newCaracteristicas };
-                            });
-                          }}
-                        />
-                        <span className="checkbox-custom"></span>
-                      </label>
-                    ) : (
-                      <input
-                        type={carac.tipo === 'number' ? 'number' : 'text'}
-                        placeholder={carac.tipo === 'number' ? '0' : 'Valor'}
-                        value={
-                          formData.caracteristicas.find(c => c.caracteristicaId === carac.id)?.valor || ''
-                        }
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          setFormData((prev) => {
-                            const exists = prev.caracteristicas.find((c) => c.caracteristicaId === carac.id);
-                            let newCaracteristicas;
-                            
-                            if (exists) {
-                              newCaracteristicas = prev.caracteristicas.map((c) =>
-                                c.caracteristicaId === carac.id ? { ...c, valor: value } : c
-                              );
-                            } else {
-                              newCaracteristicas = [...prev.caracteristicas, { 
-                                caracteristicaId: carac.id, 
-                                valor: value, 
-                                cantidad: null 
-                              }];
-                            }
-                            
-                            return { ...prev, caracteristicas: newCaracteristicas };
-                          });
-                        }}
-                        min={carac.tipo === 'number' ? '0' : undefined}
-                        step={carac.tipo === 'number' ? '1' : undefined}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-              
-              <div className="caracteristicas-personalizadas">
-                <h3>
-                  Características personalizadas
-                  <button 
-                    type="button" 
-                    className="btn-add"
-                    onClick={handleAddCustomCharacteristic}
-                  >
-                    + Agregar
-                  </button>
-                </h3>
-                
-                {formData.caracteristicasPersonalizadas.length === 0 ? (
-                  <p className="no-custom-message">No hay características personalizadas agregadas</p>
-                ) : (
-                  <div className="custom-caracteristicas-list">
-                    {formData.caracteristicasPersonalizadas.map((carac) => (
-                      <div key={carac.id} className="custom-caracteristica-item">
-                        <input
-                          type="text"
-                          value={carac.nombre}
-                          onChange={(e) => handleCustomCharacteristicChange(carac.id, 'nombre', e.target.value)}
-                          placeholder="Nombre de la característica"
-                        />
-                        <input
-                          type="text"
-                          value={carac.valor}
-                          onChange={(e) => handleCustomCharacteristicChange(carac.id, 'valor', e.target.value)}
-                          placeholder="Valor"
-                        />
-                        <button
-                          type="button"
-                          className="btn-remove"
-                          onClick={() => handleRemoveCustomCharacteristic(carac.id)}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
+          <CharacteristicsSection 
+            formData={formData} 
+            setFormData={setFormData} 
+            caracteristicaSearch={caracteristicaSearch}
+            setCaracteristicaSearch={setCaracteristicaSearch}
+            filteredCaracteristicas={filteredCaracteristicas}
+            setFilteredCaracteristicas={setFilteredCaracteristicas}
+            handleAddCustomCharacteristic={handleAddCustomCharacteristic}
+            handleCustomCharacteristicChange={handleCustomCharacteristicChange}
+            handleRemoveCustomCharacteristic={handleRemoveCustomCharacteristic}
+          />
         )}
 
         {/* SECCIÓN: Multimedia */}
         {activeTab === 'multimedia' && (
-          <section className="form-section">
-            <h2>Multimedia</h2>
-            
-            <div className="multimedia-tabs">
-              <button 
-                type="button"
-                className={activeMultimediaTab === 'imagenes' ? 'active' : ''}
-                onClick={() => setActiveMultimediaTab('imagenes')}
-              >
-                Imágenes
-              </button>
-              <button 
-                type="button"
-                className={activeMultimediaTab === 'documentos' ? 'active' : ''}
-                onClick={() => setActiveMultimediaTab('documentos')}
-              >
-                Documentos
-              </button>
-            </div>
-            
-            <div className="multimedia-content">
-              {activeMultimediaTab === 'imagenes' ? (
-                <>
-                  <h3>Imágenes del Inmueble</h3>
-                  <p>Suba imágenes de alta calidad que muestren el inmueble. La primera imagen será la portada.</p>
-                  <ImageGallery 
-                    images={formData.imagenes} 
-                    onChange={handleImagesChange} 
-                    mode="edit" 
-                  />
-                </>
-              ) : (
-                <>
-                  <h3>Documentos Legales</h3>
-                  <p>Suba documentos relacionados con el inmueble (escrituras, permisos, etc.)</p>
-            <DocumentList 
-              mode="documentos-con-tipos"
-              tiposDocumento={tiposDocumento}
-              documentosInmueble={documentosInmueble}
-              documentosPropietario={documentosPropietario}
-              onChangeInmueble={setDocumentosInmueble}
-              onChangePropietario={setDocumentosPropietario}
-              containerHeight="400px"
-              allowedFileTypes={['pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt']}
-              toastRef={toastRef}
-            />
-                </>
-              )}
-            </div>
-          </section>
+          <MultimediaSection 
+            activeMultimediaTab={activeMultimediaTab}
+            setActiveMultimediaTab={setActiveMultimediaTab}
+            formData={formData}
+            handleImagesChange={handleImagesChange}
+            tiposDocumento={tiposDocumento}
+            documentosInmueble={documentosInmueble}
+            documentosPropietario={documentosPropietario}
+            setDocumentosInmueble={setDocumentosInmueble}
+            setDocumentosPropietario={setDocumentosPropietario}
+            toastRef={toastRef}
+          />
         )}
       </form>
 
