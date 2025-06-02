@@ -7,6 +7,7 @@ import { FaWhatsapp, FaCommentDots } from 'react-icons/fa';
 import ImageGallery from '../components/ImageGallery';
 import DocumentList from '../components/DocumentList';
 import Map from '../components/Map';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 
 
@@ -43,6 +44,8 @@ const Devroom = () => {
     { file: null, nombre: 'Documento 2.docx' },
   ]);
 
+  const [loading, setLoading] = useState(false);
+
   const showToast = (message, type) => {
     if (toastRef.current) {
       toastRef.current.addToast(message, type, 5000);
@@ -63,10 +66,22 @@ const Devroom = () => {
       action: 'copy',
     },
   ];
+  
+  useEffect(() => {
+    const handleClickToDisable = (e) => {
+      setLoading(false);
+      window.removeEventListener('click', handleClickToDisable);
+    };
+    if (loading) {
+      window.addEventListener('click', handleClickToDisable);
+    }
+
+  }, [loading]);
 
   return (
     <PageTemplate pageClass="about-layout" contentClass="about-content" title="Devroom">
       <p>Lalalalava chichichichicken.</p>
+      {loading && <LoadingSpinner />}
       <ToastContainer ref={toastRef} />
       <FloatingContactButton
         contacts={contacts}
@@ -144,6 +159,11 @@ const Devroom = () => {
             }}
           />
         </div>
+      </section>
+
+      <section style={{ marginTop: '40px', border: '2px solid #007bff', padding: '20px', borderRadius: '8px' }}>
+        <h2>Loading Spinner Test Section</h2>
+        <button onClick={(e) => { e.stopPropagation(); setLoading(true); }}>Activar Loading Spinner</button>
       </section>
     </PageTemplate>
   );

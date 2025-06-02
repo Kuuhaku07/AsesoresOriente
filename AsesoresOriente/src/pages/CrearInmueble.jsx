@@ -15,6 +15,7 @@ import '../styles/CrearInmueble.css';
 
 import { formatDateForInput } from '../utils/dateUtils'; 
 import { validateData } from '../utils/validationUtils';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const CrearInmueble = () => {
   const { user } = useAuth();
@@ -33,6 +34,10 @@ const CrearInmueble = () => {
   // Add state to track selected propietario object for editing
   const [selectedPropietario, setSelectedPropietario] = useState(null);
   const [isEditingPropietario, setIsEditingPropietario] = useState(false);
+  
+  // Estado para controlar el envío del formulario
+  // and to show loading spinner
+  const [submitting, setSubmitting] = useState(false);
 
   // Estado para el nuevo propietario
   const [newPropietario, setNewPropietario] = useState({
@@ -858,6 +863,8 @@ setPropietariosPersona([...propietariosPersona, {
     }
 
     try {
+      setSubmitting(true); // Start spinner
+
       // Subir imágenes y obtener rutas
       const uploadedImages = await uploadImagesToServer(formData.imagenes);
       // Subir documentos y obtener rutas de ambos tipos
@@ -939,6 +946,9 @@ setPropietariosPersona([...propietariosPersona, {
     } catch (error) {
       toastRef.current?.addToast(error.message, 'error', 5000);
     }
+      finally {
+      setSubmitting(false); // Stop spinner
+    }
   };
 
   // ==============================================
@@ -951,8 +961,9 @@ setPropietariosPersona([...propietariosPersona, {
       contentClass="crear-inmueble-content" 
       title="Crear Inmueble"
     >
-      <form onSubmit={handleSubmit} className="crear-inmueble-form">
-        {/* Encabezado con pestañas y botón de guardar */}
+      {submitting && <LoadingSpinner />}
+      <form onSubmit={handleSubmit} className="crear-inmueble-form" style={{ pointerEvents: submitting ? 'none' : 'auto', opacity: submitting ? 0.6 : 1 }}>
+        {/* Encabezado con pestañas y botón de guardar */} 
         <div className="form-header">
           <div className="form-tabs">
             <button 
@@ -1002,7 +1013,7 @@ setPropietariosPersona([...propietariosPersona, {
             </button>
           </div>
           
-          <button type="submit" className="btn-primary">
+          <button type="submit" className="btn-primary" disabled={submitting}>
             Guardar Inmueble
           </button>
         </div>
