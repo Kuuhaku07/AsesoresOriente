@@ -191,7 +191,12 @@ export const getCiudades = async (req, res) => {
 
 export const getZonas = async (req, res) => {
   try {
-    const ciudadId = req.params.ciudadId;
+    const ciudadId = parseInt(req.params.ciudadId);
+    
+    if (isNaN(ciudadId)) {
+      return res.status(400).json({ error: 'ID de ciudad inválido' });
+    }
+
     const zonas = await inmuebleService.getZonas(ciudadId);
     res.json(zonas);
   } catch (error) {
@@ -290,5 +295,72 @@ export const getTiposDocumento = async (req, res) => {
   } catch (error) {
     console.error('Error getting tipos documento:', error);
     res.status(500).json({ error: 'Failed to get tipos documento' });
+  }
+};
+
+/**
+ * Obtiene todos los datos necesarios para modificar/ver un inmueble
+ */
+export const getModificarInmuebleData = async (req, res) => {
+  try {
+    const inmuebleId = req.params.id ? parseInt(req.params.id) : null;
+    const data = await inmuebleService.getAllModificarInmuebleData(inmuebleId);
+    res.json(data);
+  } catch (error) {
+    console.error('Error getting modificar inmueble data:', error);
+    res.status(500).json({ error: 'Failed to get modificar inmueble data' });
+  }
+};
+
+/**
+ * Controlador para actualizar un inmueble existente.
+ */
+export const updateInmueble = async (req, res) => {
+  try {
+    const inmuebleId = req.params.id;
+    const inmuebleData = req.body;
+
+    // Asignar subidoPor si no existe
+    if (inmuebleData.imagenes && Array.isArray(inmuebleData.imagenes)) {
+      inmuebleData.imagenes = inmuebleData.imagenes.map(img => ({
+        ...img,
+        subidoPor: img.subidoPor || (req.user ? req.user.id : null)
+      }));
+    }
+    if (inmuebleData.documentos && Array.isArray(inmuebleData.documentos)) {
+      inmuebleData.documentos = inmuebleData.documentos.map(doc => ({
+        ...doc,
+        subidoPor: doc.subidoPor || (req.user ? req.user.id : null)
+      }));
+    }
+
+    const updatedInmueble = await inmuebleService.updateInmueble(inmuebleId, inmuebleData);
+    res.json(updatedInmueble);
+  } catch (error) {
+    console.error('Error updating inmueble:', error);
+    
+    // Eliminar archivos subidos en caso de error
+    if (req.body) {
+      const imagenes = req.body.imagenes || [];
+      const documentos = req.body.documentos || [];
+      const filePathsToDelete = [];
+
+      imagenes.forEach(img => {
+        if (img.ruta && img.isNew) { // Solo eliminar imágenes nuevas
+          filePathsToDelete.push(img.ruta);
+        }
+      });
+      documentos.forEach(doc => {
+        if (doc.ruta && doc.isNew) { // Solo eliminar documentos nuevos
+          filePathsToDelete.push(doc.ruta);
+        }
+      });
+
+      if (filePathsToDelete.length > 0) {
+        deleteFiles(filePathsToDelete);
+      }
+    }
+
+    res.status(500).json({ error: 'Failed to update inmueble' });
   }
 };

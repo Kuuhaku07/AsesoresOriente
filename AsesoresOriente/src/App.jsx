@@ -16,6 +16,7 @@ import Register from './pages/Register';
 import Asesores from './pages/Asesores';
 import CrearInmueble from './pages/CrearInmueble';
 import Devroom from './pages/DevRoom';
+import ModificarInmueble from './pages/ModificarInmueble';
 
 export function App(){
     return (
@@ -37,6 +38,7 @@ export function App(){
                         <Route path="/asesores" element={<Asesores />} /> {/* Asesores route */}
                         <Route path="/devroom" element={<Devroom />} /> {/* Asesores route */}
                         <Route path="/nuevo" element={<CrearInmueble />} /> {/* Crear Inmueble route */}
+                        <Route path="/modificar/:id" element={<ModificarInmueble />} /> {/* Modificar Inmueble route */}
                     </Routes>
                 </div>
             </AuthProvider>

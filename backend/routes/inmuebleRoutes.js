@@ -20,8 +20,12 @@ import {
   getEstadoCivil,
   getTiposDocumento,
   uploadInmuebleImage,
-  uploadInmuebleDocument
+  uploadInmuebleDocument,
+  getModificarInmuebleData,
+  updateInmueble
 } from '../controllers/inmuebleController.js';
+
+
 
 // Configuración de multer para subir imágenes de inmuebles
 const storageImages = multer.diskStorage({
@@ -108,5 +112,6 @@ router.get('/estadoCivil', getEstadoCivil);
 
 // Nueva ruta para tipos de documento
 router.get('/tiposdocumento', getTiposDocumento);
-
+router.get('/modificar/:id?', getModificarInmuebleData);
+router.put('/:id', updateInmueble);
 export default router;
