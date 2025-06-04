@@ -220,7 +220,12 @@ const ModificarInmueble = () => {
               direccionExacta: inmueble.direccion_exacta || '',
               referencia: inmueble.referencia || '',
               coordenadas: inmueble.coordenadas || '',
-              tipoNegocios: inmueble.tipoNegocios || [],
+              tipoNegocios: inmueble.tipoNegocios ? inmueble.tipoNegocios.map(tn => ({
+                tipoNegocioId: tn.id,
+                precio: tn.precio,
+                moneda: tn.moneda,
+                disponible: tn.disponible
+              })) : [],
               caracteristicas: inmueble.caracteristicas || [],
               caracteristicasPersonalizadas: inmueble.caracteristicasPersonalizadas || [],
               imagenes: inmueble.imagenes || [],
