@@ -2,10 +2,7 @@ import React from 'react';
 import Map from '../Map';
 
 const LocationSection = ({ formData, handleChange, estados, ciudades, zonas, setFormData }) => {
-                console.log('Rendering zonas:', formData.zonaId);
-                console.log('Rendering Ciudades:', formData.ciudadId);
-                console.log('Rendering Estados:', formData.estadoId);
-  console.log('Rendering estados:', estados);
+
 
   return (
     

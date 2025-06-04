@@ -18,11 +18,16 @@ import { formatDateForInput } from '../utils/dateUtils';
 import { validateData } from '../utils/validationUtils';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+import NotFoundPage from '../components/NotFoundPage';
+
 const ModificarInmueble = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const toastRef = useRef(null);
+
+  // New state for error status
+  const [errorStatus, setErrorStatus] = useState(null);
   
   // Estados para pestañas
   const [activeTab, setActiveTab] = useState('basica');
@@ -111,6 +116,7 @@ const ModificarInmueble = () => {
     const fetchInmuebleData = async () => {
         try {
         setLoading(true);
+        setErrorStatus(null);
         
         // 1. Primero cargar todos los datos básicos
         const [dataResponse, estadosResponse] = await Promise.all([
@@ -119,8 +125,8 @@ const ModificarInmueble = () => {
         ]);
         
         if (!dataResponse.ok) {
-          if (dataResponse.status === 500) {
-            toastRef.current?.addToast('Inmueble no encontrado', 'error', 5000);
+          if (dataResponse.status === 404 || dataResponse.status === 500) {
+            setErrorStatus(dataResponse.status);
             setLoading(false);
             setInitialLoadComplete(true);
             return;
@@ -700,6 +706,14 @@ const ModificarInmueble = () => {
     );
   }
 
+  if (errorStatus === 404 || errorStatus === 500) {
+    return (
+      <PageTemplate title="Error">
+        <NotFoundPage message="Inmueble no encontrado" />
+      </PageTemplate>
+    );
+  }
+
   return (
     <PageTemplate 
       pageClass="crear-inmueble-layout" 
@@ -763,7 +777,7 @@ const ModificarInmueble = () => {
           </button>
         </div>
 
-        {/* SECCIÓN: Información Básica */}
+        {/* SECCIÓN: Información Básica */} 
         {activeTab === 'basica' && (
           <BasicInfoSection 
             formData={formData} 
@@ -786,7 +800,7 @@ const ModificarInmueble = () => {
           />
         )}
 
-        {/* SECCIÓN: Atributos Físicos */}
+        {/* SECCIÓN: Atributos Físicos */} 
         {activeTab === 'fisica' && (
           <PhysicalAttributesSection 
             formData={formData} 
@@ -794,7 +808,7 @@ const ModificarInmueble = () => {
           />
         )}
 
-        {/* SECCIÓN: Ubicación */}
+        {/* SECCIÓN: Ubicación */} 
         {activeTab === 'ubicacion' && (
           <LocationSection 
             formData={formData} 
@@ -806,7 +820,7 @@ const ModificarInmueble = () => {
           />
         )}
 
-        {/* SECCIÓN: Tipos de Negocio */}
+        {/* SECCIÓN: Tipos de Negocio */} 
         {activeTab === 'negocios' && (
           <BusinessTypesSection 
             tipoNegocios={tipoNegocios} 
@@ -815,7 +829,7 @@ const ModificarInmueble = () => {
           />
         )}
 
-        {/* SECCIÓN: Características */}
+        {/* SECCIÓN: Características */} 
         {activeTab === 'caracteristicas' && (
           <CharacteristicsSection 
             formData={formData} 
@@ -830,7 +844,7 @@ const ModificarInmueble = () => {
           />
         )}
 
-        {/* SECCIÓN: Multimedia */}
+        {/* SECCIÓN: Multimedia */} 
         {activeTab === 'multimedia' && (
           <MultimediaSection 
             activeMultimediaTab={activeMultimediaTab}
