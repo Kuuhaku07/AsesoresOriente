@@ -284,46 +284,64 @@ const ModificarInmueble = () => {
     const fetchCiudades = async () => {
       if (!formData.estadoId) {
         setCiudades([]);
+        setFormData(prev => ({ 
+          ...prev, 
+          ciudadId: '', 
+          zonaId: '' 
+        }));
         return;
       }
+      
       try {
         const res = await fetch(`/api/inmueble/ubicacion/ciudades/${formData.estadoId}`);
         if (!res.ok) throw new Error('Failed to fetch ciudades');
-        setCiudades(await res.json());
+        
+        const ciudadesData = await res.json();
+        setCiudades(ciudadesData);
+        
+        // Si la ciudad actual no pertenece al nuevo estado, limpiarla
+        if (formData.ciudadId && !ciudadesData.some(c => c.id.toString() === formData.ciudadId)) {
+          setFormData(prev => ({ 
+            ...prev, 
+            ciudadId: '', 
+            zonaId: '' 
+          }));
+        }
       } catch (error) {
         toastRef.current?.addToast(error.message, 'error', 5000);
       }
     };
+    
     fetchCiudades();
   }, [formData.estadoId]);
-
   // Filtrar zonas cuando se selecciona ciudad
   useEffect(() => {
-  const fetchZonas = async () => {
-    if (!formData.ciudadId || isNaN(formData.ciudadId)) {
-      setZonas([]);
-      return;
-    }
-    
-    try {
-      const res = await fetch(`/api/inmueble/ubicacion/zonas/${formData.ciudadId}`);
-      if (!res.ok) throw new Error('Failed to fetch zonas');
-      const zonasData = await res.json();
-      setZonas(zonasData);
-      
-      // Si hay una zonaId en formData pero no está en las zonas cargadas, limpiarla
-      if (formData.zonaId && !zonasData.some(z => z.id.toString() === formData.zonaId)) {
+    const fetchZonas = async () => {
+      if (!formData.ciudadId) {
+        setZonas([]);
         setFormData(prev => ({ ...prev, zonaId: '' }));
+        return;
       }
-    } catch (error) {
-      console.error('Error fetching zonas:', error);
-      toastRef.current?.addToast('Error cargando zonas', 'error', 5000);
-      setZonas([]);
-    }
-  };
-  
-  fetchZonas();
-}, [formData.ciudadId]);
+      
+      try {
+        const res = await fetch(`/api/inmueble/ubicacion/zonas/${formData.ciudadId}`);
+        if (!res.ok) throw new Error('Failed to fetch zonas');
+        
+        const zonasData = await res.json();
+        setZonas(zonasData);
+        
+        // Si la zona actual no pertenece a la nueva ciudad, limpiarla
+        if (formData.zonaId && !zonasData.some(z => z.id.toString() === formData.zonaId)) {
+          setFormData(prev => ({ ...prev, zonaId: '' }));
+        }
+      } catch (error) {
+        toastRef.current?.addToast('Error cargando zonas', 'error', 5000);
+        setZonas([]);
+      }
+    };
+    
+    fetchZonas();
+  }, [formData.ciudadId]);
 
   // Filtrar características según búsqueda
   useEffect(() => {
