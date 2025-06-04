@@ -2,7 +2,13 @@ import React from 'react';
 import Map from '../Map';
 
 const LocationSection = ({ formData, handleChange, estados, ciudades, zonas, setFormData }) => {
+                console.log('Rendering zonas:', formData.zonaId);
+                console.log('Rendering Ciudades:', formData.ciudadId);
+                console.log('Rendering Estados:', formData.estadoId);
+  console.log('Rendering estados:', estados);
+
   return (
+    
     <section className="form-section">
       <h2>Ubicación</h2>
       <div className="form-grid">
@@ -15,6 +21,7 @@ const LocationSection = ({ formData, handleChange, estados, ciudades, zonas, set
               onChange={handleChange} 
               required
             >
+
               <option value="">Seleccione...</option>
               {estados.map((estado) => (
                 <option key={estado.id} value={estado.id}>{estado.nombre}</option>

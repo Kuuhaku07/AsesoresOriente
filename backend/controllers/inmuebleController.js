@@ -312,6 +312,32 @@ export const getModificarInmuebleData = async (req, res) => {
   }
 };
 
+export const getZonaById = async (req, res) => {
+  try {
+    const zonaId = parseInt(req.params.zonaId);
+    if (isNaN(zonaId)) {
+      return res.status(400).json({ error: 'ID de zona inválido' });
+    }
+    const zona = await inmuebleService.getZonaById(zonaId);
+    if (!zona) {
+      return res.status(404).json({ error: 'Zona no encontrada' });
+    }
+    // Return enhanced zona data including ciudad and estado info
+    res.json({
+      id: zona.id,
+      nombre: zona.nombre,
+      ciudad_id: zona.ciudad_id,
+      ciudad_nombre: zona.ciudad_nombre,
+      estado_id: zona.estado_id,
+      estado_nombre: zona.estado_nombre,
+      codigo_postal: zona.codigo_postal
+    });
+  } catch (error) {
+    console.error('Error getting zona by id:', error);
+    res.status(500).json({ error: 'Failed to get zona by id' });
+  }
+};
+
 /**
  * Controlador para actualizar un inmueble existente.
  */

@@ -22,6 +22,7 @@ import {
   uploadInmuebleImage,
   uploadInmuebleDocument,
   getModificarInmuebleData,
+  getZonaById,
   updateInmueble
 } from '../controllers/inmuebleController.js';
 
@@ -96,6 +97,7 @@ router.get('/propietarios/empresa', getPropietariosEmpresa);
 router.get('/ubicacion/estados', getEstados);
 router.get('/ubicacion/ciudades/:estadoId', getCiudades);
 router.get('/ubicacion/zonas/:ciudadId', getZonas);
+router.get('/ubicacion/zona/:zonaId', getZonaById);
 router.get('/tiponegocios', getTipoNegocios);
 router.get('/caracteristicas', getCaracteristicas);
 

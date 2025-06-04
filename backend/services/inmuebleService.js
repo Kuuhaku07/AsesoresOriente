@@ -262,6 +262,23 @@ export const getZonas = async (ciudadId) => {
   return result.rows;
 };
 
+export const getZonaById = async (zonaId) => {
+  if (!zonaId || isNaN(zonaId)) {
+    return null;
+  }
+  const result = await pool.query(
+    `SELECT z.id, z.nombre, z.ciudad_id, z.codigo_postal,
+            c.nombre AS ciudad_nombre, c.estado_id,
+            e.nombre AS estado_nombre
+     FROM "Zona" z
+     JOIN "Ciudad" c ON z.ciudad_id = c.id
+     JOIN "Estado" e ON c.estado_id = e.id
+     WHERE z.id = $1`,
+    [zonaId]
+  );
+  return result.rows[0] || null;
+};
+
 export const getTipoNegocios = async () => {
   const result = await pool.query('SELECT id, nombre FROM "TipoNegocio" ORDER BY nombre');
   return result.rows;

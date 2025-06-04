@@ -118,7 +118,15 @@ const ModificarInmueble = () => {
             fetch('/api/inmueble/ubicacion/estados')
         ]);
         
-        if (!dataResponse.ok) throw new Error('Error al cargar datos del inmueble');
+        if (!dataResponse.ok) {
+          if (dataResponse.status === 500) {
+            toastRef.current?.addToast('Inmueble no encontrado', 'error', 5000);
+            setLoading(false);
+            setInitialLoadComplete(true);
+            return;
+          }
+          throw new Error('Error al cargar datos del inmueble');
+        }
         if (!estadosResponse.ok) throw new Error('Error al cargar estados');
         
         const data = await dataResponse.json();
@@ -144,61 +152,87 @@ const ModificarInmueble = () => {
             let ciudadId = '';
             let estadoId = '';
             let zonasData = [];
+            let ciudadesData = [];
 
             if (inmueble.zona_id) {
-            try {
-                const zonaResponse = await fetch(`/api/inmueble/ubicacion/zonas/${inmueble.zona_id}`);
+              try {
+                // Obtener zona para extraer ciudad_id y estado_id
+                const zonaResponse = await fetch(`/api/inmueble/ubicacion/zona/${inmueble.zona_id}`);
                 if (zonaResponse.ok) {
-                const zonaData = await zonaResponse.json();
-                ciudadId = zonaData.ciudad_id;
-                
-                // Cargar todas las zonas para esta ciudad
-                if (ciudadId) {
+                  const zonaData = await zonaResponse.json();
+                  ciudadId = zonaData.ciudad_id;
+                  estadoId = zonaData.estado_id;
+
+                  // Cargar todas las zonas para esta ciudad
+                  if (ciudadId) {
                     const zonasResponse = await fetch(`/api/inmueble/ubicacion/zonas/${ciudadId}`);
                     if (zonasResponse.ok) {
-                    zonasData = await zonasResponse.json();
+                      zonasData = await zonasResponse.json();
                     }
+                  }
                 }
-                }
-            } catch (error) {
+              } catch (error) {
                 console.error('Error cargando zona:', error);
+              }
+            } else if (inmueble.ciudad_id) {
+              ciudadId = inmueble.ciudad_id;
+              try {
+                // Obtener estado_id desde ciudades por estadoId no es posible, se asume que frontend tiene estados
+                // Cargar zonas para ciudad
+                const zonasResponse = await fetch(`/api/inmueble/ubicacion/zonas/${ciudadId}`);
+                if (zonasResponse.ok) {
+                  zonasData = await zonasResponse.json();
+                }
+              } catch (error) {
+                console.error('Error cargando ciudad o zonas:', error);
+              }
             }
 
-            }
-            
             setFormData({
-                codigo: inmueble.codigo,
-                titulo: inmueble.titulo,
-                descripcion: inmueble.descripcion,
-                tipoInmuebleId: inmueble.tipo_inmueble_id?.toString() || '',
-                estadoInmuebleId: inmueble.estado_id?.toString() || '',
-                asesorId: inmueble.asesor_id?.toString() || '',
-                propietarioTipo: inmueble.propietarioTipo || 'persona',
-                propietarioId: inmueble.propietario_persona_id 
-                    ? inmueble.propietario_persona_id.toString() 
-                    : inmueble.propietario_empresa_id?.toString() || '',
-                areaConstruida: inmueble.area_construida?.toString() || '',
-                areaTerreno: inmueble.area_terreno?.toString() || '',
-                habitaciones: inmueble.habitaciones || 0,
-                banos: inmueble.banos || 0,
-                estacionamientos: inmueble.estacionamientos || 0,
-                niveles: inmueble.niveles || 1,
-                anoConstruccion: inmueble.ano_construccion?.toString() || '',
-                amueblado: inmueble.amueblado || false,
-                climatizado: inmueble.climatizado || false,
-                estadoId: estadoId ? estadoId.toString() : '',
-                ciudadId: ciudadId ? ciudadId.toString() : '',
-                zonaId: inmueble.zona_id ? inmueble.zona_id.toString() : '',
-                direccionExacta: inmueble.direccion_exacta || '',
-                referencia: inmueble.referencia || '',
-                coordenadas: inmueble.coordenadas || '',
-                tipoNegocios: inmueble.tipoNegocios || [],
-                caracteristicas: inmueble.caracteristicas || [],
-                caracteristicasPersonalizadas: inmueble.caracteristicasPersonalizadas || [],
-                imagenes: inmueble.imagenes || [],
-                });
+              codigo: inmueble.codigo,
+              titulo: inmueble.titulo,
+              descripcion: inmueble.descripcion,
+              tipoInmuebleId: inmueble.tipo_inmueble_id?.toString() || '',
+              estadoInmuebleId: inmueble.estado_id?.toString() || '',
+              asesorId: inmueble.asesor_id?.toString() || '',
+              propietarioTipo: inmueble.propietarioTipo || 'persona',
+              propietarioId: inmueble.propietario_persona_id
+                ? inmueble.propietario_persona_id.toString()
+                : inmueble.propietario_empresa_id?.toString() || '',
+              areaConstruida: inmueble.area_construida?.toString() || '',
+              areaTerreno: inmueble.area_terreno?.toString() || '',
+              habitaciones: inmueble.habitaciones || 0,
+              banos: inmueble.banos || 0,
+              estacionamientos: inmueble.estacionamientos || 0,
+              niveles: inmueble.niveles || 1,
+              anoConstruccion: inmueble.ano_construccion?.toString() || '',
+              amueblado: inmueble.amueblado || false,
+              climatizado: inmueble.climatizado || false,
+              estadoId: estadoId ? estadoId.toString() : '',
+              ciudadId: ciudadId ? ciudadId.toString() : '',
+              zonaId: inmueble.zona_id ? inmueble.zona_id.toString() : '',
+              direccionExacta: inmueble.direccion_exacta || '',
+              referencia: inmueble.referencia || '',
+              coordenadas: inmueble.coordenadas || '',
+              tipoNegocios: inmueble.tipoNegocios || [],
+              caracteristicas: inmueble.caracteristicas || [],
+              caracteristicasPersonalizadas: inmueble.caracteristicasPersonalizadas || [],
+              imagenes: inmueble.imagenes || [],
+            });
 
-            setCiudades(estadosData.filter(e => e.estado_id === estadoId));
+            // Corregir setCiudades para usar ciudadesData o fetch ciudades por estadoId
+            if (estadoId) {
+              try {
+                const ciudadesResponse = await fetch(`/api/inmueble/ubicacion/ciudades/${estadoId}`);
+                if (ciudadesResponse.ok) {
+                  ciudadesData = await ciudadesResponse.json();
+                }
+              } catch (error) {
+                console.error('Error cargando ciudades:', error);
+              }
+            }
+
+            setCiudades(ciudadesData);
             setZonas(zonasData);
             setDocumentosInmueble(inmueble.documentos || []);
 
