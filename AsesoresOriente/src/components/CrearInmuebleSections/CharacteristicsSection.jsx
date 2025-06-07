@@ -8,7 +8,9 @@ const CharacteristicsSection = ({
   formData,
   setFormData,
   tipoCaracteristicasOptions,
+  refreshCaracteristicas,
 }) => {
+  console.log('CharacteristicsSection props:', { filteredCaracteristicas, tipoCaracteristicasOptions, formData });
   const [showCaracteristicaModal, setShowCaracteristicaModal] = React.useState(false);
   const [isEditingCaracteristica, setIsEditingCaracteristica] = React.useState(false);
   const [currentCaracteristica, setCurrentCaracteristica] = React.useState({
@@ -98,6 +100,36 @@ const CharacteristicsSection = ({
       setShowCaracteristicaModal(false);
       // Clear selection after save
       setSelectedCaracteristicaId(null);
+
+      // Refresh characteristics list in parent component
+      if (typeof refreshCaracteristicas === 'function') {
+        await refreshCaracteristicas();
+
+        // After refreshing characteristics list, update filteredCaracteristicas state to reflect new data
+        setFilteredCaracteristicas((prevFiltered) => {
+          const updatedFiltered = [...prevFiltered];
+          // Replace with fresh data from parent (assumed to be updated by refreshCaracteristicas)
+          // This assumes parent passes updated filteredCaracteristicas prop after refresh
+          return updatedFiltered;
+        });
+
+        // After refreshing characteristics list, update formData.caracteristicas to sync with updated types
+        setFormData((prev) => {
+          const updatedCaracteristicas = prev.caracteristicas.map((c) => {
+            const updatedCarac = filteredCaracteristicas.find(fc => fc.id === c.caracteristicaId);
+            if (updatedCarac) {
+              return {
+                ...c,
+                nombre: updatedCarac.nombre,
+                tipo_id: updatedCarac.tipo_id,
+                descripcion: updatedCarac.descripcion,
+              };
+            }
+            return c;
+          });
+          return { ...prev, caracteristicas: updatedCaracteristicas };
+        });
+      }
     } catch (error) {
       alert(error.message);
     }
@@ -188,6 +220,44 @@ const CharacteristicsSection = ({
                 />
                 <span className="checkbox-custom"></span>
               </label>
+              {(() => {
+                const tipoCarac = tipoCaracteristicasOptions.find(t => t.id === carac.tipo_id);
+                if (tipoCarac && tipoCarac.unidad_medida) {
+                  const caracteristicaData = formData.caracteristicas.find(c => c.caracteristicaId === carac.id);
+                  if (caracteristicaData && caracteristicaData.tiene === true) {
+                    return (
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        value={caracteristicaData ? (caracteristicaData.cantidad || '') : ''}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData((prev) => {
+                            const exists = prev.caracteristicas.find(c => c.caracteristicaId === carac.id);
+                            let newCaracteristicas;
+                            if (exists) {
+                              newCaracteristicas = prev.caracteristicas.map(c =>
+                                c.caracteristicaId === carac.id ? { ...c, cantidad: value } : c
+                              );
+                            } else {
+                              newCaracteristicas = [...prev.caracteristicas, {
+                                caracteristicaId: carac.id,
+                                tiene: false,
+                                cantidad: value
+                              }];
+                            }
+                            return { ...prev, caracteristicas: newCaracteristicas };
+                          });
+                        }}
+                        style={{ width: '80px', marginLeft: '8px' }}
+                        placeholder={tipoCarac.unidad_medida}
+                      />
+                    );
+                  }
+                }
+                return null;
+              })()}
             </div>
           ))}
         </div>

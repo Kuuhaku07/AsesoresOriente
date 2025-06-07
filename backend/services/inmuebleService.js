@@ -277,12 +277,12 @@ export const getTipoNegocios = async () => {
 };
 
 export const getCaracteristicas = async () => {
-  const result = await pool.query('SELECT c.id, c.nombre, tc.nombre AS tipo FROM "Caracteristica" c JOIN "TipoCaracteristica" tc ON c.tipo_id = tc.id ORDER BY c.nombre');
-  return result.rows.map(c => ({ id: c.id, nombre: c.nombre, tipo: c.tipo }));
+  const result = await pool.query('SELECT c.id, c.nombre, c.tipo_id, tc.nombre AS tipo FROM "Caracteristica" c JOIN "TipoCaracteristica" tc ON c.tipo_id = tc.id ORDER BY c.nombre');
+  return result.rows.map(c => ({ id: c.id, nombre: c.nombre, tipo_id: c.tipo_id, tipo: c.tipo }));
 };
 
 export const getTipoCaracteristicas = async () => {
-  const result = await pool.query('SELECT id, nombre FROM "TipoCaracteristica" ORDER BY nombre');
+  const result = await pool.query('SELECT id, nombre, unidad_medida FROM "TipoCaracteristica" ORDER BY nombre');
   return result.rows;
 };
 
@@ -550,7 +550,7 @@ export const getAllModificarInmuebleData = async (inmuebleId = null) => {
 
       // Fetch inmueble caracteristicas
       const caracteristicasResult = await client.query(`
-        SELECT ic.caracteristica_id AS id, c.nombre, c.tipo_id, ic.valor, ic.cantidad
+        SELECT ic.caracteristica_id AS id, c.nombre, c.tipo_id, ic.tiene, ic.cantidad
         FROM "InmuebleCaracteristica" ic
         JOIN "Caracteristica" c ON ic.caracteristica_id = c.id
         WHERE ic.inmueble_id = $1

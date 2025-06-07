@@ -13,6 +13,7 @@ import {
   getZonas,
   getTipoNegocios,
   getCaracteristicas,
+  getCaracteristicaById,
   createCaracteristica,
   updateCaracteristica,
   createPropietarioPersona,
@@ -102,6 +103,7 @@ router.get('/ubicacion/zonas/:ciudadId', getZonas);
 router.get('/ubicacion/zona/:zonaId', getZonaById);
 router.get('/tiponegocios', getTipoNegocios);
 router.get('/caracteristicas', getCaracteristicas);
+router.get('/caracteristicas/:id', getCaracteristicaById);
 router.get('/tipocaracteristicas', getTipoCaracteristicas);
 
 // New routes for caracteristica

@@ -32,6 +32,7 @@ export const getTipoCaracteristicas = async (req, res) => {
   }
 };
 
+
 /**
  * Controlador para crear un nuevo inmueble.
  */

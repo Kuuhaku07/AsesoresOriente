@@ -24,4 +24,10 @@
     "unidad_medida": null,
     "es_prioritaria": false
   }
+  ,
+  {
+    "nombre": "Extra medible",
+    "unidad_medida": "m²",
+    "es_prioritaria": false
+  }
 ]

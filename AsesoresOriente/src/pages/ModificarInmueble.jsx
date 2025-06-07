@@ -43,6 +43,36 @@ const ModificarInmueble = () => {
   const [submitting, setSubmitting] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
+  // State for tipoCaracteristicasOptions
+  const [tipoCaracteristicasOptions, setTipoCaracteristicasOptions] = useState([]);
+
+  // Fetch tipoCaracteristicasOptions from backend
+  useEffect(() => {
+    const fetchTipoCaracteristicas = async () => {
+      try {
+        const res = await fetch('/api/inmueble/tipocaracteristicas');
+        if (!res.ok) throw new Error('Failed to fetch tipoCaracteristicas');
+        const tipos = await res.json();
+        setTipoCaracteristicasOptions(tipos);
+      } catch (error) {
+        console.error('Error fetching tipoCaracteristicas:', error);
+      }
+    };
+    fetchTipoCaracteristicas();
+  }, []);
+
+  // Function to fetch updated characteristics list
+  const fetchCaracteristicas = async () => {
+    try {
+      const res = await fetch('/api/inmueble/caracteristicas');
+      if (!res.ok) throw new Error('Failed to fetch caracteristicas');
+      const data = await res.json();
+      setCaracteristicas(data);
+    } catch (error) {
+      console.error('Error fetching caracteristicas:', error);
+    }
+  };
+
   // Estado para el nuevo propietario
   const [newPropietario, setNewPropietario] = useState({
     tipo: 'persona',
@@ -193,41 +223,45 @@ const ModificarInmueble = () => {
               }
             }
 
-    setFormData({
-      codigo: inmueble.codigo,
-      titulo: inmueble.titulo,
-      descripcion: inmueble.descripcion,
-      tipoInmuebleId: inmueble.tipo_inmueble_id?.toString() || '',
-      estadoInmuebleId: inmueble.estado_id?.toString() || '',
-      asesorId: inmueble.asesor_id?.toString() || '',
-      propietarioTipo: inmueble.propietarioTipo || 'persona',
-      propietarioId: inmueble.propietario_persona_id
-        ? inmueble.propietario_persona_id.toString()
-        : inmueble.propietario_empresa_id?.toString() || '',
-      areaConstruida: inmueble.area_construida?.toString() || '',
-      areaTerreno: inmueble.area_terreno?.toString() || '',
-      habitaciones: inmueble.habitaciones || 0,
-      banos: inmueble.banos || 0,
-      estacionamientos: inmueble.estacionamientos || 0,
-      niveles: inmueble.niveles || 1,
-      anoConstruccion: inmueble.ano_construccion?.toString() || '',
-      amueblado: inmueble.amueblado || false,
-      climatizado: inmueble.climatizado || false,
-      estadoId: estadoId ? estadoId.toString() : '',
-      ciudadId: ciudadId ? ciudadId.toString() : '',
-      zonaId: inmueble.zona_id ? inmueble.zona_id.toString() : '',
-      direccionExacta: inmueble.direccion_exacta || '',
-      referencia: inmueble.referencia || '',
-      coordenadas: inmueble.coordenadas || '',
-      tipoNegocios: inmueble.tipoNegocios ? inmueble.tipoNegocios.map(tn => ({
-        tipoNegocioId: tn.id,
-        precio: tn.precio,
-        moneda: tn.moneda,
-        disponible: tn.disponible
-      })) : [],
-      caracteristicas: inmueble.caracteristicas || [],
-      imagenes: inmueble.imagenes || [],
-    });
+      setFormData({
+        codigo: inmueble.codigo,
+        titulo: inmueble.titulo,
+        descripcion: inmueble.descripcion,
+        tipoInmuebleId: inmueble.tipo_inmueble_id?.toString() || '',
+        estadoInmuebleId: inmueble.estado_id?.toString() || '',
+        asesorId: inmueble.asesor_id?.toString() || '',
+        propietarioTipo: inmueble.propietarioTipo || 'persona',
+        propietarioId: inmueble.propietario_persona_id
+          ? inmueble.propietario_persona_id.toString()
+          : inmueble.propietario_empresa_id?.toString() || '',
+        areaConstruida: inmueble.area_construida?.toString() || '',
+        areaTerreno: inmueble.area_terreno?.toString() || '',
+        habitaciones: inmueble.habitaciones || 0,
+        banos: inmueble.banos || 0,
+        estacionamientos: inmueble.estacionamientos || 0,
+        niveles: inmueble.niveles || 1,
+        anoConstruccion: inmueble.ano_construccion?.toString() || '',
+        amueblado: inmueble.amueblado || false,
+        climatizado: inmueble.climatizado || false,
+        estadoId: estadoId ? estadoId.toString() : '',
+        ciudadId: ciudadId ? ciudadId.toString() : '',
+        zonaId: inmueble.zona_id ? inmueble.zona_id.toString() : '',
+        direccionExacta: inmueble.direccion_exacta || '',
+        referencia: inmueble.referencia || '',
+        coordenadas: inmueble.coordenadas || '',
+        tipoNegocios: inmueble.tipoNegocios ? inmueble.tipoNegocios.map(tn => ({
+          tipoNegocioId: tn.id,
+          precio: tn.precio,
+          moneda: tn.moneda,
+          disponible: tn.disponible
+        })) : [],
+        caracteristicas: inmueble.caracteristicas ? inmueble.caracteristicas.map(c => ({
+          caracteristicaId: c.id,
+          tiene: true,
+          cantidad: c.cantidad || null
+        })) : [],
+        imagenes: inmueble.imagenes || [],
+      });
 
             // Corregir setCiudades para usar ciudadesData o fetch ciudades por estadoId
             if (estadoId) {
@@ -358,6 +392,18 @@ const ModificarInmueble = () => {
       setFilteredCaracteristicas(caracteristicas);
     }
   }, [caracteristicaSearch, caracteristicas]);
+
+  // Function to refresh characteristics list from backend
+  const refreshCaracteristicas = async () => {
+    try {
+      const res = await fetch('/api/inmueble/caracteristicas');
+      if (!res.ok) throw new Error('Failed to fetch caracteristicas');
+      const data = await res.json();
+      setCaracteristicas(data);
+    } catch (error) {
+      console.error('Error refreshing caracteristicas:', error);
+    }
+  };
 
   // Manejadores de eventos (los mismos que en CrearInmueble)
   const handleChange = (e) => {
@@ -852,7 +898,7 @@ const ModificarInmueble = () => {
 
         {/* SECCIÓN: Características */} 
         {activeTab === 'caracteristicas' && (
-          <CharacteristicsSection 
+        <CharacteristicsSection 
             formData={formData} 
             setFormData={setFormData} 
             caracteristicaSearch={caracteristicaSearch}
@@ -862,6 +908,7 @@ const ModificarInmueble = () => {
             handleAddCustomCharacteristic={handleAddCustomCharacteristic}
             handleCustomCharacteristicChange={handleCustomCharacteristicChange}
             handleRemoveCustomCharacteristic={handleRemoveCustomCharacteristic}
+            tipoCaracteristicasOptions={tipoCaracteristicasOptions}
           />
         )}
 
