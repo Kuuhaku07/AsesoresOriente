@@ -31,7 +31,6 @@ export const createInmueble = async (inmuebleData) => {
       climatizado,
       tipoNegocios,
       caracteristicas,
-      caracteristicasPersonalizadas,
       imagenes,
       documentos,
       estadoId,
@@ -112,27 +111,20 @@ export const createInmueble = async (inmuebleData) => {
     // Insertar características
     if (Array.isArray(caracteristicas)) {
       for (const c of caracteristicas) {
-        const { caracteristicaId, valor, cantidad } = c;
+        const { caracteristicaId, tiene, cantidad } = c;
         const caracteristicaInsertQuery = `
-          INSERT INTO "InmuebleCaracteristica" (inmueble_id, caracteristica_id, valor, cantidad)
+          INSERT INTO "InmuebleCaracteristica" (inmueble_id, caracteristica_id, tiene, cantidad)
           VALUES ($1,$2,$3,$4)`;
         await client.query(caracteristicaInsertQuery, [
           inmueble.id,
           caracteristicaId,
-          valor,
+          tiene,
           cantidad || null
         ]);
       }
     }
 
-    // Insertar características personalizadas (como características con nombre y valor)
-    if (Array.isArray(caracteristicasPersonalizadas)) {
-      for (const c of caracteristicasPersonalizadas) {
-        // Insertar en Caracteristica si no existe o manejar de otra forma
-        // Para simplificar, se omite inserción en Caracteristica y se guarda como InmuebleCaracteristica con nombre personalizado
-        // Esto requiere un ajuste en el esquema o manejo especial, here we skip DB insert for custom for now
-      }
-    }
+    
 
     // Insertar imágenes
     if (Array.isArray(imagenes)) {
@@ -287,6 +279,65 @@ export const getTipoNegocios = async () => {
 export const getCaracteristicas = async () => {
   const result = await pool.query('SELECT c.id, c.nombre, tc.nombre AS tipo FROM "Caracteristica" c JOIN "TipoCaracteristica" tc ON c.tipo_id = tc.id ORDER BY c.nombre');
   return result.rows.map(c => ({ id: c.id, nombre: c.nombre, tipo: c.tipo }));
+};
+
+export const getTipoCaracteristicas = async () => {
+  const result = await pool.query('SELECT id, nombre FROM "TipoCaracteristica" ORDER BY nombre');
+  return result.rows;
+};
+
+export const createCaracteristica = async (caracteristicaData) => {
+  const { nombre, tipo_id, descripcion } = caracteristicaData;
+  const client = await pool.connect();
+  try {
+    const insertQuery = `
+      INSERT INTO "Caracteristica" (nombre, tipo_id, descripcion)
+      VALUES ($1, $2, $3)
+      RETURNING id, nombre, tipo_id, descripcion
+    `;
+    const result = await client.query(insertQuery, [nombre, tipo_id, descripcion]);
+    return result.rows[0];
+  } catch (error) {
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const updateCaracteristica = async (id, caracteristicaData) => {
+  const { nombre, tipo_id, descripcion } = caracteristicaData;
+  const client = await pool.connect();
+  try {
+    const updateQuery = `
+      UPDATE "Caracteristica"
+      SET nombre = $1, tipo_id = $2, descripcion = $3
+      WHERE id = $4
+      RETURNING id, nombre, tipo_id, descripcion
+    `;
+    const result = await client.query(updateQuery, [nombre, tipo_id, descripcion, id]);
+    return result.rows[0];
+  } catch (error) {
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const getCaracteristicaById = async (id) => {
+  const client = await pool.connect();
+  try {
+    const query = `
+      SELECT id, nombre, tipo_id, descripcion
+      FROM "Caracteristica"
+      WHERE id = $1
+    `;
+    const result = await client.query(query, [id]);
+    return result.rows[0] || null;
+  } catch (error) {
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 /**
@@ -598,7 +649,6 @@ export const updateInmueble = async (inmuebleId, inmuebleData) => {
       climatizado,
       tipoNegocios,
       caracteristicas,
-      caracteristicasPersonalizadas,
       imagenes,
       documentos,
       estadoId,
@@ -709,14 +759,14 @@ export const updateInmueble = async (inmuebleId, inmuebleData) => {
     await client.query('DELETE FROM "InmuebleCaracteristica" WHERE inmueble_id = $1', [inmueble.id]);
     if (Array.isArray(caracteristicas)) {
       for (const c of caracteristicas) {
-        const { caracteristicaId, valor, cantidad } = c;
+        const { caracteristicaId, tiene, cantidad } = c;
         const caracteristicaInsertQuery = `
-          INSERT INTO "InmuebleCaracteristica" (inmueble_id, caracteristica_id, valor, cantidad)
+          INSERT INTO "InmuebleCaracteristica" (inmueble_id, caracteristica_id, tiene, cantidad)
           VALUES ($1,$2,$3,$4)`;
         await client.query(caracteristicaInsertQuery, [
           inmueble.id,
           caracteristicaId,
-          valor,
+          tiene,
           cantidad || null
         ]);
       }

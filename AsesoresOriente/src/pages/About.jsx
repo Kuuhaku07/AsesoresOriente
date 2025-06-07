@@ -7,8 +7,8 @@ import {
 } from 'react-icons/fa';
 
 // Placeholder images (to be replaced later)
-const image1 = 'https://via.placeholder.com/800x400?text=Imagen+1';
-const image2 = 'https://via.placeholder.com/500x300?text=Imagen+2';
+const image1 = '/img/about/about1.png'; 
+const image2 = '/img/about/about2.png';
 
 const About = () => {
   return (

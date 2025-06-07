@@ -239,7 +239,7 @@ CREATE TABLE "UbicacionInmueble" (
 CREATE TABLE "InmuebleCaracteristica" (
     "inmueble_id" INTEGER NOT NULL REFERENCES "Inmueble"("id") ON DELETE CASCADE,
     "caracteristica_id" INTEGER NOT NULL REFERENCES "Caracteristica"("id"),
-    "valor" VARCHAR(255) NULL,
+    "tiene" BOOLEAN NOT NULL DEFAULT FALSE,
     "cantidad" INTEGER NULL,
     PRIMARY KEY ("inmueble_id", "caracteristica_id")
 );

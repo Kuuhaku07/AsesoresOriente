@@ -1,0 +1,27 @@
+[
+  {
+    "nombre": "Extra",
+    "unidad_medida": null,
+    "es_prioritaria": false
+  },
+  {
+    "nombre": "Ubicación",
+    "unidad_medida": null,
+    "es_prioritaria": false
+  },
+  {
+    "nombre": "Amenidad",
+    "unidad_medida": null,
+    "es_prioritaria": false
+  },
+  {
+    "nombre": "Seguridad",
+    "unidad_medida": null,
+    "es_prioritaria": false
+  },
+  {
+    "nombre": "Conservación",
+    "unidad_medida": null,
+    "es_prioritaria": false
+  }
+]

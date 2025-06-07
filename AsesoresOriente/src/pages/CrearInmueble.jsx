@@ -83,9 +83,7 @@ const CrearInmueble = () => {
     coordenadas: '',
     tipoNegocios: [],
     caracteristicas: [],
-    caracteristicasPersonalizadas: [],
     imagenes: [],
-    // Remove documentos from formData, manage separately
   });
 
   // Add separate states for documentosInmueble and documentosPropietario
@@ -107,6 +105,7 @@ const CrearInmueble = () => {
   const [filteredCaracteristicas, setFilteredCaracteristicas] = useState([]);
   const [estadoCivilOptions, setEstadoCivilOptions] = useState([]);
   const [tiposDocumento, setTiposDocumento] = useState([]);
+  const [tipoCaracteristicasOptions, setTipoCaracteristicasOptions] = useState([]);
 
   // Loading and error states for options fetching
   const [loadingOptions, setLoadingOptions] = useState(false);
@@ -125,6 +124,21 @@ const CrearInmueble = () => {
       }
     };
     fetchTiposDocumento();
+  }, []);
+
+  // Fetch tipoCaracteristicas from backend
+  useEffect(() => {
+    const fetchTipoCaracteristicas = async () => {
+      try {
+        const res = await fetch('/api/inmueble/tipocaracteristicas');
+        if (!res.ok) throw new Error('Failed to fetch tipoCaracteristicas');
+        const tipos = await res.json();
+        setTipoCaracteristicasOptions(tipos);
+      } catch (error) {
+        console.error('Error fetching tipoCaracteristicas:', error);
+      }
+    };
+    fetchTipoCaracteristicas();
   }, []);
 
   // Mapping of estadoId to coordinates [lat, lng]
@@ -715,17 +729,7 @@ setPropietariosPersona([...propietariosPersona, {
    * Agrega una nueva característica personalizada
    */
   const handleAddCustomCharacteristic = () => {
-    const newCharacteristic = {
-      id: Date.now(), // ID temporal
-      nombre: `Característica personalizada ${formData.caracteristicasPersonalizadas.length + 1}`,
-      valor: '',
-      personalizada: true
-    };
-    
-    setFormData(prev => ({
-      ...prev,
-      caracteristicasPersonalizadas: [...prev.caracteristicasPersonalizadas, newCharacteristic]
-    }));
+    // Removed as caracteristicasPersonalizadas is no longer used
   };
 
   /**
@@ -735,12 +739,7 @@ setPropietariosPersona([...propietariosPersona, {
    * @param {String} value - Nuevo valor
    */
   const handleCustomCharacteristicChange = (id, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      caracteristicasPersonalizadas: prev.caracteristicasPersonalizadas.map(c => 
-        c.id === id ? { ...c, [field]: value } : c
-      )
-    }));
+    // Removed as caracteristicasPersonalizadas is no longer used
   };
 
   /**
@@ -748,10 +747,7 @@ setPropietariosPersona([...propietariosPersona, {
    * @param {Number} id - ID de la característica a eliminar
    */
   const handleRemoveCustomCharacteristic = (id) => {
-    setFormData(prev => ({
-      ...prev,
-      caracteristicasPersonalizadas: prev.caracteristicasPersonalizadas.filter(c => c.id !== id)
-    }));
+    // Removed as caracteristicasPersonalizadas is no longer used
   };
 
   /**
@@ -1079,10 +1075,11 @@ setPropietariosPersona([...propietariosPersona, {
             setCaracteristicaSearch={setCaracteristicaSearch}
             filteredCaracteristicas={filteredCaracteristicas}
             setFilteredCaracteristicas={setFilteredCaracteristicas}
-            handleAddCustomCharacteristic={handleAddCustomCharacteristic}
-            handleCustomCharacteristicChange={handleCustomCharacteristicChange}
-            handleRemoveCustomCharacteristic={handleRemoveCustomCharacteristic}
-          />
+        handleAddCustomCharacteristic={handleAddCustomCharacteristic}
+        handleCustomCharacteristicChange={handleCustomCharacteristicChange}
+        handleRemoveCustomCharacteristic={handleRemoveCustomCharacteristic}
+        tipoCaracteristicasOptions={tipoCaracteristicasOptions}
+      />
         )}
 
         {/* SECCIÓN: Multimedia */}

@@ -13,6 +13,8 @@ import {
   getZonas,
   getTipoNegocios,
   getCaracteristicas,
+  createCaracteristica,
+  updateCaracteristica,
   createPropietarioPersona,
   updatePropietarioPersona,
   createPropietarioEmpresa,
@@ -23,9 +25,9 @@ import {
   uploadInmuebleDocument,
   getModificarInmuebleData,
   getZonaById,
-  updateInmueble
+  updateInmueble,
+  getTipoCaracteristicas
 } from '../controllers/inmuebleController.js';
-
 
 
 // Configuración de multer para subir imágenes de inmuebles
@@ -100,6 +102,11 @@ router.get('/ubicacion/zonas/:ciudadId', getZonas);
 router.get('/ubicacion/zona/:zonaId', getZonaById);
 router.get('/tiponegocios', getTipoNegocios);
 router.get('/caracteristicas', getCaracteristicas);
+router.get('/tipocaracteristicas', getTipoCaracteristicas);
+
+// New routes for caracteristica
+router.post('/caracteristicas', createCaracteristica);
+router.put('/caracteristicas/:id', updateCaracteristica);
 
 // New routes for propietario persona
 router.post('/propietarios/persona', createPropietarioPersona);

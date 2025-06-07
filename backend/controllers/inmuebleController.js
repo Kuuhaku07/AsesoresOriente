@@ -20,6 +20,19 @@ const deleteFiles = (filePaths) => {
 };
 
 /**
+ * Controlador para obtener tipos de características.
+ */
+export const getTipoCaracteristicas = async (req, res) => {
+  try {
+    const tipos = await inmuebleService.getTipoCaracteristicas();
+    res.json(tipos);
+  } catch (error) {
+    console.error('Error getting tipoCaracteristicas:', error);
+    res.status(500).json({ error: 'Failed to get tipoCaracteristicas' });
+  }
+};
+
+/**
  * Controlador para crear un nuevo inmueble.
  */
 export const createInmueble = async (req, res) => {
@@ -222,6 +235,49 @@ export const getCaracteristicas = async (req, res) => {
   } catch (error) {
     console.error('Error getting caracteristicas:', error);
     res.status(500).json({ error: 'Failed to get caracteristicas' });
+  }
+};
+
+/**
+ * Controlador para crear una nueva característica.
+ */
+export const createCaracteristica = async (req, res) => {
+  try {
+    const caracteristicaData = req.body;
+    const newCaracteristica = await inmuebleService.createCaracteristica(caracteristicaData);
+    res.status(201).json(newCaracteristica);
+  } catch (error) {
+    console.error('Error creating caracteristica:', error);
+    res.status(500).json({ error: 'Failed to create caracteristica' });
+  }
+};
+
+/**
+ * Controlador para actualizar una característica existente.
+ */
+export const updateCaracteristica = async (req, res) => {
+  try {
+    const caracteristicaId = req.params.id;
+    const caracteristicaData = req.body;
+    const updatedCaracteristica = await inmuebleService.updateCaracteristica(caracteristicaId, caracteristicaData);
+    res.json(updatedCaracteristica);
+  } catch (error) {
+    console.error('Error updating caracteristica:', error);
+    res.status(500).json({ error: 'Failed to update caracteristica' });
+  }
+};
+
+export const getCaracteristicaById = async (req, res) => {
+  try {
+    const caracteristicaId = req.params.id;
+    const caracteristica = await inmuebleService.getCaracteristicaById(caracteristicaId);
+    if (!caracteristica) {
+      return res.status(404).json({ error: 'Característica no encontrada' });
+    }
+    res.json(caracteristica);
+  } catch (error) {
+    console.error('Error getting caracteristica by id:', error);
+    res.status(500).json({ error: 'Failed to get caracteristica by id' });
   }
 };
 
