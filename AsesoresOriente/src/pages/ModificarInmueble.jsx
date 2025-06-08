@@ -903,13 +903,14 @@ const ModificarInmueble = () => {
             setFormData={setFormData} 
             caracteristicaSearch={caracteristicaSearch}
             setCaracteristicaSearch={setCaracteristicaSearch}
-            filteredCaracteristicas={filteredCaracteristicas}
-            setFilteredCaracteristicas={setFilteredCaracteristicas}
-            handleAddCustomCharacteristic={handleAddCustomCharacteristic}
-            handleCustomCharacteristicChange={handleCustomCharacteristicChange}
-            handleRemoveCustomCharacteristic={handleRemoveCustomCharacteristic}
-            tipoCaracteristicasOptions={tipoCaracteristicasOptions}
-          />
+        filteredCaracteristicas={filteredCaracteristicas}
+        setFilteredCaracteristicas={setFilteredCaracteristicas}
+        refreshCaracteristicas={refreshCaracteristicas}
+        handleAddCustomCharacteristic={handleAddCustomCharacteristic}
+        handleCustomCharacteristicChange={handleCustomCharacteristicChange}
+        handleRemoveCustomCharacteristic={handleRemoveCustomCharacteristic}
+        tipoCaracteristicasOptions={tipoCaracteristicasOptions}
+      />
         )}
 
         {/* SECCIÓN: Multimedia */} 

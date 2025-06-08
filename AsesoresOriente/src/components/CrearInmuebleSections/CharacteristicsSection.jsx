@@ -3,6 +3,7 @@ import CaracteristicaModal from './CaracteristicaModal';
 
 const CharacteristicsSection = ({
   filteredCaracteristicas,
+  setFilteredCaracteristicas,
   caracteristicaSearch,
   setCaracteristicaSearch,
   formData,

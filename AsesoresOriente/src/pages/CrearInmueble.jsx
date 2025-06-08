@@ -359,6 +359,18 @@ const CrearInmueble = () => {
     }
   }, [caracteristicaSearch, caracteristicas]);
 
+  // Function to refresh characteristics list from backend
+  const refreshCaracteristicas = async () => {
+    try {
+      const res = await fetch('/api/inmueble/caracteristicas');
+      if (!res.ok) throw new Error('Failed to fetch caracteristicas');
+      const data = await res.json();
+      setCaracteristicas(data);
+    } catch (error) {
+      console.error('Error refreshing caracteristicas:', error);
+    }
+  };
+
   // ==============================================
   // MANEJADORES DE EVENTOS
   // ==============================================
@@ -1073,13 +1085,14 @@ setPropietariosPersona([...propietariosPersona, {
             setFormData={setFormData} 
             caracteristicaSearch={caracteristicaSearch}
             setCaracteristicaSearch={setCaracteristicaSearch}
-            filteredCaracteristicas={filteredCaracteristicas}
-            setFilteredCaracteristicas={setFilteredCaracteristicas}
-        handleAddCustomCharacteristic={handleAddCustomCharacteristic}
-        handleCustomCharacteristicChange={handleCustomCharacteristicChange}
-        handleRemoveCustomCharacteristic={handleRemoveCustomCharacteristic}
-        tipoCaracteristicasOptions={tipoCaracteristicasOptions}
-      />
+        filteredCaracteristicas={filteredCaracteristicas}
+        setFilteredCaracteristicas={setFilteredCaracteristicas}
+        refreshCaracteristicas={refreshCaracteristicas}
+    handleAddCustomCharacteristic={handleAddCustomCharacteristic}
+    handleCustomCharacteristicChange={handleCustomCharacteristicChange}
+    handleRemoveCustomCharacteristic={handleRemoveCustomCharacteristic}
+    tipoCaracteristicasOptions={tipoCaracteristicasOptions}
+  />
         )}
 
         {/* SECCIÓN: Multimedia */}
