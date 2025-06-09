@@ -11,7 +11,6 @@ const CharacteristicsSection = ({
   tipoCaracteristicasOptions,
   refreshCaracteristicas,
 }) => {
-  console.log('CharacteristicsSection props:', { filteredCaracteristicas, tipoCaracteristicasOptions, formData });
   const [showCaracteristicaModal, setShowCaracteristicaModal] = React.useState(false);
   const [isEditingCaracteristica, setIsEditingCaracteristica] = React.useState(false);
   const [currentCaracteristica, setCurrentCaracteristica] = React.useState({
