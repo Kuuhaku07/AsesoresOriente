@@ -124,6 +124,42 @@ const ModificarInmueble = () => {
   const [documentosInmueble, setDocumentosInmueble] = useState([]);
   const [documentosPropietario, setDocumentosPropietario] = useState([]);
 
+  /**
+   * Función para subir documentos al backend y obtener las rutas guardadas.
+   * @param {Array} documents - Array de objetos de documento con archivo y metadatos.
+   * @returns {Array} - Array de objetos con rutas y metadatos para guardar en inmueble.
+   */
+  const uploadDocumentsToServer = async (documents) => {
+    const formData = new FormData();
+    documents.forEach((doc) => {
+      if (doc.file) {
+        formData.append('documents', doc.file);
+      }
+    });
+    try {
+      const response = await fetch('/api/inmueble/upload/document', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error('Error al subir documentos');
+      }
+      const data = await response.json();
+      // Mapear las rutas devueltas con los metadatos originales
+      return data.archivos.map((fileInfo, index) => ({
+        tipoId: documents[index].tipoId || null,
+        nombreArchivo: documents[index].nombre || '',
+        ruta: fileInfo.ruta,
+        tamano: fileInfo.tamaño || 0,
+        // Asumir que el usuario está logueado, enviar id o nombre de usuario
+        subidoPor: user?.id || 'usuario_desconocido',
+      }));
+    } catch (error) {
+      toastRef.current?.addToast(error.message, 'error', 5000);
+      return [];
+    }
+  };
+
   // Estados para las opciones de los dropdowns
   const [tipoInmuebles, setTipoInmuebles] = useState([]);
   const [estadoInmuebles, setEstadoInmuebles] = useState([]);
@@ -288,8 +324,27 @@ const ModificarInmueble = () => {
 
             setCiudades(ciudadesData);
             setZonas(zonasData);
-            setDocumentosInmueble(inmueble.documentos || []);
-            setDocumentosPropietario(inmueble.documentosPropietario || []);
+            // Transformar documentosInmueble para agregar campos necesarios para DocumentList
+            const baseUrldoc = ''; // Ajustar si es necesario
+            const transformedDocumentosInmueble = (inmueble.documentos || []).map(doc => ({
+              ...doc,
+              nombre: doc.nombre_archivo || doc.nombre || '',
+              tipoId: doc.tipoId || doc.tipo_id || null,
+              preview: doc.ruta ? baseUrldoc + doc.ruta : '',
+              file: null,
+            }));
+
+            // Transformar documentosPropietario para agregar campos necesarios para DocumentList
+            const transformedDocumentosPropietario = (inmueble.documentosPropietario || []).map(doc => ({
+              ...doc,
+              nombre: doc.nombre_archivo || doc.nombre || '',
+              tipoId: doc.tipoId || doc.tipo_id || null,
+              preview: doc.ruta ? baseUrldoc + doc.ruta : '',
+              file: null,
+            }));
+
+            setDocumentosInmueble(transformedDocumentosInmueble);
+            setDocumentosPropietario(transformedDocumentosPropietario);
 
             if (inmueble.propietario) {
             const prop = inmueble.propietario;
@@ -681,8 +736,12 @@ const ModificarInmueble = () => {
     }));
   };
 
-  const handleDocumentsChange = (documents) => {
-    setDocumentosInmueble(documents);
+  const handleDocumentsChange = (documents, tipo = 'inmueble') => {
+    if (tipo === 'inmueble') {
+      setDocumentosInmueble(documents);
+    } else if (tipo === 'propietario') {
+      setDocumentosPropietario(documents);
+    }
   };
 
   const handleAddCustomCharacteristic = () => {
@@ -750,10 +809,17 @@ const ModificarInmueble = () => {
     try {
       setSubmitting(true);
 
+      // Subir documentos y obtener rutas de ambos tipos
+      const uploadedDocumentsInmueble = await uploadDocumentsToServer(documentosInmueble);
+      const uploadedDocumentsPropietario = await uploadDocumentsToServer(documentosPropietario);
+
+      // Combinar documentos subidos
+      const uploadedDocuments = [...uploadedDocumentsInmueble, ...uploadedDocumentsPropietario];
+
       // Preparar datos para enviar
       const inmuebleDataToSend = {
         ...formData,
-        documentos: documentosInmueble,
+        documentos: uploadedDocuments,
         id: id // Asegurarnos de incluir el ID para la actualización
       };
 
