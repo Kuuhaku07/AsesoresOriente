@@ -238,10 +238,42 @@ const DocumentList = ({
     }
 
     const doc = activeDocuments[selectedIndex];
-    const file = doc.file;
+    let file = doc.file;
 
     if (onPreview) {
       onPreview(selectedIndex, doc);
+    }
+
+    // If no file but preview exists, create a dummy file object with inferred type
+    if (!file && doc.preview) {
+      // Infer file type from preview URL extension or doc.nombre extension
+      const inferFileType = () => {
+        const url = doc.preview || '';
+        const name = doc.nombre || '';
+        const ext = (url.split('.').pop() || name.split('.').pop() || '').toLowerCase();
+        switch (ext) {
+          case 'pdf':
+            return 'application/pdf';
+          case 'jpg':
+          case 'jpeg':
+          case 'png':
+          case 'gif':
+          case 'bmp':
+          case 'webp':
+            return 'image/' + ext;
+          case 'doc':
+          case 'docx':
+            return 'application/msword';
+          case 'xls':
+          case 'xlsx':
+            return 'application/vnd.ms-excel';
+          case 'txt':
+            return 'text/plain';
+          default:
+            return 'application/octet-stream';
+        }
+      };
+      file = { type: inferFileType() };
     }
 
     if (!file) {
@@ -257,14 +289,14 @@ const DocumentList = ({
       return renderPreviewContent(doc.preview, doc, file);
     }
 
-    if (!previewUrlRef.current) {
+    if (!previewUrlRef.current && file instanceof File) {
       previewUrlRef.current = URL.createObjectURL(file);
     }
 
     return renderPreviewContent(previewUrlRef.current, doc, file);
   };
 
-   const renderDocumentItem = (doc, index) => {
+  const renderDocumentItem = (doc, index) => {
     const isSelected = selectedIndex === index;
     const isFocused = focusedIndex === index;
     
