@@ -124,6 +124,38 @@ const ModificarInmueble = () => {
   const [documentosInmueble, setDocumentosInmueble] = useState([]);
   const [documentosPropietario, setDocumentosPropietario] = useState([]);
 
+  // Transformar documentos para vista previa al cargar datos iniciales
+  useEffect(() => {
+    if (initialLoadComplete) {
+      const baseUrldoc = ''; // Ajustar si es necesario
+      const transformedDocumentosInmueble = documentosInmueble.map(doc => ({
+        ...doc,
+        nombre: doc.nombreArchivo || doc.nombre || '',
+        tipoId: doc.tipoId || doc.tipo_id || null,
+        preview: doc.ruta ? baseUrldoc + doc.ruta : '',
+        file: null,
+      }));
+      const transformedDocumentosPropietario = documentosPropietario.map(doc => ({
+        ...doc,
+        nombre: doc.nombreArchivo || doc.nombre || '',
+        tipoId: doc.tipoId || doc.tipo_id || null,
+        preview: doc.ruta ? baseUrldoc + doc.ruta : '',
+        file: null,
+      }));
+      setDocumentosInmueble(transformedDocumentosInmueble);
+      setDocumentosPropietario(transformedDocumentosPropietario);
+    }
+  }, [initialLoadComplete]);
+
+  // Manejador para cambios en documentos
+  const handleDocumentsChange = (documents, tipo = 'inmueble') => {
+    if (tipo === 'inmueble') {
+      setDocumentosInmueble(documents);
+    } else if (tipo === 'propietario') {
+      setDocumentosPropietario(documents);
+    }
+  };
+
   /**
    * Función para subir documentos al backend y obtener las rutas guardadas.
    * @param {Array} documents - Array de objetos de documento con archivo y metadatos.
@@ -145,14 +177,14 @@ const ModificarInmueble = () => {
         throw new Error('Error al subir documentos');
       }
       const data = await response.json();
-      // Mapear las rutas devueltas con los metadatos originales
+      // Mapear las rutas devueltas con los metadatos originales y marcar como nuevos
       return data.archivos.map((fileInfo, index) => ({
         tipoId: documents[index].tipoId || null,
         nombreArchivo: documents[index].nombre || '',
         ruta: fileInfo.ruta,
         tamano: fileInfo.tamaño || 0,
-        // Asumir que el usuario está logueado, enviar id o nombre de usuario
         subidoPor: user?.id || 'usuario_desconocido',
+        isNew: true,
       }));
     } catch (error) {
       toastRef.current?.addToast(error.message, 'error', 5000);
@@ -736,13 +768,7 @@ const ModificarInmueble = () => {
     }));
   };
 
-  const handleDocumentsChange = (documents, tipo = 'inmueble') => {
-    if (tipo === 'inmueble') {
-      setDocumentosInmueble(documents);
-    } else if (tipo === 'propietario') {
-      setDocumentosPropietario(documents);
-    }
-  };
+
 
   const handleAddCustomCharacteristic = () => {
     const newCharacteristic = {
@@ -809,17 +835,47 @@ const ModificarInmueble = () => {
     try {
       setSubmitting(true);
 
-      // Subir documentos y obtener rutas de ambos tipos
-      const uploadedDocumentsInmueble = await uploadDocumentsToServer(documentosInmueble);
-      const uploadedDocumentsPropietario = await uploadDocumentsToServer(documentosPropietario);
+      // Filtrar documentos nuevos (con file) para subir
+      const newDocumentsInmueble = documentosInmueble.filter(doc => doc.file);
+      const newDocumentsPropietario = documentosPropietario.filter(doc => doc.file);
 
-      // Combinar documentos subidos
-      const uploadedDocuments = [...uploadedDocumentsInmueble, ...uploadedDocumentsPropietario];
+      // Subir documentos nuevos y obtener rutas solo si hay documentos nuevos
+      let uploadedDocumentsInmueble = [];
+      if (newDocumentsInmueble.length > 0) {
+        uploadedDocumentsInmueble = await uploadDocumentsToServer(newDocumentsInmueble);
+      }
+      let uploadedDocumentsPropietario = [];
+      if (newDocumentsPropietario.length > 0) {
+        uploadedDocumentsPropietario = await uploadDocumentsToServer(newDocumentsPropietario);
+      }
+
+      // Filtrar documentos existentes (sin file)
+      const existingDocumentsInmueble = documentosInmueble.filter(doc => !doc.file);
+      const existingDocumentsPropietario = documentosPropietario.filter(doc => !doc.file);
+
+      // Combinar documentos existentes y subidos
+      const combinedDocumentsInmueble = [...existingDocumentsInmueble, ...uploadedDocumentsInmueble];
+      const combinedDocumentsPropietario = [...existingDocumentsPropietario, ...uploadedDocumentsPropietario];
+
+      // Combinar ambos tipos de documentos
+      const allDocuments = [...combinedDocumentsInmueble, ...combinedDocumentsPropietario];
 
       // Preparar datos para enviar
+      // Asegurar que subidoPor esté definido para imágenes y documentos
+      const imagesWithUploader = formData.imagenes.map(img => ({
+        ...img,
+        subidoPor: img.subidoPor || user?.id || 'usuario_desconocido'
+      }));
+      const documentsWithUploader = allDocuments.map(doc => ({
+        ...doc,
+        nombreArchivo: doc.nombreArchivo || doc.nombre || 'documento_sin_nombre',
+        subidoPor: doc.subidoPor || user?.id || 'usuario_desconocido'
+      }));
+
       const inmuebleDataToSend = {
         ...formData,
-        documentos: uploadedDocuments,
+        imagenes: imagesWithUploader,
+        documentos: documentsWithUploader,
         id: id // Asegurarnos de incluir el ID para la actualización
       };
 
@@ -993,18 +1049,19 @@ const ModificarInmueble = () => {
 
         {/* SECCIÓN: Multimedia */} 
         {activeTab === 'multimedia' && (
-          <MultimediaSection 
-            activeMultimediaTab={activeMultimediaTab}
-            setActiveMultimediaTab={setActiveMultimediaTab}
-            formData={formData}
-            handleImagesChange={handleImagesChange}
-            tiposDocumento={tiposDocumento}
-            documentosInmueble={documentosInmueble}
-            documentosPropietario={documentosPropietario}
-            setDocumentosInmueble={setDocumentosInmueble}
-            setDocumentosPropietario={setDocumentosPropietario}
-            toastRef={toastRef}
-          />
+        <MultimediaSection 
+          activeMultimediaTab={activeMultimediaTab}
+          setActiveMultimediaTab={setActiveMultimediaTab}
+          formData={formData}
+          handleImagesChange={handleImagesChange}
+          tiposDocumento={tiposDocumento}
+          documentosInmueble={documentosInmueble}
+          documentosPropietario={documentosPropietario}
+          setDocumentosInmueble={setDocumentosInmueble}
+          setDocumentosPropietario={setDocumentosPropietario}
+          handleDocumentsChange={handleDocumentsChange}
+          toastRef={toastRef}
+        />
         )}
       </form>
 
