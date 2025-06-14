@@ -1,5 +1,6 @@
 import pool from '../db.js';
-
+import fs from 'fs';
+import path from 'path';
 /**
  * Crea un nuevo inmueble y sus datos relacionados en una transacción.
  * @param {Object} inmuebleData - Datos del inmueble y relacionados.
@@ -666,6 +667,36 @@ export const updateInmueble = async (inmuebleId, inmuebleData) => {
     } else if (propietarioTipo === 'empresa') {
       propietario_empresa_id = propietarioId;
     }
+
+    // Fetch existing documents to find which were removed
+    const existingDocsResult = await client.query(
+      'SELECT id, ruta FROM "Documento" WHERE inmueble_id = $1',
+      [inmuebleId]
+    );
+    const existingDocs = existingDocsResult.rows;
+
+    // Determine which documents were removed
+    const newDocPaths = (documentos || []).map(doc => doc.ruta);
+    const removedDocs = existingDocs.filter(doc => !newDocPaths.includes(doc.ruta));
+
+
+
+    // Delete files of removed documents
+    removedDocs.forEach(doc => {
+      // Fix path to avoid duplicate 'backend' in path
+      let relativePath = doc.ruta;
+      if (relativePath.startsWith('/')) {
+        relativePath = relativePath.substring(1);
+      }
+      const filePath = path.join(process.cwd(), relativePath);
+      fs.unlink(filePath, err => {
+        if (err) {
+          console.error(`Error deleting file ${filePath}:`, err);
+        } else {
+          console.log(`Deleted file: ${filePath}`);
+        }
+      });
+    });
 
     // Actualizar tabla Inmueble
     const inmuebleUpdateQuery = `
