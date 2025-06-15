@@ -192,6 +192,41 @@ const ModificarInmueble = () => {
     }
   };
 
+  /**
+   * Función para subir imágenes al backend y obtener las rutas guardadas.
+   * @param {Array} images - Array de objetos de imagen con archivo y metadatos.
+   * @returns {Array} - Array de objetos con rutas y metadatos para guardar en inmueble.
+   */
+  const uploadImagesToServer = async (images) => {
+    const formData = new FormData();
+    images.forEach((img) => {
+      if (img.file) {
+        formData.append('images', img.file);
+      }
+    });
+    try {
+      const response = await fetch('/api/inmueble/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error('Error al subir imágenes');
+      }
+      const data = await response.json();
+      // Mapear las rutas devueltas con los metadatos originales
+      return data.archivos.map((fileInfo, index) => ({
+        ruta: fileInfo.ruta,
+        titulo: images[index].titulo || '',
+        descripcion: images[index].descripcion || '',
+        // Asumir que el usuario está logueado, enviar id o nombre de usuario
+        subidoPor: user?.id || 'usuario_desconocido',
+      }));
+    } catch (error) {
+      toastRef.current?.addToast(error.message, 'error', 5000);
+      return [];
+    }
+  };
+
   // Estados para las opciones de los dropdowns
   const [tipoInmuebles, setTipoInmuebles] = useState([]);
   const [estadoInmuebles, setEstadoInmuebles] = useState([]);
@@ -835,6 +870,17 @@ const ModificarInmueble = () => {
     try {
       setSubmitting(true);
 
+      // Subir imágenes nuevas y obtener rutas
+      const newImages = formData.imagenes.filter(img => img.file);
+      let uploadedImages = [];
+      if (newImages.length > 0) {
+        uploadedImages = await uploadImagesToServer(newImages);
+      }
+
+      // Combinar imágenes existentes (sin file) y las subidas
+      const existingImages = formData.imagenes.filter(img => !img.file);
+      const combinedImages = [...existingImages, ...uploadedImages];
+
       // Filtrar documentos nuevos (con file) para subir
       const newDocumentsInmueble = documentosInmueble.filter(doc => doc.file);
       const newDocumentsPropietario = documentosPropietario.filter(doc => doc.file);
@@ -862,7 +908,7 @@ const ModificarInmueble = () => {
 
       // Preparar datos para enviar
       // Asegurar que subidoPor esté definido para imágenes y documentos
-      const imagesWithUploader = formData.imagenes.map(img => ({
+      const imagesWithUploader = combinedImages.map(img => ({
         ...img,
         subidoPor: img.subidoPor || user?.id || 'usuario_desconocido'
       }));

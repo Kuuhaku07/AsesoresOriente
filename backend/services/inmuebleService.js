@@ -129,7 +129,9 @@ export const createInmueble = async (inmuebleData) => {
 
     // Insertar imágenes
     if (Array.isArray(imagenes)) {
-      for (const [index, img] of imagenes.entries()) {
+      // Filter out images with null or empty ruta to avoid DB errors
+      const validImages = imagenes.filter(img => img.ruta && img.ruta.trim() !== '');
+      for (const [index, img] of validImages.entries()) {
         const { ruta, titulo, descripcion, subidoPor } = img;
         const imagenInsertQuery = `
           INSERT INTO "ImagenInmueble" (inmueble_id, ruta, orden, titulo, descripcion, subido_por)
@@ -679,8 +681,6 @@ export const updateInmueble = async (inmuebleId, inmuebleData) => {
     const newDocPaths = (documentos || []).map(doc => doc.ruta);
     const removedDocs = existingDocs.filter(doc => !newDocPaths.includes(doc.ruta));
 
-
-
     // Delete files of removed documents
     removedDocs.forEach(doc => {
       // Fix path to avoid duplicate 'backend' in path
@@ -694,6 +694,33 @@ export const updateInmueble = async (inmuebleId, inmuebleData) => {
           console.error(`Error deleting file ${filePath}:`, err);
         } else {
           console.log(`Deleted file: ${filePath}`);
+        }
+      });
+    });
+
+    // Fetch existing images to find which were removed
+    const existingImagesResult = await client.query(
+      'SELECT id, ruta FROM "ImagenInmueble" WHERE inmueble_id = $1',
+      [inmuebleId]
+    );
+    const existingImages = existingImagesResult.rows;
+
+    // Determine which images were removed
+    const newImagePaths = (imagenes || []).map(img => img.ruta);
+    const removedImages = existingImages.filter(img => !newImagePaths.includes(img.ruta));
+
+    // Delete files of removed images
+    removedImages.forEach(img => {
+      let relativePath = img.ruta;
+      if (relativePath.startsWith('/')) {
+        relativePath = relativePath.substring(1);
+      }
+      const filePath = path.join(process.cwd(), relativePath);
+      fs.unlink(filePath, err => {
+        if (err) {
+          console.error(`Error deleting image file ${filePath}:`, err);
+        } else {
+          console.log(`Deleted image file: ${filePath}`);
         }
       });
     });
