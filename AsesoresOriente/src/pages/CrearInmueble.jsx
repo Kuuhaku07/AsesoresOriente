@@ -17,8 +17,15 @@ import { formatDateForInput } from '../utils/dateUtils';
 import { validateData } from '../utils/validationUtils';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+import { Navigate } from 'react-router-dom';
+
 const CrearInmueble = () => {
   const { user } = useAuth();
+
+  if (!user) {
+    return <Navigate to="/" />;
+  }
+
   // Referencia para mostrar notificaciones toast
   const toastRef = useRef(null);
   

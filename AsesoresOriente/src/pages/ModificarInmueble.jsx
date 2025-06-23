@@ -20,10 +20,17 @@ import LoadingSpinner from '../components/LoadingSpinner';
 
 import NotFoundPage from '../components/NotFoundPage';
 
+import { Navigate } from 'react-router-dom';
+
 const ModificarInmueble = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+
+   if (!user) {
+      return <Navigate to="/" />;
+    }
+
   const toastRef = useRef(null);
 
   // New state for error status

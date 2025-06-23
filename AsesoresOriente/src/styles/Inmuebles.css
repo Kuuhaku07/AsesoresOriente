@@ -1,0 +1,51 @@
+.inmueble-page-container {
+  display: flex;
+  position: relative;
+  padding: 20px;
+  gap: 20px;
+}
+
+.inmueble-main-content {
+  flex: 1;
+  max-width: 900px;
+}
+
+.inmueble-header {
+  margin-bottom: 20px;
+}
+
+.business-type-location {
+  margin-bottom: 20px;
+}
+
+.gallery-section {
+  margin-bottom: 20px;
+}
+
+.general-info {
+  margin-bottom: 20px;
+}
+
+.map-location {
+  margin-bottom: 20px;
+  height: 300px;
+}
+
+.description-section {
+  margin-bottom: 20px;
+}
+
+.other-details {
+  margin-bottom: 20px;
+}
+
+.characteristics ul,
+.documents ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+.characteristics li,
+.documents li {
+  margin-bottom: 5px;
+}
