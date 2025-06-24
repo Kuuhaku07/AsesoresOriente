@@ -4,12 +4,14 @@
 
 .menu-offset {
     padding-top: var(--spacing-menu-offset); /* Padding to avoid fixed menu overlap */
+    background-color: var(--color-background);
 }
 
 /* Container for main page content */
 /* Increased max-width for wider content */
 .page-container {
-    max-width: 1800px;
+
     margin: 0 auto;
     padding: 0 var(--spacing-page-container-padding);
+    background-color: var(--color-background);
 }

@@ -6,6 +6,7 @@ import NotFoundPage from '../components/NotFoundPage';
 import ImageGallery from '../components/ImageGallery';
 import Map from '../components/Map';
 import SectionNavMenu from '../components/SectionNavMenu';
+import { FaBed, FaBath, FaCar, FaRulerCombined, FaLayerGroup, FaCalendarAlt, FaCouch, FaSnowflake, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
 import '../styles/Inmuebles.css';
 
 const Inmuebles = () => {
@@ -71,158 +72,199 @@ const Inmuebles = () => {
     return null;
   }
 
-  // Helper function to format boolean values
   const formatBoolean = (value) => (value ? 'Sí' : 'No');
 
-  const sections = [
-    { id: 'business-type-location', label: 'Tipo de Negocio y Ubicación' },
-    { id: 'gallery', label: 'Galería de Fotos' },
-    { id: 'general-info', label: 'Datos Generales' },
-    { id: 'map-location', label: 'Ubicación en el Mapa' },
-    { id: 'description', label: 'Descripción' },
-    { id: 'other-details', label: 'Otros Detalles' },
-  ];
+  const getStatusColor = (status) => {
+    switch (status?.toUpperCase()) {
+      case 'DISPONIBLE': return '#4CAF50';
+      case 'RESERVADO': return '#FFC107';
+      case 'VENDIDO': return '#F44336';
+      case 'NO_DISPONIBLE': return '#9E9E9E';
+      default: return '#cccccc';
+    }
+  };
 
+  
   return (
     <PageTemplate title={`Inmueble: ${inmuebleData.titulo || ''}`}>
       <div className="inmueble-page-container">
-        <SectionNavMenu sections={sections} />
+        {/* Header Section */}
+        <header className="inmueble-header">
 
-        <main className="inmueble-main-content">
-          <section id="business-type-location" className="business-type-location">
-            {inmuebleData.tipoNegocios && inmuebleData.tipoNegocios.length > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                {inmuebleData.tipoNegocios.map((tn) => (
-                  <span
-                    key={tn.tipoNegocioId}
-                    style={{
-                      backgroundColor: '#007bff',
-                      color: 'white',
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      fontWeight: '600',
-                      fontSize: '0.9rem',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {tn.nombre || ''}
-                  </span>
-                ))}
-                {inmuebleData.tipoNegocios.map((tn) => (
-                  <span
-                    key={`price-${tn.tipoNegocioId}`}
-                    style={{
-                      fontWeight: '700',
-                      fontSize: '1.2rem',
-                      marginLeft: 'auto',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {tn.precio} {tn.moneda}
-                  </span>
-                ))}
-              </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <span 
+              className="status-tag" 
+              style={{ backgroundColor: getStatusColor(inmuebleData.estado_nombre) }}
+            >
+              {inmuebleData.estado_nombre || ''}
+            </span>
+            
+            {inmuebleData.tipoNegocios?.map((tn) => (
+              <span key={tn.tipoNegocioId} className="business-tag">
+                {tn.nombre || ''}
+              </span>
+            ))}
+            
+            {inmuebleData.tipoNegocios?.length > 0 && (
+              <span className="price-tag">
+                {inmuebleData.tipoNegocios[0].precio} {inmuebleData.tipoNegocios[0].moneda}
+              </span>
             )}
-            <p style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.95rem', color: '#555' }}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                className="bi bi-geo-alt"
-                viewBox="0 0 16 16"
-              >
-                <path d="M12.166 8.94c0 1.5-2.166 4.5-2.166 4.5s-2.166-3-2.166-4.5a2.166 2.166 0 1 1 4.332 0z" />
-                <path d="M8 0a5.53 5.53 0 0 0-5.5 5.5c0 3.038 5.5 10.5 5.5 10.5s5.5-7.462 5.5-10.5A5.53 5.53 0 0 0 8 0zM8 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
-              </svg>
-              {inmuebleData.direccion_exacta || ''}
-            </p>
-          </section>
+          </div>
+        </header>
 
-          <section id="gallery" className="gallery-section">
-            {inmuebleData.imagenes && inmuebleData.imagenes.length > 0 ? (
-              <ImageGallery
-                images={inmuebleData.imagenes.map(img => ({
-                  ...img,
-                  preview: img.ruta || img.preview || '',
-                }))}
-                mode="display"
-                labels={{ bannerSelector: true }}
-              />
-            ) : (
-              <p>No hay imágenes disponibles.</p>
-            )}
-          </section>
-
-          <section id="general-info" className="general-info">
-            <h2>Datos Generales</h2>
-            <p><strong>Tipo de Inmueble:</strong> {inmuebleData.tipo_inmueble_nombre || ''}</p>
-            <p><strong>Estado del Inmueble:</strong> {inmuebleData.estado_nombre || ''}</p>
-            <p><strong>Asesor:</strong> {inmuebleData.asesor_nombre || ''}</p>
-            <p><strong>Área Construida:</strong> {inmuebleData.area_construida} m²</p>
-            <p><strong>Área de Terreno:</strong> {inmuebleData.area_terreno} m²</p>
-            <p><strong>Habitaciones:</strong> {inmuebleData.habitaciones}</p>
-            <p><strong>Baños:</strong> {inmuebleData.banos}</p>
-            <p><strong>Estacionamientos:</strong> {inmuebleData.estacionamientos}</p>
-            <p><strong>Niveles:</strong> {inmuebleData.niveles}</p>
-            <p><strong>Año de Construcción:</strong> {inmuebleData.ano_construccion || 'N/A'}</p>
-            <p><strong>Amueblado:</strong> {formatBoolean(inmuebleData.amueblado)}</p>
-            <p><strong>Climatizado:</strong> {formatBoolean(inmuebleData.climatizado)}</p>
-          </section>
-
-          <section id="map-location" className="map-location">
-            <h2>Ubicación en el Mapa</h2>
-            <Map 
-              location={{
-                lat: inmuebleData.coordenadas ? parseFloat(inmuebleData.coordenadas.split(',')[0]) : 0,
-                lng: inmuebleData.coordenadas ? parseFloat(inmuebleData.coordenadas.split(',')[1]) : 0,
-              }}
+        {/* Image Gallery Section */}
+        <section id="gallery" className="gallery-section">
+          {inmuebleData.imagenes?.length > 0 ? (
+            <ImageGallery
+              images={inmuebleData.imagenes.map(img => ({
+                ...img,
+                preview: img.ruta || img.preview || '',
+              }))}
+              mode="display"
+              labels={{ bannerSelector: true }}
             />
-          </section>
+          ) : (
+            <div className="info-card">
+              <p>No hay imágenes disponibles.</p>
+            </div>
+          )}
+        </section>
 
-          <section id="description" className="description-section">
-            <h2>Descripción</h2>
-            <p>{inmuebleData.descripcion}</p>
-          </section>
+        {/* Combined Location and Map Section */}
+        <section id="location-map" className="location-map-section">
+          {/* Location Details */}
+          <div className="info-card">
+            <h2>Ubicación</h2>
+            <table className="info-table">
+              <tbody>
+                <tr>
+                  <td><FaMapMarkerAlt /></td>
+                  <td>Dirección</td>
+                  <td>{inmuebleData.direccion_exacta || 'No especificada'}</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>Zona</td>
+                  <td>{inmuebleData.zona_nombre || 'No especificada'}</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>Ciudad</td>
+                  <td>{inmuebleData.ciudad_nombre || 'No especificada'}</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>Estado</td>
+                  <td>{inmuebleData.estado_nombre_ubicacion || 'No especificado'}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Map */}
+          <div className="info-card">
+            <h2>Ubicación en el Mapa</h2>
+            <div className="map-container">
+              <Map 
+                location={{
+                  lat: inmuebleData.coordenadas ? parseFloat(inmuebleData.coordenadas.split(',')[0]) : 0,
+                  lng: inmuebleData.coordenadas ? parseFloat(inmuebleData.coordenadas.split(',')[1]) : 0,
+                }}
+              />
+            </div>
+          </div>
+        </section>
 
-          <section id="other-details" className="other-details">
-            <h2>Otros Detalles</h2>
-            <p><strong>Estado:</strong> {inmuebleData.estado_nombre_ubicacion || ''}</p>
-            <p><strong>Ciudad:</strong> {inmuebleData.ciudad_nombre || ''}</p>
-            <p><strong>Zona:</strong> {inmuebleData.zona_nombre || ''}</p>
-            <section className="characteristics">
-              <h3>Características</h3>
-              {inmuebleData.caracteristicas && inmuebleData.caracteristicas.length > 0 ? (
-                <ul>
-                  {inmuebleData.caracteristicas.map((carac) => (
-                    <li key={carac.caracteristicaId}>
-                      {carac.nombre || 'Característica'} {carac.cantidad ? `- Cantidad: ${carac.cantidad}` : ''}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No hay características disponibles.</p>
-              )}
-            </section>
+        {/* General Information Section */}
+        <section id="general-info" className="info-card">
+          <h2>Datos Generales</h2>
+          <div className="general-info-grid">
+            <table className="info-table">
+              <tbody>
+                <tr>
+                  <td><FaLayerGroup /></td>
+                  <td>Tipo</td>
+                  <td>{inmuebleData.tipo_inmueble_nombre || 'No especificado'}</td>
+                </tr>
+                <tr>
+                  <td><FaUser /></td>
+                  <td>Asesor</td>
+                  <td>{inmuebleData.asesor_nombre || 'No asignado'}</td>
+                </tr>
+                <tr>
+                  <td><FaRulerCombined /></td>
+                  <td>Área Construida</td>
+                  <td>{inmuebleData.area_construida || '0'} m²</td>
+                </tr>
+                <tr>
+                  <td><FaRulerCombined /></td>
+                  <td>Área de Terreno</td>
+                  <td>{inmuebleData.area_terreno || '0'} m²</td>
+                </tr>
+                <tr>
+                  <td><FaBed /></td>
+                  <td>Habitaciones</td>
+                  <td>{inmuebleData.habitaciones || '0'}</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <table className="info-table">
+              <tbody>
+                <tr>
+                  <td><FaBath /></td>
+                  <td>Baños</td>
+                  <td>{inmuebleData.banos || '0'}</td>
+                </tr>
+                <tr>
+                  <td><FaCar /></td>
+                  <td>Estacionamientos</td>
+                  <td>{inmuebleData.estacionamientos || '0'}</td>
+                </tr>
+                <tr>
+                  <td><FaLayerGroup /></td>
+                  <td>Niveles</td>
+                  <td>{inmuebleData.niveles || '1'}</td>
+                </tr>
+                <tr>
+                  <td><FaCalendarAlt /></td>
+                  <td>Año de Construcción</td>
+                  <td>{inmuebleData.ano_construccion || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td><FaCouch /></td>
+                  <td>Amueblado</td>
+                  <td>{formatBoolean(inmuebleData.amueblado)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-            <section className="documents">
-              <h3>Documentos</h3>
-              {inmuebleData.documentos && inmuebleData.documentos.length > 0 ? (
-                <ul>
-                  {inmuebleData.documentos.map((doc) => (
-                    <li key={doc.id}>
-                      <a href={doc.ruta} target="_blank" rel="noopener noreferrer">
-                        {doc.nombre_archivo || doc.nombre}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No hay documentos disponibles.</p>
-              )}
-            </section>
-          </section>
-        </main>
+        {/* Additional Characteristics Section */}
+        <section id="other-details" className="info-card">
+          <h2>Características</h2>
+          {inmuebleData.caracteristicas?.length > 0 ? (
+            <ul className="characteristics-list">
+              {inmuebleData.caracteristicas.map((carac) => (
+                <li key={carac.caracteristicaId}>
+                  {carac.nombre || 'Característica'} 
+                  {carac.cantidad && ` (${carac.cantidad})`}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No hay características adicionales disponibles.</p>
+          )}
+        </section>
+
+        <SectionNavMenu sections={[
+          { id: 'gallery', label: 'Galería de Fotos' },
+          { id: 'general-info', label: 'Datos Generales' },
+          { id: 'location-map', label: 'Ubicación y Mapa' },
+          { id: 'other-details', label: 'Características' },
+        ]} />
       </div>
     </PageTemplate>
   );

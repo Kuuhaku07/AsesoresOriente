@@ -1,51 +1,166 @@
 .inmueble-page-container {
   display: flex;
+  flex-direction: column;
   position: relative;
   padding: 20px;
-  gap: 20px;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.inmueble-main-content {
-  flex: 1;
-  max-width: 900px;
-}
-
+/* Header styles */
 .inmueble-header {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
-.business-type-location {
-  margin-bottom: 20px;
+.inmueble-header h1 {
+  font-size: 2rem;
+  margin: 0 0 12px 0;
+  color: #333;
 }
 
+/* Status and price tags */
+.status-tag {
+  background-color: #4CAF50;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: inline-block;
+}
+
+.business-tag {
+  background-color: #007bff;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: inline-block;
+}
+
+.price-tag {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #333;
+  margin-left: auto;
+}
+
+/* Gallery section */
 .gallery-section {
-  margin-bottom: 20px;
+  margin-bottom: 32px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.general-info {
-  margin-bottom: 20px;
+/* Location and map section */
+.location-map-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
 }
 
-.map-location {
-  margin-bottom: 20px;
+@media (max-width: 768px) {
+  .location-map-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Info cards styling */
+.info-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 24px;
+}
+
+.info-card h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+/* Improved table styling */
+.info-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+.info-table tr:not(:last-child) td {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-table td {
+  padding: 12px 8px;
+  vertical-align: middle;
+}
+
+.info-table td:first-child {
+  width: 40px;
+  text-align: center;
+  color: #007bff;
+}
+
+.info-table td:nth-child(2) {
+  font-weight: 500;
+  color: #555;
+  width: 160px;
+}
+
+.info-table td:nth-child(3) {
+  color: #333;
+  font-weight: 400;
+}
+
+.info-table svg {
+  font-size: 1.2rem;
+  vertical-align: middle;
+}
+
+/* Two-column layout for general info */
+.general-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .general-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Characteristics list */
+.characteristics-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+}
+
+.characteristics-list li {
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Map container */
+.map-container {
   height: 300px;
-}
-
-.description-section {
-  margin-bottom: 20px;
-}
-
-.other-details {
-  margin-bottom: 20px;
-}
-
-.characteristics ul,
-.documents ul {
-  list-style-type: disc;
-  padding-left: 20px;
-}
-
-.characteristics li,
-.documents li {
-  margin-bottom: 5px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
