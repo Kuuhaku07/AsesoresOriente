@@ -86,7 +86,7 @@ const Inmuebles = () => {
 
   
   return (
-    <PageTemplate title={`Inmueble: ${inmuebleData.titulo || ''}`}>
+    <PageTemplate title={`${inmuebleData.titulo || 'Inmueble'}`}>
       <div className="inmueble-page-container">
         {/* Header Section */}
         <header className="inmueble-header">
