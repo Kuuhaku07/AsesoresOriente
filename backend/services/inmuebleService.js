@@ -531,9 +531,13 @@ export const getAllModificarInmuebleData = async (inmuebleId = null) => {
       // Fetch inmueble main data
       const inmuebleResult = await client.query(`
         SELECT i.*, 
-               up.zona_id, up.direccion_exacta, up.referencia, up.coordenadas, up.mapa_url
+               up.zona_id, up.direccion_exacta, up.referencia, up.coordenadas, up.mapa_url,
+               ti.nombre AS tipo_inmueble_nombre,
+               ei.nombre AS estado_nombre
         FROM "Inmueble" i
         LEFT JOIN "UbicacionInmueble" up ON i.id = up.inmueble_id
+        LEFT JOIN "TipoInmueble" ti ON i.tipo_inmueble_id = ti.id
+        LEFT JOIN "EstadoInmueble" ei ON i.estado_id = ei.id
         WHERE i.id = $1
       `, [inmuebleId]);
 
@@ -545,9 +549,10 @@ export const getAllModificarInmuebleData = async (inmuebleId = null) => {
 
       // Fetch inmueble tipoNegocios
       const tipoNegociosResult = await client.query(`
-        SELECT tipo_negocio_id AS id, precio, moneda, disponible, comision
-        FROM "InmuebleTipoNegocio"
-        WHERE inmueble_id = $1
+        SELECT itn.tipo_negocio_id AS id, tn.nombre, itn.precio, itn.moneda, itn.disponible, itn.comision
+        FROM "InmuebleTipoNegocio" itn
+        JOIN "TipoNegocio" tn ON itn.tipo_negocio_id = tn.id
+        WHERE itn.inmueble_id = $1
       `, [inmuebleId]);
       inmuebleData.tipoNegocios = tipoNegociosResult.rows;
 
@@ -595,6 +600,16 @@ export const getAllModificarInmuebleData = async (inmuebleId = null) => {
         `, [inmuebleData.propietario_empresa_id]);
         inmuebleData.propietario = propietarioEmpresaResult.rows[0] || null;
         inmuebleData.propietarioTipo = 'empresa';
+      }
+    }
+
+    // Add zona_nombre, ciudad_nombre, estado_nombre_ubicacion to inmuebleData if zona_id exists
+    if (inmuebleData.zona_id) {
+      const zonaData = await getZonaById(inmuebleData.zona_id);
+      if (zonaData) {
+        inmuebleData.zona_nombre = zonaData.nombre || null;
+        inmuebleData.ciudad_nombre = zonaData.ciudad_nombre || null;
+        inmuebleData.estado_nombre_ubicacion = zonaData.estado_nombre || null;
       }
     }
 

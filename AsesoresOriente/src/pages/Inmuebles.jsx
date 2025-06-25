@@ -18,6 +18,7 @@ const Inmuebles = () => {
   const [loading, setLoading] = useState(true);
   const [errorStatus, setErrorStatus] = useState(null);
   const [inmuebleData, setInmuebleData] = useState(null);
+  const [estadoCivilList, setEstadoCivilList] = useState([]);
 
   useEffect(() => {
     const fetchInmuebleData = async () => {
@@ -37,6 +38,7 @@ const Inmuebles = () => {
 
         const data = await response.json();
         setInmuebleData(data.inmuebleData);
+        setEstadoCivilList(data.estadoCivil || []);
       } catch (error) {
         console.error('Error fetching inmueble data:', error);
         setErrorStatus(500);
@@ -277,6 +279,11 @@ const Inmuebles = () => {
                   <td>Amueblado</td>
                   <td>{formatBoolean(inmuebleData.amueblado)}</td>
                 </tr>
+                <tr>
+                  <td><FaSnowflake /></td>
+                  <td>Climatizado</td>
+                  <td>{formatBoolean(inmuebleData.climatizado)}</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -352,12 +359,28 @@ const Inmuebles = () => {
           <div className="propietario-info" style={{ flex: 1 }}>
             <h2>Datos del Propietario</h2>
             {inmuebleData.propietario ? (
-              <div>
-                <p><strong>Nombre:</strong> {inmuebleData.propietario.nombre} {inmuebleData.propietario.apellido || ''}</p>
-                <p><strong>Teléfono:</strong> {inmuebleData.propietario.telefono || 'No disponible'}</p>
-                <p><strong>Email:</strong> {inmuebleData.propietario.correo || 'No disponible'}</p>
-                <p><strong>Dirección:</strong> {inmuebleData.propietario.direccion || 'No disponible'}</p>
-              </div>
+              inmuebleData.propietarioTipo === 'persona' ? (
+                <div>
+                  <p><strong>Nombre:</strong> {inmuebleData.propietario.nombre} {inmuebleData.propietario.apellido || ''}</p>
+                  <p><strong>Teléfono:</strong> {inmuebleData.propietario.telefono || 'No disponible'}</p>
+                  <p><strong>Email:</strong> {inmuebleData.propietario.correo || 'No disponible'}</p>
+                  <p><strong>Dirección:</strong> {inmuebleData.propietario.direccion || 'No disponible'}</p>
+                  <p><strong>Estado Civil:</strong> {estadoCivilList.find(e => e.id === inmuebleData.propietario.estado_civil_id)?.nombre || 'No disponible'}</p>
+                  <p><strong>Fecha de Nacimiento:</strong> {inmuebleData.propietario.fecha_nacimiento ? new Date(inmuebleData.propietario.fecha_nacimiento).toLocaleDateString() : 'No disponible'}</p>
+                  <p><strong>Notas:</strong> {inmuebleData.propietario.notas || 'No disponible'}</p>
+                </div>
+              ) : (
+                <div>
+                  <p><strong>Nombre Empresa:</strong> {inmuebleData.propietario.nombre || 'No disponible'}</p>
+                  <p><strong>RIF:</strong> {inmuebleData.propietario.rif || 'No disponible'}</p>
+                  <p><strong>Teléfono:</strong> {inmuebleData.propietario.telefono || 'No disponible'}</p>
+                  <p><strong>Email:</strong> {inmuebleData.propietario.correo || 'No disponible'}</p>
+                  <p><strong>Dirección:</strong> {inmuebleData.propietario.direccion || 'No disponible'}</p>
+                  <p><strong>Representante Legal:</strong> {inmuebleData.propietario.representante_legal || 'No disponible'}</p>
+                  <p><strong>Documento Representante:</strong> {inmuebleData.propietario.documento_representante || 'No disponible'}</p>
+                  <p><strong>Notas:</strong> {inmuebleData.propietario.notas || 'No disponible'}</p>
+                </div>
+              )
             ) : (
               <p>No hay datos del propietario disponibles.</p>
             )}
