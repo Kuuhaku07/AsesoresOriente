@@ -184,3 +184,52 @@
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
+
+/* Contact section styles */
+.contact-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-container {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.contact-photo img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.contact-info {
+  flex: 1;
+  min-width: 250px;
+}
+
+.contact-info p {
+  margin: 6px 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.social-links {
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+}
+
+.social-links a {
+  font-size: 1.8rem;
+  color: #555;
+  transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+  color: #007bff;
+}

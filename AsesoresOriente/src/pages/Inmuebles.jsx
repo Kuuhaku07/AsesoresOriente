@@ -6,11 +6,15 @@ import NotFoundPage from '../components/NotFoundPage';
 import ImageGallery from '../components/ImageGallery';
 import Map from '../components/Map';
 import SectionNavMenu from '../components/SectionNavMenu';
-import { FaBed, FaBath, FaCar, FaRulerCombined, FaLayerGroup, FaCalendarAlt, FaCouch, FaSnowflake, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
+import { FaBed, FaBath,FaPhone,FaEnvelope, FaCar, FaRulerCombined, FaLayerGroup, FaCalendarAlt, FaCouch, FaSnowflake, FaMapMarkerAlt, FaUser, FaFacebookSquare, FaInstagram, FaTwitterSquare } from 'react-icons/fa';
 import '../styles/Inmuebles.css';
+
+import { useAuth } from '../context/AuthContext';
+import { verifyPermissions } from '../utils/permissionUtils';
 
 const Inmuebles = () => {
   const { id } = useParams();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [errorStatus, setErrorStatus] = useState(null);
   const [inmuebleData, setInmuebleData] = useState(null);
@@ -86,11 +90,22 @@ const Inmuebles = () => {
 
   
   return (
-    <PageTemplate title={`${inmuebleData.titulo || 'Inmueble'}`}>
+    <PageTemplate 
+      title={`${inmuebleData.titulo || 'Inmueble'}`}
+      headerRight={(
+        <a 
+          href={`/modificar/${inmuebleData.id}`} 
+          className="btn btn-primary google-maps-link"
+          style={{ marginLeft: 'auto', textDecoration: 'none' }}
+        >
+          Editar
+        </a>
+      )}
+    >
       <div className="inmueble-page-container">
         {/* Header Section */}
-        <header className="inmueble-header">
-
+        <div className="inmueble-header">
+          <div>{inmuebleData.direccion_exacta || 'No especificada'}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <span 
               className="status-tag" 
@@ -99,8 +114,8 @@ const Inmuebles = () => {
               {inmuebleData.estado_nombre || ''}
             </span>
             
-            {inmuebleData.tipoNegocios?.map((tn) => (
-              <span key={tn.tipoNegocioId} className="business-tag">
+            {inmuebleData.tipoNegocios?.map((tn, index) => (
+              <span key={tn.tipoNegocioId ?? index} className="business-tag">
                 {tn.nombre || ''}
               </span>
             ))}
@@ -111,7 +126,7 @@ const Inmuebles = () => {
               </span>
             )}
           </div>
-        </header>
+        </div>
 
         {/* Image Gallery Section */}
         <section id="gallery" className="gallery-section">
@@ -158,6 +173,25 @@ const Inmuebles = () => {
                   <td>Estado</td>
                   <td>{inmuebleData.estado_nombre_ubicacion || 'No especificado'}</td>
                 </tr>
+                <tr>
+                  <td></td>
+                  <td>Referencia</td>
+                  <td>{inmuebleData.referencia || 'No especificada'}</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td colSpan={2}>
+                    <a 
+                      href={`https://www.google.com/maps?q=${inmuebleData.coordenadas || ''}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="btn btn-primary google-maps-link"
+                      style={{ padding: '6px 12px', borderRadius: '4px', display: 'inline-block', fontWeight: '600', textDecoration: 'none' }}
+                    >
+                      Ver en Google Maps
+                    </a>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -177,6 +211,12 @@ const Inmuebles = () => {
         </section>
 
         {/* General Information Section */}
+        {inmuebleData.descripcion && (
+          <section className="info-card description-section">
+            <h2>Descripción</h2>
+            <p>{inmuebleData.descripcion}</p>
+          </section>
+        )}
         <section id="general-info" className="info-card">
           <h2>Datos Generales</h2>
           <div className="general-info-grid">
@@ -264,8 +304,83 @@ const Inmuebles = () => {
           { id: 'general-info', label: 'Datos Generales' },
           { id: 'location-map', label: 'Ubicación y Mapa' },
           { id: 'other-details', label: 'Características' },
+          { id: 'contact', label: 'Contacto' },
         ]} />
+
+        {/* Contact Section */}
+        <section id="contact" className="info-card contact-section">
+          <h2>Contacto</h2>
+          <div className="contact-container">
+            <div className="contact-photo">
+              <img 
+                src={inmuebleData.asesor_foto_perfil || 'https://static.vecteezy.com/system/resources/thumbnails/003/337/584/small/default-avatar-photo-placeholder-profile-icon-vector.jpg'} 
+                alt={`Foto de ${inmuebleData.asesor_nombre || 'Asesor'}`} 
+              />
+            </div>
+            <div className="contact-info">
+              <p><FaUser style={{ marginRight: '8px' }} />{inmuebleData.asesor_nombre || 'No asignado'}</p>
+              <p style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                <span><FaEnvelope style={{ marginRight: '8px' }} />{inmuebleData.asesor_correo || 'No disponible'}</span>
+                <span><FaPhone style={{ marginRight: '8px' }} />{inmuebleData.asesor_telefono || 'No disponible'}</span>
+              </p>
+              <div className="social-links">
+                {inmuebleData.asesor_facebook && (
+                  <a href={inmuebleData.asesor_facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                    <FaFacebookSquare />
+                  </a>
+                )}
+                {inmuebleData.asesor_instagram && (
+                  <a href={inmuebleData.asesor_instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                    <FaInstagram />
+                  </a>
+                )}
+                {inmuebleData.asesor_twitter && (
+                  <a href={inmuebleData.asesor_twitter} target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                    <FaTwitterSquare />
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
+
+      {/* Información del Inmueble Section - visible only if user logged in */}
+      {(user && (verifyPermissions(user, ['ADMINISTRADOR', 'GERENTE']) || user.id_asesor === inmuebleData.asesorId)) && (
+        <section className="info-card inmueble-info-section" style={{ display: 'flex', gap: '24px', marginTop: '24px' }}>
+          {/* Left side - Propietario info */}
+          <div className="propietario-info" style={{ flex: 1 }}>
+            <h2>Datos del Propietario</h2>
+            {inmuebleData.propietario ? (
+              <div>
+                <p><strong>Nombre:</strong> {inmuebleData.propietario.nombre} {inmuebleData.propietario.apellido || ''}</p>
+                <p><strong>Teléfono:</strong> {inmuebleData.propietario.telefono || 'No disponible'}</p>
+                <p><strong>Email:</strong> {inmuebleData.propietario.correo || 'No disponible'}</p>
+                <p><strong>Dirección:</strong> {inmuebleData.propietario.direccion || 'No disponible'}</p>
+              </div>
+            ) : (
+              <p>No hay datos del propietario disponibles.</p>
+            )}
+          </div>
+
+          {/* Right side - Documentos list */}
+          <div className="documentos-info" style={{ flex: 1 }}>
+            <h2>Documentos</h2>
+            {inmuebleData.documentos && inmuebleData.documentos.length > 0 ? (
+              <ul>
+                {inmuebleData.documentos.map((doc) => (
+                  <li key={doc.id || doc.nombre}>
+                    <a href={doc.ruta} target="_blank" rel="noopener noreferrer">{doc.nombre || doc.nombreArchivo || 'Documento'}</a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No hay documentos disponibles.</p>
+            )}
+          </div>
+        </section>
+      )}
+
     </PageTemplate>
   );
 };

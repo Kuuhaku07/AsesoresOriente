@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+
 import PageTemplate from '../components/PageTemplate';
 import ToastContainer from '../components/ToastContainer';
 
@@ -17,19 +17,29 @@ import '../styles/CrearInmueble.css';
 import { formatDateForInput } from '../utils/dateUtils'; 
 import { validateData } from '../utils/validationUtils';
 import LoadingSpinner from '../components/LoadingSpinner';
-
 import NotFoundPage from '../components/NotFoundPage';
 
+import { verifyPermissions } from '../utils/permissionUtils';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const ModificarInmueble = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
-   if (!user) {
-      return <Navigate to="/" />;
+
+  // Verificar permisos al cargar la página
+  useEffect(() => {
+    if (!loading) {
+      const allowed = verifyPermissions(user, ['ADMINISTRADOR', 'GERENTE','ASESOR']);
+      if (!allowed) {
+        navigate('/');
+      }
     }
+  }, [user, navigate, loading]);
+
 
   const toastRef = useRef(null);
 
@@ -46,7 +56,7 @@ const ModificarInmueble = () => {
   const [isEditingPropietario, setIsEditingPropietario] = useState(false);
   
   // Estados para carga y envío
-  const [loading, setLoading] = useState(true);
+
   const [submitting, setSubmitting] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 

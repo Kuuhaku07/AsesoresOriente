@@ -16,15 +16,25 @@ import '../styles/CrearInmueble.css';
 import { formatDateForInput } from '../utils/dateUtils'; 
 import { validateData } from '../utils/validationUtils';
 import LoadingSpinner from '../components/LoadingSpinner';
-
-import { Navigate } from 'react-router-dom';
+import { verifyPermissions } from '../utils/permissionUtils';
+import { Navigate,useNavigate } from 'react-router-dom';
 
 const CrearInmueble = () => {
-  const { user } = useAuth();
-
-  if (!user) {
-    return <Navigate to="/" />;
-  }
+    const [loading, setLoading] = useState(true);
+    const { user } = useAuth();
+    const navigate = useNavigate();
+  
+  
+    // Verificar permisos al cargar la página
+    useEffect(() => {
+      if (!loading) {
+        const allowed = verifyPermissions(user, ['ADMINISTRADOR', 'GERENTE','ASESOR']);
+        if (!allowed) {
+          navigate('/');
+        }
+      }
+    }, [user, navigate, loading]);
+  
 
   // Referencia para mostrar notificaciones toast
   const toastRef = useRef(null);

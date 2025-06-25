@@ -18,13 +18,21 @@ const PageTemplate = ({
   pageClass = '',
   contentClass = '',
   title = '',
+  headerRight = null,
 }) => {
   return (
     <>
       <Menu />
       <div className={`menu-offset ${pageClass}`}>
         <div className={`page-container ${contentClass}`}>
-          {title && <PageTitle>{title}</PageTitle>}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            {title && <PageTitle>{title}</PageTitle>}
+            {headerRight && (
+              <div className="header-right">
+                {headerRight}
+              </div>
+            )}
+          </div>
           {children}
         </div>
       </div>
