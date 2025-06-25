@@ -496,6 +496,9 @@ export const getTiposDocumento = async () => {
  * @param {number|null} inmuebleId - ID del inmueble a obtener (opcional).
  * @returns {Object} - Datos agregados para modificar/ver inmueble.
  */
+import { getAsesorById } from './asesorService.js';
+import { getRedesByAsesorId } from './redesAsesorService.js';
+
 export const getAllModificarInmuebleData = async (inmuebleId = null) => {
   const client = await pool.connect();
   try {
@@ -601,10 +604,20 @@ export const getAllModificarInmuebleData = async (inmuebleId = null) => {
         inmuebleData.propietario = propietarioEmpresaResult.rows[0] || null;
         inmuebleData.propietarioTipo = 'empresa';
       }
+
+      // Fetch detailed asesor info and social media
+      if (inmuebleData.asesor_id) {
+        const asesorDetails = await getAsesorById(inmuebleData.asesor_id);
+        const redes = await getRedesByAsesorId(inmuebleData.asesor_id);
+        inmuebleData.asesorDetails = {
+          ...asesorDetails,
+          redes
+        };
+      }
     }
 
     // Add zona_nombre, ciudad_nombre, estado_nombre_ubicacion to inmuebleData if zona_id exists
-    if (inmuebleData.zona_id) {
+    if (inmuebleData && inmuebleData.zona_id) {
       const zonaData = await getZonaById(inmuebleData.zona_id);
       if (zonaData) {
         inmuebleData.zona_nombre = zonaData.nombre || null;

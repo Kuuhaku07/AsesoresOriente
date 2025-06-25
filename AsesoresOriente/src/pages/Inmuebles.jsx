@@ -8,7 +8,8 @@ import Map from '../components/Map';
 import SectionNavMenu from '../components/SectionNavMenu';
 import { FaBed, FaBath,FaPhone,FaEnvelope, FaCar, FaRulerCombined, FaLayerGroup, FaCalendarAlt, FaCouch, FaSnowflake, FaMapMarkerAlt, FaUser, FaFacebookSquare, FaInstagram, FaTwitterSquare } from 'react-icons/fa';
 import '../styles/Inmuebles.css';
-
+import iconMap from '../utils/iconMap';
+import DocumentList from '../components/DocumentList';
 import { useAuth } from '../context/AuthContext';
 import { verifyPermissions } from '../utils/permissionUtils';
 
@@ -116,8 +117,8 @@ const Inmuebles = () => {
               {inmuebleData.estado_nombre || ''}
             </span>
             
-            {inmuebleData.tipoNegocios?.map((tn, index) => (
-              <span key={tn.tipoNegocioId ?? index} className="business-tag">
+            {inmuebleData.tipoNegocios?.map((tn) => (
+              <span key={tn.id} className="business-tag">
                 {tn.nombre || ''}
               </span>
             ))}
@@ -201,14 +202,13 @@ const Inmuebles = () => {
           {/* Map */}
           <div className="info-card">
             <h2>Ubicación en el Mapa</h2>
-            <div className="map-container">
-              <Map 
-                location={{
-                  lat: inmuebleData.coordenadas ? parseFloat(inmuebleData.coordenadas.split(',')[0]) : 0,
-                  lng: inmuebleData.coordenadas ? parseFloat(inmuebleData.coordenadas.split(',')[1]) : 0,
-                }}
-              />
-            </div>
+          <div className="map-container">
+            <Map 
+              coordinates={inmuebleData.coordenadas || ''}
+              interactive={false}
+              height="300px"
+            />
+          </div>
           </div>
         </section>
 
@@ -231,8 +231,8 @@ const Inmuebles = () => {
                 </tr>
                 <tr>
                   <td><FaUser /></td>
-                  <td>Asesor</td>
-                  <td>{inmuebleData.asesor_nombre || 'No asignado'}</td>
+                <td>Asesor</td>
+                <td>{inmuebleData.asesorDetails ? `${inmuebleData.asesorDetails.nombre} ${inmuebleData.asesorDetails.apellido}` : (inmuebleData.asesor_nombre || 'No asignado')}</td>
                 </tr>
                 <tr>
                   <td><FaRulerCombined /></td>
@@ -293,10 +293,10 @@ const Inmuebles = () => {
         <section id="other-details" className="info-card">
           <h2>Características</h2>
           {inmuebleData.caracteristicas?.length > 0 ? (
-            <ul className="characteristics-list">
+            <ul className="characteristics-list styled-list">
               {inmuebleData.caracteristicas.map((carac) => (
-                <li key={carac.caracteristicaId}>
-                  {carac.nombre || 'Característica'} 
+                <li key={carac.caracteristicaId} className="styled-list-item">
+                  &#9632; {carac.nombre || 'Característica'} 
                   {carac.cantidad && ` (${carac.cantidad})`}
                 </li>
               ))}
@@ -320,34 +320,33 @@ const Inmuebles = () => {
           <div className="contact-container">
             <div className="contact-photo">
               <img 
-                src={inmuebleData.asesor_foto_perfil || 'https://static.vecteezy.com/system/resources/thumbnails/003/337/584/small/default-avatar-photo-placeholder-profile-icon-vector.jpg'} 
-                alt={`Foto de ${inmuebleData.asesor_nombre || 'Asesor'}`} 
+                src={inmuebleData.asesorDetails?.foto_perfil ? `/uploads/profile_pictures/${inmuebleData.asesorDetails.foto_perfil}` : (inmuebleData.asesor_foto_perfil || 'https://static.vecteezy.com/system/resources/thumbnails/003/337/584/small/default-avatar-photo-placeholder-profile-icon-vector.jpg')} 
+                alt={`Foto de ${inmuebleData.asesorDetails ? inmuebleData.asesorDetails.nombre + ' ' + inmuebleData.asesorDetails.apellido : (inmuebleData.asesor_nombre || 'Asesor')}`} 
               />
             </div>
             <div className="contact-info">
-              <p><FaUser style={{ marginRight: '8px' }} />{inmuebleData.asesor_nombre || 'No asignado'}</p>
+              <p><FaUser style={{ marginRight: '8px' }} />{inmuebleData.asesorDetails ? `${inmuebleData.asesorDetails.nombre} ${inmuebleData.asesorDetails.apellido}` : (inmuebleData.asesor_nombre || 'No asignado')}</p>
               <p style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                <span><FaEnvelope style={{ marginRight: '8px' }} />{inmuebleData.asesor_correo || 'No disponible'}</span>
-                <span><FaPhone style={{ marginRight: '8px' }} />{inmuebleData.asesor_telefono || 'No disponible'}</span>
+                <span><FaEnvelope style={{ marginRight: '8px' }} />{inmuebleData.asesorDetails?.correo || inmuebleData.asesor_correo || 'No disponible'}</span>
+                <span><FaPhone style={{ marginRight: '8px' }} />{inmuebleData.asesorDetails?.telefono || inmuebleData.asesor_telefono || 'No disponible'}</span>
               </p>
               <div className="social-links">
-                {inmuebleData.asesor_facebook && (
-                  <a href={inmuebleData.asesor_facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-                    <FaFacebookSquare />
-                  </a>
-                )}
-                {inmuebleData.asesor_instagram && (
-                  <a href={inmuebleData.asesor_instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                    <FaInstagram />
-                  </a>
-                )}
-                {inmuebleData.asesor_twitter && (
-                  <a href={inmuebleData.asesor_twitter} target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-                    <FaTwitterSquare />
-                  </a>
-                )}
+                {inmuebleData.asesorDetails?.redes?.map((red) => {
+                  if (!red.url) return null;
+                  let iconKey = red.icono;
+                  if (iconKey && !iconKey.startsWith('fa-')) {
+                    iconKey = 'fa-' + iconKey;
+                  }
+                  const IconComponent = iconMap[iconKey] || null;
+                  if (!IconComponent) return null;
+                  return (
+                    <a key={red.id} href={red.url} target="_blank" rel="noopener noreferrer" aria-label={red.nombre}>
+                      <IconComponent style={{ color: red.color || '#000' }} />
+                    </a>
+                  );
+                })}
               </div>
-            </div>
+             </div>
           </div>
         </section>
       </div>

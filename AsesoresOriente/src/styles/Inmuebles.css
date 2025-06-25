@@ -169,12 +169,20 @@
 }
 
 .characteristics-list li {
-  background: #f8f9fa;
-  padding: 8px 12px;
-  border-radius: 4px;
-  display: flex;
+  background: var(--color-primary-blue);
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
+  color: var(--color-white);
+  font-weight: 600;
+  cursor: default;
+  transition: background-color 0.3s ease;
+}
+
+.characteristics-list li:hover {
+  background-color: var(--color-primary);
 }
 
 /* Map container */
