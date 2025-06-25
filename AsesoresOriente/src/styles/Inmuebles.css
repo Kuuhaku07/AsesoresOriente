@@ -1,13 +1,33 @@
+/* Inmuebles.css */
 .inmueble-page-container {
-  display: flex;
-  flex-direction: column;
-  position: relative;
   padding: 20px;
-  gap: 24px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
+@media (max-width: 768px) {
+  .inmueble-page-container {
+    padding: 15px;
+  }
+  
+  .general-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .location-map-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .inmueble-page-container {
+    padding: 10px;
+  }
+  
+  .price-tag {
+    font-size: 1.2rem;
+  }
+}
 /* Header styles */
 .inmueble-header {
   margin-bottom: 24px;

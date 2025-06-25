@@ -17,15 +17,14 @@ const PageTemplate = ({
   children,
   pageClass = '',
   contentClass = '',
-  title='',
+  title = '',
 }) => {
   return (
     <>
       <Menu />
-
       <div className={`menu-offset ${pageClass}`}>
-        <PageTitle>{title}</PageTitle>
         <div className={`page-container ${contentClass}`}>
+          {title && <PageTitle>{title}</PageTitle>}
           {children}
         </div>
       </div>

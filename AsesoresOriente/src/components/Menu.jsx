@@ -34,7 +34,7 @@ export function Menu() {
           onMouseLeave={() => setShowNosotrosDropdown(false)}
         >
           <button className="dropbtn" onClick={toggleNosotrosDropdown}>
-            Nosotros ▼
+            Nosotros 
           </button>
           {showNosotrosDropdown && (
             <div className="dropdown-content">
@@ -66,7 +66,7 @@ export function Menu() {
                   <img src={`/uploads/profile_pictures/${user.pfp}`} alt="Perfil" className="profile-pic" />
                 ) : (
                   <span>{user.name}</span>
-                )} ▼
+                )} 
               </button>
               {showProfileDropdown && (
                 <div className="dropdown-content">

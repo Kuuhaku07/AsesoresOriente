@@ -1,17 +1,14 @@
-/* src/styles/layout.css */
+/* layout.css */
 
-/* Common layout styles */
 
 .menu-offset {
-    padding-top: var(--spacing-menu-offset); /* Padding to avoid fixed menu overlap */
-    background-color: var(--color-background);
+  padding-top: var(--spacing-menu-offset);
+  background-color: var(--color-background);
+  min-height: calc(100vh - var(--spacing-menu-offset));
 }
 
-/* Container for main page content */
-/* Increased max-width for wider content */
 .page-container {
-
-    margin: 0 auto;
-    padding: 0 var(--spacing-page-container-padding);
-    background-color: var(--color-background);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px var(--spacing-page-container-padding);
 }
