@@ -96,13 +96,15 @@ const Inmuebles = () => {
     <PageTemplate 
       title={`${inmuebleData.titulo || 'Inmueble'}`}
       headerRight={(
-        <a 
-          href={`/modificar/${inmuebleData.id}`} 
-          className="btn btn-primary google-maps-link"
-          style={{ marginLeft: 'auto', textDecoration: 'none' }}
-        >
-          Editar
-        </a>
+        user && (verifyPermissions(user, ['ADMINISTRADOR', 'GERENTE']) || user.id_asesor === inmuebleData.asesorId) ? (
+          <a 
+            href={`/modificar/${inmuebleData.id}`} 
+            className="btn btn-primary google-maps-link"
+            style={{ marginLeft: 'auto', textDecoration: 'none' }}
+          >
+            Editar
+          </a>
+        ) : null
       )}
     >
       <div className="inmueble-page-container">
@@ -355,7 +357,7 @@ const Inmuebles = () => {
       {(user && (verifyPermissions(user, ['ADMINISTRADOR', 'GERENTE']) || user.id_asesor === inmuebleData.asesorId)) && (
         <section className="info-card inmueble-info-section" style={{ display: 'flex', gap: '24px', marginTop: '24px' }}>
           {/* Left side - Propietario info */}
-          <div className="propietario-info" style={{ flex: 1 }}>
+          <div className="propietario-info" style={{ flex: 1, flexBasis: '50%', maxWidth: '50%' }}>
             <h2>Datos del Propietario</h2>
             {inmuebleData.propietario ? (
               inmuebleData.propietarioTipo === 'persona' ? (
@@ -386,16 +388,35 @@ const Inmuebles = () => {
           </div>
 
           {/* Right side - Documentos list */}
-          <div className="documentos-info" style={{ flex: 1 }}>
+          <div className="documentos-info" style={{ flex: 1, flexBasis: '50%', maxWidth: '50%' }}>
             <h2>Documentos</h2>
             {inmuebleData.documentos && inmuebleData.documentos.length > 0 ? (
-              <ul>
-                {inmuebleData.documentos.map((doc) => (
-                  <li key={doc.id || doc.nombre}>
-                    <a href={doc.ruta} target="_blank" rel="noopener noreferrer">{doc.nombre || doc.nombreArchivo || 'Documento'}</a>
-                  </li>
-                ))}
-              </ul>
+              <DocumentList
+                documents={inmuebleData.documentos.map(doc => {
+                  const ext = (doc.ruta || '').split('.').pop().toLowerCase();
+                  let mimeType = 'application/octet-stream';
+                  if (ext === 'pdf') mimeType = 'application/pdf';
+                  else if (ext === 'doc' || ext === 'docx') mimeType = 'application/msword';
+                  else if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) mimeType = 'image/' + ext;
+                  else if (ext === 'xls' || ext === 'xlsx') mimeType = 'application/vnd.ms-excel';
+                  else if (ext === 'txt') mimeType = 'text/plain';
+
+                  // Create a dummy file object with name and type for DocumentList
+                  const file = {
+                    name: doc.nombre || doc.nombreArchivo || `document.${ext}`,
+                    type: mimeType,
+                  };
+
+                  return {
+                    ...doc,
+                    preview: doc.preview || doc.ruta || '',
+                    downloadUrl: doc.ruta || doc.preview || '',
+                    file,
+                  };
+                })}
+                mode="view"
+                containerHeight="400px"
+              />
             ) : (
               <p>No hay documentos disponibles.</p>
             )}

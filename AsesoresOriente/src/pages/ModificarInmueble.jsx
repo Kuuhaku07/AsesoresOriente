@@ -29,18 +29,6 @@ const ModificarInmueble = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-
-  // Verificar permisos al cargar la página
-  useEffect(() => {
-    if (!loading) {
-      const allowed = verifyPermissions(user, ['ADMINISTRADOR', 'GERENTE','ASESOR']);
-      if (!allowed) {
-        navigate('/');
-      }
-    }
-  }, [user, navigate, loading]);
-
-
   const toastRef = useRef(null);
 
   // New state for error status
@@ -136,6 +124,16 @@ const ModificarInmueble = () => {
     caracteristicas: [],
     imagenes: [],
   });
+
+  // Verificar permisos al cargar la página
+  useEffect(() => {
+    if (!loading) {
+      const allowed = user && (verifyPermissions(user, ['ADMINISTRADOR', 'GERENTE']) || user.id_asesor === formData.asesorId);
+      if (!allowed) {
+        navigate('/');
+      }
+    }
+  }, [user, navigate, loading, formData]);
 
   // Estados para documentos
   const [documentosInmueble, setDocumentosInmueble] = useState([]);
