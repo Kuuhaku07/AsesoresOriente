@@ -6,45 +6,24 @@ import PropertiesGrid from '../components/PropertiesGrid';
 import { Menu } from '../components/Menu';
 import '../styles/Home.css';
 
+// Home.jsx - Ejemplo de mock data actualizado
 const mockProperties = [
   {
     id: 1,
     name: "Casa en la playa con vista al mar",
     type: "Venta",
+    status: "Disponible",
     location: "Playa del Carmen, Quintana Roo",
     size: "180",
     rooms: "4",
     bathrooms: "3",
-    price: "$3,200,000 ",
-    imageUrl: "https://images.unsplash.com/photo-1615571022219-eb45cf7faa9d?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Y2FzYSUyMGRlJTIwbGElMjBwbGF5YXxlbnwwfHwwfHx8MA%3D%3D",
+    price: "$3,200,000",
+    businessTypes: ["Venta"],
+    imageUrl: "https://images.unsplash.com/photo-1615571022219-eb45cf7faa9d",
     detailsLink: "/propiedad/1"
   },
-  {
-    id: 2,
-    name: "Moderno departamento en zona céntrica",
-    type: "Alquiler",
-    location: "Condesa, CDMX",
-    size: "90",
-    rooms: "2",
-    bathrooms: "1",
-    price: "$18,000 /mes",
-    imageUrl: "https://postandporch.com/cdn/shop/articles/AdobeStock_209124760.jpg?v=1662575433",
-    detailsLink: "/propiedad/2"
-  },
-  {
-    id: 3,
-    name: "Casa campestre con amplio jardín",
-    type: "Venta",
-    location: "Valle de Bravo, Estado de México",
-    size: "220",
-    rooms: "3",
-    bathrooms: "2",
-    price: "$4,500,000 ",
-    // imageUrl dejado vacío para probar el fallback
-    detailsLink: "/propiedad/3"
-  }
+  // ... más propiedades
 ];
-
 const Home = () => {
   return (
     <div className="home-page">

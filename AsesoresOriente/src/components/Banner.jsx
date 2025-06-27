@@ -1,7 +1,18 @@
 // src/components/Banner.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { FaBed, FaBath, FaRulerCombined,FaMapMarkerAlt } from 'react-icons/fa';
 import '../styles/Banner.css';
+
+const getStatusColor = (status) => {
+  switch (status?.toUpperCase()) {
+    case 'DISPONIBLE': return '#4CAF50';
+    case 'RESERVADO': return '#FFC107';
+    case 'VENDIDO': return '#F44336';
+    case 'NO_DISPONIBLE': return '#9E9E9E';
+    default: return '#cccccc';
+  }
+};
 
 const Banner = ({ 
   properties = [], 
@@ -57,11 +68,7 @@ const Banner = ({
   const currentProperty = properties[currentIndex];
 
   return (
-    <div 
-      className={`banner ${isTransitioning ? 'transitioning' : ''}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className={`banner ${isTransitioning ? 'transitioning' : ''}`}>
       <div className="banner-image-container">
         <img 
           src={currentProperty.imageUrl || defaultImage} 
@@ -72,7 +79,70 @@ const Banner = ({
           }}
         />
       </div>
-      
+
+      <div className={`info-box ${isHovered ? 'hovered' : ''}`}>
+        <div className="info-box-content">
+          {/* Estado y Tipo juntos */}
+          <div className="status-type-container">
+            {currentProperty.status && (
+              <div className="status-tag" style={{ backgroundColor: getStatusColor(currentProperty.status) }}>
+                {currentProperty.status}
+              </div>
+            )}
+            {currentProperty.businessTypes?.map((type, index) => (
+              <span key={index} className={`status-tag ${type.toLowerCase()}`}>
+                {type}
+              </span>
+            ))}
+          </div>
+          
+          <h3>{currentProperty.name}</h3>
+          
+          {/* Ubicación */}
+          {currentProperty.location && (
+            <p className="property-location">
+              <FaMapMarkerAlt /> {currentProperty.location}
+            </p>
+          )}
+          
+          <div className="property-tag-container">
+
+            {/* Precio */}
+            {currentProperty.price && (
+              <span className="property-tag price-tag">
+                {currentProperty.price}
+              </span>
+            )}
+          </div>
+
+          <div className="property-details">
+            {currentProperty.size && (
+              <div className="detail-item">
+                <FaRulerCombined />
+                <span>{currentProperty.size} m²</span>
+              </div>
+            )}
+            {currentProperty.rooms && (
+              <div className="detail-item">
+                <FaBed />
+                <span>{currentProperty.rooms} hab.</span>
+              </div>
+            )}
+            {currentProperty.bathrooms && (
+              <div className="detail-item">
+                <FaBath />
+                <span>{currentProperty.bathrooms} baños</span>
+              </div>
+            )}
+          </div>
+          
+          <Link to={currentProperty.detailsLink || '/'} className="btn-details-link">
+            <button className="btn-details">
+              Ver detalles
+            </button>
+          </Link>
+        </div>
+      </div>
       <div className="arrow left-arrow" onClick={goToPrev}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
           <path fillRule="evenodd" d="M7.28 7.72a.75.75 0 0 1 0 1.06l-2.47 2.47H21a.75.75 0 0 1 0 1.5H4.81l2.47 2.47a.75.75 0 1 1-1.06 1.06l-3.75-3.75a.75.75 0 0 1 0-1.06l3.75-3.75a.75.75 0 0 1 1.06 0Z" clipRule="evenodd" />
@@ -83,60 +153,6 @@ const Banner = ({
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
           <path fillRule="evenodd" d="M16.72 7.72a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06l-3.75 3.75a.75.75 0 1 1-1.06-1.06l2.47-2.47H3a.75.75 0 0 1 0-1.5h16.19l-2.47-2.47a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
         </svg>
-      </div>
-
-      <div className={`info-box ${isHovered ? 'hovered' : ''}`}>
-        <div className="info-box-content">
-          <h3>{currentProperty.name}</h3>
-          <div className="property-tag-container">
-            <span className={`property-tag ${currentProperty.type.toLowerCase()}`}>
-              {currentProperty.type}
-            </span>
-          </div>
-          
-          <div className="property-details">
-            {currentProperty.size && (
-              <div className="detail-item">
-                <i className="icon-area" style={{ 
-                  backgroundImage: "url('/img/icons/area.svg')",
-                  filter: "brightness(0) invert(1)"
-                }}></i>
-                <span>{currentProperty.size} m²</span>
-              </div>
-            )}
-            {currentProperty.rooms && (
-              <div className="detail-item">
-                <i className="icon-bed" style={{ 
-                  backgroundImage: "url('/img/icons/bed.svg')",
-                  filter: "brightness(0) invert(1)"
-                }}></i>
-                <span>{currentProperty.rooms} hab.</span>
-              </div>
-            )}
-            {currentProperty.bathrooms && (
-              <div className="detail-item">
-                <i className="icon-bath" style={{ 
-                  backgroundImage: "url('/img/icons/bath.svg')",
-                  filter: "brightness(0) invert(1)"
-                }}></i>
-                <span>{currentProperty.bathrooms} baños</span>
-              </div>
-            )}
-          </div>
-          
-          <Link 
-            to={currentProperty.detailsLink || '/'} 
-            className="btn-details-link"
-          >
-            <button className="btn-details">
-              Ver detalles 
-              <i className="icon-arrow" style={{ 
-                backgroundImage: "url('/img/icons/arrow-right.svg')",
-                filter: "brightness(0) invert(1)"
-              }}></i>
-            </button>
-          </Link>
-        </div>
       </div>
     </div>
   );
