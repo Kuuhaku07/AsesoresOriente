@@ -27,7 +27,8 @@ import {
   getModificarInmuebleData,
   getZonaById,
   updateInmueble,
-  getTipoCaracteristicas
+  getTipoCaracteristicas,
+  getNewestInmueblesController
 } from '../controllers/inmuebleController.js';
 
 
@@ -124,5 +125,7 @@ router.get('/estadoCivil', getEstadoCivil);
 // Nueva ruta para tipos de documento
 router.get('/tiposdocumento', getTiposDocumento);
 router.get('/modificar/:id?', getModificarInmuebleData);
+router.get('/newest', getNewestInmueblesController);
+router.get('/featured', getNewestInmueblesController);
 router.put('/:id', updateInmueble);
 export default router;

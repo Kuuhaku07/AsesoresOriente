@@ -1,4 +1,3 @@
-// src/components/PropertyCard.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaBed, FaBath, FaRulerCombined,FaMapMarkerAlt } from 'react-icons/fa';
@@ -14,7 +13,7 @@ const getStatusColor = (status) => {
   }
 };
 
-const PropertyCard = ({ property }) => {
+const PropertyCard = ({ property, defaultImage = '/img/default-property.jpg' }) => {
   return (
     <div className="property-card">
       <div className="property-header">
@@ -34,11 +33,11 @@ const PropertyCard = ({ property }) => {
       <div className="property-image-frame">
         <div className="property-image-container">
           <img 
-            src={property.imageUrl || '/img/default-property.jpg'} 
+            src={property.imageurl ? (property.imageurl.startsWith('http') || property.imageurl.startsWith('/uploads') ? property.imageurl : property.imageurl.startsWith('/img/') ? property.imageurl : `/uploads${property.imageurl}`) : defaultImage} 
             alt={property.name}
             className="property-image"
             onError={(e) => {
-              e.target.src = '/img/default-property.jpg';
+              e.target.src = defaultImage;
             }}
           />
         </div>
@@ -46,8 +45,8 @@ const PropertyCard = ({ property }) => {
 
       <div className="property-details">
         <div className="property-type-container">
-          <span className={`property-type ${property.type.toLowerCase()}`}>
-            {property.type}
+          <span className={`property-type ${property.businesstypes && property.businesstypes.length > 0 ? property.businesstypes[0].toLowerCase() : ''}`}>
+            {property.businesstypes && property.businesstypes.length > 0 ? property.businesstypes[0] : 'N/A'}
           </span>
         </div>
         {/* Ubicación */}
@@ -72,11 +71,13 @@ const PropertyCard = ({ property }) => {
           </div>
         </div>
 
+
+
         <div className="property-footer">
           <span className="property-price">
             {property.price}
           </span>
-          <Link to={property.detailsLink || '#'} className="details-link">
+          <Link to={property.detailslink || '#'} className="details-link">
             Ver detalles →
           </Link>
         </div>

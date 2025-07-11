@@ -358,6 +358,20 @@ export const getTiposDocumento = async (req, res) => {
 /**
  * Obtiene todos los datos necesarios para modificar/ver un inmueble
  */
+import { getNewestInmuebles } from '../services/inmuebleService.js';
+
+export const getNewestInmueblesController = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 5;
+    const inmuebles = await getNewestInmuebles(limit);
+    console.log('Fetched newest inmuebles:', inmuebles);
+    res.json(inmuebles);
+  } catch (error) {
+    console.error('Error getting newest inmuebles:', error);
+    res.status(500).json({ error: 'Failed to get newest inmuebles' });
+  }
+};
+
 export const getModificarInmuebleData = async (req, res) => {
   try {
     const inmuebleId = req.params.id ? parseInt(req.params.id) : null;

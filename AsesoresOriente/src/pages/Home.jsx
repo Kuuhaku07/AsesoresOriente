@@ -1,35 +1,33 @@
-// src/pages/Home.jsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Banner from '../components/Banner';
 import SearchBar from '../components/SearchBar';
 import PropertiesGrid from '../components/PropertiesGrid';
 import { Menu } from '../components/Menu';
 import '../styles/Home.css';
 
-// Home.jsx - Ejemplo de mock data actualizado
-const mockProperties = [
-  {
-    id: 1,
-    name: "Casa en la playa con vista al mar",
-    type: "Venta",
-    status: "Disponible",
-    location: "Playa del Carmen, Quintana Roo",
-    size: "180",
-    rooms: "4",
-    bathrooms: "3",
-    price: "$3,200,000",
-    businessTypes: ["Venta"],
-    imageUrl: "https://images.unsplash.com/photo-1615571022219-eb45cf7faa9d",
-    detailsLink: "/propiedad/1"
-  },
-  // ... más propiedades
-];
 const Home = () => {
+  const [newestProperties, setNewestProperties] = useState([]);
+  const [featuredProperties, setFeaturedProperties] = useState([]);
+
+  useEffect(() => {
+    // Fetch newest properties for banner
+    fetch('/api/inmueble/newest')
+      .then(res => res.json())
+      .then(data => setNewestProperties(data))
+      .catch(err => console.error('Error fetching newest properties:', err));
+
+    // Fetch featured properties for grid
+    fetch('/api/inmueble/featured')
+      .then(res => res.json())
+      .then(data => setFeaturedProperties(data))
+      .catch(err => console.error('Error fetching featured properties:', err));
+  }, []);
+
   return (
     <div className="home-page">
       <Menu/>
       <Banner 
-        properties={mockProperties} 
+        properties={newestProperties} 
         autoPlay={true} 
         interval={7000}
         defaultImage="https://www.rawls-campbellagency.com/sites/default/files/styles/large/public/blogpost-1.jpg?itok=lDKT1OHZ" 
@@ -39,7 +37,7 @@ const Home = () => {
       </div>
       <div className="featured-properties">
         <h2>Propiedades Destacadas</h2>
-        <PropertiesGrid properties={mockProperties} />
+        <PropertiesGrid properties={featuredProperties} />
       </div>
     </div>
   );

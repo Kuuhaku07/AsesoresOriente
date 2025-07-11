@@ -71,7 +71,7 @@ const Banner = ({
     <div className={`banner ${isTransitioning ? 'transitioning' : ''}`}>
       <div className="banner-image-container">
         <img 
-          src={currentProperty.imageUrl || defaultImage} 
+          src={currentProperty.imageurl ? (currentProperty.imageurl.startsWith('http') || currentProperty.imageurl.startsWith('/uploads') ? currentProperty.imageurl : `/uploads${currentProperty.imageurl}`) : defaultImage} 
           alt={`Inmueble: ${currentProperty.name}`} 
           className="banner-image"
           onError={(e) => {
@@ -89,7 +89,7 @@ const Banner = ({
                 {currentProperty.status}
               </div>
             )}
-            {currentProperty.businessTypes?.map((type, index) => (
+            {currentProperty.businesstypes?.map((type, index) => (
               <span key={index} className={`status-tag ${type.toLowerCase()}`}>
                 {type}
               </span>
@@ -136,7 +136,7 @@ const Banner = ({
             )}
           </div>
           
-          <Link to={currentProperty.detailsLink || '/'} className="btn-details-link">
+          <Link to={currentProperty.detailslink || '/'} className="btn-details-link">
             <button className="btn-details">
               Ver detalles
             </button>

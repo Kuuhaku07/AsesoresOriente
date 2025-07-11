@@ -655,6 +655,7 @@ export const getAllModificarInmuebleData = async (inmuebleId = null) => {
  * @param {Object} inmuebleData - Datos del inmueble y relacionados.
  * @returns {Object} - El inmueble actualizado con sus relaciones.
  */
+
 export const updateInmueble = async (inmuebleId, inmuebleData) => {
   const client = await pool.connect();
   try {
@@ -904,4 +905,33 @@ export const updateInmueble = async (inmuebleId, inmuebleData) => {
   } finally {
     client.release();
   }
+};
+
+// New function to get newest inmuebles
+export const getNewestInmuebles = async (limit = 5) => {
+  const result = await pool.query(`
+    SELECT i.id, i.titulo AS name, ei.nombre AS status, 
+           ARRAY_AGG(tn.nombre) AS businesstypes,
+           CONCAT(up.direccion_exacta, ', ', z.nombre) AS location,
+           itn.precio AS price, i.area_construida AS size, i.habitaciones AS rooms, i.banos AS bathrooms,
+           (SELECT ruta FROM "ImagenInmueble" WHERE inmueble_id = i.id ORDER BY orden LIMIT 1) AS imageurl,
+           '/inmueble/' || i.id AS detailslink
+    FROM "Inmueble" i
+    LEFT JOIN "EstadoInmueble" ei ON i.estado_id = ei.id
+    LEFT JOIN "InmuebleTipoNegocio" itn ON i.id = itn.inmueble_id
+    LEFT JOIN "TipoNegocio" tn ON itn.tipo_negocio_id = tn.id
+    LEFT JOIN "UbicacionInmueble" up ON i.id = up.inmueble_id
+    LEFT JOIN "Zona" z ON up.zona_id = z.id
+  WHERE LOWER(ei.nombre) = LOWER('Disponible')
+    GROUP BY i.id, ei.nombre, up.direccion_exacta, z.nombre, itn.precio, i.area_construida, i.habitaciones, i.banos
+    ORDER BY i.id DESC
+    LIMIT $1
+  `, [limit]);
+  return result.rows;
+};
+
+// New function to get featured inmuebles (for now same as newest)
+export const getFeaturedInmuebles = async (limit = 10) => {
+  // This can be customized to filter featured properties differently
+  return getNewestInmuebles(limit);
 };
