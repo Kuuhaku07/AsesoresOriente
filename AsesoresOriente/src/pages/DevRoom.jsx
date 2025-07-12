@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
-import PageTemplate from '../components/PageTemplate';
+import { useLocation, useNavigate } from 'react-router-dom';
+import MangoTemplate from '../components/MangoTemplate';
 import ToastContainer from '../components/ToastContainer';
 import FloatingContactButton from '../components/FloatingContactButton';
 import CopyButton from '../components/CopyButton';
@@ -10,9 +11,11 @@ import Map from '../components/Map';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 
-
 const Devroom = () => {
   const toastRef = useRef(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
 
   // Sample images state for testing ImageGallery
   const [images, setImages] = useState([
@@ -79,7 +82,9 @@ const Devroom = () => {
   }, [loading]);
 
   return (
-    <PageTemplate pageClass="about-layout" contentClass="about-content" title="Devroom">
+    <MangoTemplate 
+
+    >
       <p>Lalalalava chichichichicken.</p>
       {loading && <LoadingSpinner />}
       <ToastContainer ref={toastRef} />
@@ -165,7 +170,7 @@ const Devroom = () => {
         <h2>Loading Spinner Test Section</h2>
         <button onClick={(e) => { e.stopPropagation(); setLoading(true); }}>Activar Loading Spinner</button>
       </section>
-    </PageTemplate>
+    </MangoTemplate>
   );
 };
 
