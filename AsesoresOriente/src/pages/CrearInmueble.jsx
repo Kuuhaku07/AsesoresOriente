@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import PageTemplate from '../components/PageTemplate';
+import MangoTemplate from '../components/MangoTemplate';
+import PageTitle from '../components/PageTitle';
 import ToastContainer from '../components/ToastContainer';
 
 import BasicInfoSection from '../components/CrearInmuebleSections/BasicInfoSection';
@@ -981,11 +982,8 @@ setPropietariosPersona([...propietariosPersona, {
   // ==============================================
 
   return (
-    <PageTemplate 
-      pageClass="crear-inmueble-layout" 
-      contentClass="crear-inmueble-content" 
-      title="Crear Inmueble"
-    >
+    <MangoTemplate>
+      <PageTitle>Crear Inmueble</PageTitle>
       {submitting && <LoadingSpinner />}
       <form onSubmit={handleSubmit} className="crear-inmueble-form" style={{ pointerEvents: submitting ? 'none' : 'auto', opacity: submitting ? 0.6 : 1 }}>
         {/* Encabezado con pestañas y botón de guardar */} 
@@ -1140,7 +1138,7 @@ setPropietariosPersona([...propietariosPersona, {
       />
 
       <ToastContainer ref={toastRef} />
-    </PageTemplate>
+    </MangoTemplate>
   );
 };
 

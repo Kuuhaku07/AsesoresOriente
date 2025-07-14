@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Menu } from '../components/Menu';
+import MangoTemplate from '../components/MangoTemplate';
 import '../styles/Register.css';
-import '../styles/layout.css';
+
 import PageTitle from '../components/PageTitle';
 import { verifyPermissions } from '../utils/permissionUtils';
 import ToastContainer from '../components/ToastContainer';
@@ -266,10 +266,10 @@ const Register = () => {
   };
 
   return (
-    <>
-      <Menu />
+    <MangoTemplate>
+
       <ToastContainer ref={toastRef} />
-      <div className="register menu-offset">
+      <div >
         <PageTitle>{selectedUsuarioId ? 'Actualizar Usuario y Asesor' : 'Registrar Usuario y Asesor'}</PageTitle>
         <div className="register-content page-container">
           <div className="form-container">
@@ -393,7 +393,7 @@ const Register = () => {
           </div>
         </div>
       </div>
-    </>
+    </MangoTemplate>
   );
 };
 export default Register;

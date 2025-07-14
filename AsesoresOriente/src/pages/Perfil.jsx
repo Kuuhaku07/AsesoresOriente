@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Menu } from '../components/Menu';
 import { Navigate, useParams } from 'react-router-dom';
+import MangoTemplate from '../components/MangoTemplate';
 import PageTitle from '../components/PageTitle';
 import '../styles/Perfil.css';
 import '../styles/layout.css';
@@ -137,11 +137,9 @@ const Perfil = () => {
   };
 
   return (
-    <>
-      <Menu />
-      <div className="perfil-layout menu-offset">
-        <PageTitle>Perfil</PageTitle>
-        <div className="perfil-content page-container">
+    <MangoTemplate>
+      <div>
+        <div className="">
           <section className="profile-header">
             {user.Pfp ? (
               <img
@@ -256,7 +254,8 @@ const Perfil = () => {
         imageSrc={user && user.Pfp ? `/uploads/profile_pictures/${user.Pfp}` : ''}
         altText={user ? user.Nombre : 'Imagen de perfil'}
       />
-    </>
+
+  </MangoTemplate>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import PageTemplate from '../components/PageTemplate';
+import MangoTemplate from '../components/MangoTemplate';
+import PageTitle from '../components/PageTitle';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NotFoundPage from '../components/NotFoundPage';
 import ImageGallery from '../components/ImageGallery';
@@ -53,9 +54,10 @@ const Inmuebles = () => {
 
   if (loading) {
     return (
-      <PageTemplate title="Cargando inmueble...">
+      <MangoTemplate >
+        <PageTitle>{"Cargando inmueble..."}</PageTitle>
         <LoadingSpinner />
-      </PageTemplate>
+      </MangoTemplate>
     );
   }
 
@@ -93,20 +95,20 @@ const Inmuebles = () => {
 
   
   return (
-    <PageTemplate 
-      title={`${inmuebleData.titulo || 'Inmueble'}`}
-      headerRight={(
-        user && (verifyPermissions(user, ['ADMINISTRADOR', 'GERENTE']) || user.id_asesor === inmuebleData.asesorId) ? (
-          <a 
-            href={`/modificar/${inmuebleData.id}`} 
-            className="btn btn-primary google-maps-link"
-            style={{ marginLeft: 'auto', textDecoration: 'none' }}
-          >
-            Editar
-          </a>
-        ) : null
-      )}
+    <MangoTemplate >
+      <PageTitle 
+      headerRight={user && (verifyPermissions(user, ['ADMINISTRADOR', 'GERENTE']) || user.id_asesor === inmuebleData.asesorId) ? (
+        <a 
+          href={`/modificar/${inmuebleData.id}`} 
+          className="btn btn-primary google-maps-link"
+          style={{ marginLeft: 'auto', textDecoration: 'none' }}
+        >
+          Editar
+        </a>
+      ) : null}
     >
+      {inmuebleData.titulo || 'Inmueble'}
+    </PageTitle>
       <div className="inmueble-page-container">
         {/* Header Section */}
         <div className="inmueble-header">
@@ -424,7 +426,7 @@ const Inmuebles = () => {
         </section>
       )}
 
-    </PageTemplate>
+    </MangoTemplate>
   );
 };
 

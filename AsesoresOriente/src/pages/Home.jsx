@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Banner from '../components/Banner';
 import SearchBar from '../components/SearchBar';
 import PropertiesGrid from '../components/PropertiesGrid';
-import { Menu } from '../components/Menu';
+import MangoTemplate from '../components/MangoTemplate';
+
 import '../styles/Home.css';
 
 const Home = () => {
@@ -24,8 +25,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="home-page">
-      <Menu/>
+    <MangoTemplate>
       <Banner 
         properties={newestProperties} 
         autoPlay={true} 
@@ -39,7 +39,7 @@ const Home = () => {
         <h2>Propiedades Destacadas</h2>
         <PropertiesGrid properties={featuredProperties} />
       </div>
-    </div>
+    </MangoTemplate>
   );
 };
 

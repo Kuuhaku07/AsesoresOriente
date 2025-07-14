@@ -1,5 +1,6 @@
 import React from 'react';
-import PageTemplate from '../components/PageTemplate';
+import MangoTemplate from '../components/MangoTemplate';
+import PageTitle from '../components/PageTitle';
 import '../styles/About.css';
 import {
   FaHandshake, FaUserFriends, FaLaughBeam, FaUsers,
@@ -12,7 +13,8 @@ const image2 = '/img/about/about2.png';
 
 const About = () => {
   return (
-    <PageTemplate pageClass="about-layout" contentClass="about-content" title="Quiénes Somos">
+    <MangoTemplate>
+      <PageTitle>Quiénes Somos</PageTitle>
       <div className="about-page-container">
         {/* Hero Section: Image on top, centered text below */}
         <section className="about-section about-hero-section">
@@ -119,7 +121,7 @@ const About = () => {
           </p>
         </section>
       </div>
-    </PageTemplate>
+    </MangoTemplate>
   );
 };
 

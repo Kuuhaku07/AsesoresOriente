@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-import PageTemplate from '../components/PageTemplate';
+import MangoTemplate from '../components/MangoTemplate';
+import PageTitle from '../components/PageTitle';
 import ToastContainer from '../components/ToastContainer';
 
 import BasicInfoSection from '../components/CrearInmuebleSections/BasicInfoSection';
@@ -962,26 +963,25 @@ const ModificarInmueble = () => {
 
   if (loading || !initialLoadComplete) {
     return (
-      <PageTemplate title="Cargando inmueble...">
+      <MangoTemplate>
+        <PageTitle>Cargando inmueble...</PageTitle>
         <LoadingSpinner />
-      </PageTemplate>
+      </MangoTemplate>
     );
   }
 
   if (errorStatus === 404 || errorStatus === 500) {
     return (
-      <PageTemplate title="Error">
+      <MangoTemplate>
+        <PageTitle>Error</PageTitle>
         <NotFoundPage message="Inmueble no encontrado" />
-      </PageTemplate>
+      </MangoTemplate>
     );
   }
 
   return (
-    <PageTemplate 
-      pageClass="crear-inmueble-layout" 
-      contentClass="crear-inmueble-content" 
-      title={`Modificar Inmueble: ${formData.codigo}`}
-    >
+    <MangoTemplate>
+      <PageTitle>{`Modificar Inmueble: ${formData.codigo}`}</PageTitle>
       {submitting && <LoadingSpinner />}
       <form onSubmit={handleSubmit} className="crear-inmueble-form" style={{ pointerEvents: submitting ? 'none' : 'auto', opacity: submitting ? 0.6 : 1 }}>
         {/* Encabezado con pestañas y botón de guardar */} 
@@ -1137,7 +1137,7 @@ const ModificarInmueble = () => {
       />
 
       <ToastContainer ref={toastRef} />
-    </PageTemplate>
+    </MangoTemplate>
   );
 };
 
