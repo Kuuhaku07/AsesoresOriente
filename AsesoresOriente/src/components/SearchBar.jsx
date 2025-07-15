@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/SearchBar.css';
 
 const SearchBar = () => {
+  const navigate = useNavigate();
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     location: '',
@@ -20,8 +22,13 @@ const SearchBar = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Filtros aplicados:', filters);
-    // Lógica de búsqueda aquí
+    // Send only the location input as the search parameter 'q'
+    const queryParams = new URLSearchParams();
+    if (filters.location) {
+      queryParams.append('q', filters.location);
+    }
+    // Navigate to Buscar page with query param 'q'
+    navigate(`/buscar?${queryParams.toString()}`);
   };
 
   return (

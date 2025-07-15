@@ -103,12 +103,26 @@ const MangoTemplate = ({
                 </button>
               </div>
               <div className="right-controls">
-                {showSearch && (
-                  <div className="search-container">
-                    <Icons.FiSearch className="search-icon" />
-                    <input type="text" className="search-input" placeholder="Search..." />
-                  </div>
-                )}
+{showSearch && (
+  <div className="search-container">
+    <Icons.FiSearch className="search-icon" />
+    <input
+      type="text"
+      className="search-input"
+      placeholder="Search..."
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const query = e.currentTarget.value.trim();
+          if (query) {
+            // Navigate to Buscar page with query param 'q'
+            window.location.href = `/buscar?q=${encodeURIComponent(query)}`;
+          }
+        }
+      }}
+    />
+  </div>
+)}
                 <div className="nav-icons">
                   {showMessages && (
                     <button className="icon-button" aria-label="Messages">
