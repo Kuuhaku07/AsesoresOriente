@@ -32,6 +32,27 @@ export const getTipoCaracteristicas = async (req, res) => {
   }
 };
 
+// New controller for searching inmuebles with filters
+export const searchInmuebles = async (req, res) => {
+  try {
+    const filters = {
+      q: req.query.q || null,
+      propertyType: req.query.propertyType || null,
+      transactionType: req.query.transactionType || null,
+      bedrooms: req.query.bedrooms || null,
+      bathrooms: req.query.bathrooms || null,
+      minPrice: req.query.minPrice || null,
+      maxPrice: req.query.maxPrice || null,
+      limit: req.query.limit ? parseInt(req.query.limit) : 20,
+      offset: req.query.offset ? parseInt(req.query.offset) : 0,
+    };
+    const inmuebles = await inmuebleService.searchInmuebles(filters);
+    res.json(inmuebles);
+  } catch (error) {
+    console.error('Error searching inmuebles:', error);
+    res.status(500).json({ error: 'Failed to search inmuebles' });
+  }
+};
 
 /**
  * Controlador para crear un nuevo inmueble.
@@ -356,7 +377,10 @@ export const getTiposDocumento = async (req, res) => {
 };
 
 /**
- * Obtiene todos los datos necesarios para modificar/ver un inmueble
+ * Obtiene todos los datos necesarios para modificar/ver un inmueble,
+ * incluyendo datos del inmueble si se proporciona un inmuebleId.
+ * @param {number|null} inmuebleId - ID del inmueble a obtener (opcional).
+ * @returns {Object} - Datos agregados para modificar/ver inmueble.
  */
 import { getNewestInmuebles } from '../services/inmuebleService.js';
 
@@ -461,3 +485,4 @@ export const updateInmueble = async (req, res) => {
     res.status(500).json({ error: 'Failed to update inmueble' });
   }
 };
+

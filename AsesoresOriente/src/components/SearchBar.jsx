@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/SearchBar.css';
 
@@ -22,12 +22,39 @@ const SearchBar = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Send only the location input as the search parameter 'q'
     const queryParams = new URLSearchParams();
+
     if (filters.location) {
       queryParams.append('q', filters.location);
     }
-    // Navigate to Buscar page with query param 'q'
+    if (filters.propertyType) {
+      queryParams.append('propertyType', filters.propertyType);
+    }
+    if (filters.transactionType) {
+      queryParams.append('transactionType', filters.transactionType);
+    }
+    if (filters.bedrooms) {
+      queryParams.append('bedrooms', filters.bedrooms);
+    }
+    if (filters.bathrooms) {
+      queryParams.append('bathrooms', filters.bathrooms);
+    }
+    if (filters.minPrice) {
+      queryParams.append('minPrice', filters.minPrice);
+    }
+    if (filters.maxPrice) {
+      queryParams.append('maxPrice', filters.maxPrice);
+    }
+    if (filters.estadoId) {
+      queryParams.append('estadoId', filters.estadoId);
+    }
+    if (filters.ciudadId) {
+      queryParams.append('ciudadId', filters.ciudadId);
+    }
+    if (filters.zonaId) {
+      queryParams.append('zonaId', filters.zonaId);
+    }
+
     navigate(`/buscar?${queryParams.toString()}`);
   };
 
@@ -46,7 +73,7 @@ const SearchBar = () => {
               className="search-main-input"
             />
           </div>
-          <button type="button" 
+          <button type="button"
             className="filter-toggle"
             onClick={() => setShowFilters(!showFilters)}
           >
@@ -146,5 +173,4 @@ const SearchBar = () => {
     </div>
   );
 };
-
 export default SearchBar;

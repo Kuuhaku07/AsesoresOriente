@@ -28,7 +28,8 @@ import {
   getZonaById,
   updateInmueble,
   getTipoCaracteristicas,
-  getNewestInmueblesController
+  getNewestInmueblesController,
+  searchInmuebles
 } from '../controllers/inmuebleController.js';
 
 
@@ -105,27 +106,17 @@ router.get('/ubicacion/zona/:zonaId', getZonaById);
 router.get('/tiponegocios', getTipoNegocios);
 router.get('/caracteristicas', getCaracteristicas);
 router.get('/caracteristicas/:id', getCaracteristicaById);
-router.get('/tipocaracteristicas', getTipoCaracteristicas);
-
-// New routes for caracteristica
 router.post('/caracteristicas', createCaracteristica);
 router.put('/caracteristicas/:id', updateCaracteristica);
-
-// New routes for propietario persona
 router.post('/propietarios/persona', createPropietarioPersona);
 router.put('/propietarios/persona/:id', updatePropietarioPersona);
-
-// New routes for propietario empresa
 router.post('/propietarios/empresa', createPropietarioEmpresa);
 router.put('/propietarios/empresa/:id', updatePropietarioEmpresa);
-
-// New route for estado civil
 router.get('/estadoCivil', getEstadoCivil);
-
-// Nueva ruta para tipos de documento
 router.get('/tiposdocumento', getTiposDocumento);
 router.get('/modificar/:id?', getModificarInmuebleData);
 router.get('/newest', getNewestInmueblesController);
 router.get('/featured', getNewestInmueblesController);
+router.get('/search', searchInmuebles);
 router.put('/:id', updateInmueble);
 export default router;

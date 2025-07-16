@@ -930,6 +930,111 @@ export const getNewestInmuebles = async (limit = 5) => {
   return result.rows;
 };
 
+// New function to search inmuebles with optional filters
+export const searchInmuebles = async (filters) => {
+  const {
+    q, // search query for name or location
+    propertyType,
+    transactionType,
+    bedrooms,
+    bathrooms,
+    minPrice,
+    maxPrice,
+    estadoId,
+    ciudadId,
+    zonaId,
+    limit = 20,
+    offset = 0
+  } = filters;
+
+  const values = [];
+  let whereClauses = [];
+  let joinTipoNegocio = false;
+
+  if (q) {
+    values.push(`%${q.toLowerCase()}%`);
+    whereClauses.push(`(LOWER(i.titulo) LIKE $${values.length} OR LOWER(up.direccion_exacta) LIKE $${values.length} OR LOWER(e.nombre) LIKE $${values.length} OR LOWER(c.nombre) LIKE $${values.length} OR LOWER(z.nombre) LIKE $${values.length})`);
+  }
+
+  if (propertyType) {
+    values.push(propertyType);
+    whereClauses.push(`ti.nombre = $${values.length}`);
+  }
+
+  if (transactionType) {
+    joinTipoNegocio = true;
+    values.push(transactionType);
+    whereClauses.push(`tn.nombre = $${values.length}`);
+  }
+
+  if (bedrooms) {
+    values.push(parseInt(bedrooms));
+    whereClauses.push(`i.habitaciones >= $${values.length}`);
+  }
+
+  if (bathrooms) {
+    values.push(parseInt(bathrooms));
+    whereClauses.push(`i.banos >= $${values.length}`);
+  }
+
+  if (minPrice) {
+    joinTipoNegocio = true;
+    values.push(parseFloat(minPrice));
+    whereClauses.push(`itn.precio >= $${values.length}`);
+  }
+
+  if (maxPrice) {
+    joinTipoNegocio = true;
+    values.push(parseFloat(maxPrice));
+    whereClauses.push(`itn.precio <= $${values.length}`);
+  }
+
+
+  let query = `
+    SELECT DISTINCT i.id, i.titulo AS name, ei.nombre AS status,
+           ARRAY_AGG(DISTINCT tn.nombre) AS businesstypes,
+           CONCAT(up.direccion_exacta, ', ', z.nombre) AS location,
+           itn.precio AS price, i.area_construida AS size, i.habitaciones AS rooms, i.banos AS bathrooms,
+           (SELECT ruta FROM "ImagenInmueble" WHERE inmueble_id = i.id ORDER BY orden LIMIT 1) AS imageurl,
+           '/inmueble/' || i.id AS detailslink
+    FROM "Inmueble" i
+    LEFT JOIN "EstadoInmueble" ei ON i.estado_id = ei.id
+    LEFT JOIN "UbicacionInmueble" up ON i.id = up.inmueble_id
+    LEFT JOIN "Zona" z ON up.zona_id = z.id
+    LEFT JOIN "Ciudad" c ON z.ciudad_id = c.id
+    LEFT JOIN "Estado" e ON c.estado_id = e.id
+    LEFT JOIN "TipoInmueble" ti ON i.tipo_inmueble_id = ti.id
+  `;
+
+  if (joinTipoNegocio) {
+    query += `
+      LEFT JOIN "InmuebleTipoNegocio" itn ON i.id = itn.inmueble_id
+      LEFT JOIN "TipoNegocio" tn ON itn.tipo_negocio_id = tn.id
+    `;
+  } else {
+    query += `
+      LEFT JOIN "InmuebleTipoNegocio" itn ON i.id = itn.inmueble_id
+      LEFT JOIN "TipoNegocio" tn ON itn.tipo_negocio_id = tn.id
+    `;
+  }
+
+  if (whereClauses.length > 0) {
+    query += ' WHERE ' + whereClauses.join(' AND ');
+  }
+
+  query += `
+    GROUP BY i.id, ei.nombre, up.direccion_exacta, z.nombre, c.id, e.id, itn.precio, i.area_construida, i.habitaciones, i.banos
+    ORDER BY i.id DESC
+    LIMIT $${values.length + 1} OFFSET $${values.length + 2}
+  `;
+
+  values.push(limit);
+  values.push(offset);
+
+  const result = await pool.query(query, values);
+  return result.rows;
+};
+
 // New function to get featured inmuebles (for now same as newest)
 export const getFeaturedInmuebles = async (limit = 10) => {
   // This can be customized to filter featured properties differently
