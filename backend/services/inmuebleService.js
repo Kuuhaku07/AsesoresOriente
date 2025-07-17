@@ -957,14 +957,14 @@ export const searchInmuebles = async (filters) => {
   }
 
   if (propertyType) {
-    values.push(propertyType);
-    whereClauses.push(`ti.nombre = $${values.length}`);
+    values.push(propertyType.toLowerCase());
+    whereClauses.push(`LOWER(ti.nombre) = $${values.length}`);
   }
 
   if (transactionType) {
     joinTipoNegocio = true;
-    values.push(transactionType);
-    whereClauses.push(`tn.nombre = $${values.length}`);
+    values.push(transactionType.toLowerCase());
+    whereClauses.push(`LOWER(tn.nombre) = $${values.length}`);
   }
 
   if (bedrooms) {

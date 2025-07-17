@@ -15,6 +15,30 @@ const SearchBar = () => {
     maxPrice: ''
   });
 
+  const [tipoInmuebles, setTipoInmuebles] = useState([]);
+  const [tipoNegocios, setTipoNegocios] = useState([]);
+
+  useEffect(() => {
+    const fetchTipos = async () => {
+      try {
+        const [inmueblesRes, negociosRes] = await Promise.all([
+          fetch('/api/inmueble/tipos'),
+          fetch('/api/inmueble/tiponegocios')
+        ]);
+        if (!inmueblesRes.ok || !negociosRes.ok) {
+          throw new Error('Error fetching tipos');
+        }
+        const inmueblesData = await inmueblesRes.json();
+        const negociosData = await negociosRes.json();
+        setTipoInmuebles(inmueblesData);
+        setTipoNegocios(negociosData);
+      } catch (error) {
+        console.error('Error fetching tipos:', error);
+      }
+    };
+    fetchTipos();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
@@ -96,9 +120,11 @@ const SearchBar = () => {
                 className="filter-select"
               >
                 <option value="">Todos</option>
-                <option value="casa">Casa</option>
-                <option value="apartamento">Apartamento</option>
-                <option value="local">Local</option>
+                {tipoInmuebles.map(tipo => (
+                  <option key={tipo.id} value={tipo.nombre.toLowerCase()}>
+                    {tipo.nombre}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -111,8 +137,11 @@ const SearchBar = () => {
                 className="filter-select"
               >
                 <option value="">Todos</option>
-                <option value="venta">Venta</option>
-                <option value="alquiler">Alquiler</option>
+                {tipoNegocios.map(tipo => (
+                  <option key={tipo.id} value={tipo.nombre.toLowerCase()}>
+                    {tipo.nombre}
+                  </option>
+                ))}
               </select>
             </div>
 
