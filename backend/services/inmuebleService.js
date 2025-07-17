@@ -952,8 +952,11 @@ export const searchInmuebles = async (filters) => {
   let joinTipoNegocio = false;
 
   if (q) {
-    values.push(`%${q.toLowerCase()}%`);
-    whereClauses.push(`(LOWER(i.titulo) LIKE $${values.length} OR LOWER(up.direccion_exacta) LIKE $${values.length} OR LOWER(e.nombre) LIKE $${values.length} OR LOWER(c.nombre) LIKE $${values.length} OR LOWER(z.nombre) LIKE $${values.length})`);
+    const terms = q.toLowerCase().split(/\s+/).filter(term => term.length > 0);
+    terms.forEach(term => {
+      values.push(`%${term}%`);
+      whereClauses.push(`(LOWER(i.titulo) LIKE $${values.length} OR LOWER(up.direccion_exacta) LIKE $${values.length} OR LOWER(e.nombre) LIKE $${values.length} OR LOWER(c.nombre) LIKE $${values.length} OR LOWER(z.nombre) LIKE $${values.length})`);
+    });
   }
 
   if (propertyType) {
