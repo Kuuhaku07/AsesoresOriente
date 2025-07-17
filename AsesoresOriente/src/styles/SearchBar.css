@@ -1,33 +1,31 @@
-:root {
-    --primary-color: #3a86ff;
-    --secondary-color: #2a6fdb;
-    --text-color: #333;
-    --light-gray: #f5f5f5;
-    --border-color: #ddd;
-    --border-radius: 8px;
-    --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    --spacing-md: 16px;
-    --spacing-sm: 8px;
-  }
+
+
   
-  .search-container {
-    max-width: 800px;
-    margin: 20px auto;
+.search-container {
+    width: 100%;
+    margin: 0 auto;
     padding: 0 var(--spacing-md);
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
   
   .search-form {
     background: white;
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
-    padding: var(--spacing-md);
+    padding: var(--spacing-md) 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: visible;
   }
   
   /* Fila superior */
-  .search-top-row {
+.search-top-row {
     display: flex;
     gap: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
+    padding: 0 var(--spacing-md);
+    box-sizing: border-box;
   }
   
   .search-input-wrapper {
@@ -75,22 +73,30 @@
   /* Filtros desplegables */
   .filters-column {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: var(--spacing-md);
-    padding-top: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-md) 0 var(--spacing-md);
     border-top: 1px solid var(--light-gray);
     animation: fadeIn 0.3s ease-out;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+  }
+  .filter-row {
+    flex: 1 1 auto;
+    min-width: 120px;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    box-sizing: border-box;
+    max-width: 100%;
+    word-wrap: break-word;
   }
   
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
-  }
-  
-  .filter-row {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
   }
   
   .filter-label {
@@ -157,5 +163,15 @@
     
     .price-separator {
       display: none;
+    }
+
+    .filters-column {
+      flex-direction: column;
+      padding: var(--spacing-md);
+    }
+
+    .filter-row {
+      min-width: auto;
+      width: 100%;
     }
   }

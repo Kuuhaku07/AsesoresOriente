@@ -5,11 +5,10 @@
     min-height: 100vh;
   }
   
-  .search-section {
-    max-width: 1200px;
+.search-section {
     width: 100%;
     margin: 0 auto;
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md) 0 0 0;
   }
   
   .featured-properties {
