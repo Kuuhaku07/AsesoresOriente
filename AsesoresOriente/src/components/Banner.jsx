@@ -24,6 +24,10 @@ const Banner = ({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  // Swipe gesture support
+  let touchStartX = 0;
+  let touchEndX = 0;
+
   const navigateBanner = (direction) => {
     if (isTransitioning) return;
     setIsTransitioning(true);
@@ -43,11 +47,46 @@ const Banner = ({
   const goToPrev = () => navigateBanner('prev');
   const goToNext = () => navigateBanner('next');
 
+  // Add keyboard support for arrows
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowLeft') {
+      goToPrev();
+    } else if (e.key === 'ArrowRight') {
+      goToNext();
+    }
+  };
+
   useEffect(() => {
     if (!autoPlay || properties.length <= 1) return;
-    const timer = setInterval(goToNext, interval);
-    return () => clearInterval(timer);
-  }, [currentIndex, properties]);
+    if (!isHovered) {
+      const timer = setInterval(goToNext, interval);
+      return () => clearInterval(timer);
+    }
+  }, [currentIndex, properties, isHovered]);
+
+  const handleTouchStart = (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchEndX === 0) return;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        // Swipe left
+        goToNext();
+      } else {
+        // Swipe right
+        goToPrev();
+      }
+    }
+    touchStartX = 0;
+    touchEndX = 0;
+  };
 
   if (properties.length === 0) {
     return (
@@ -68,11 +107,23 @@ const Banner = ({
   const currentProperty = properties[currentIndex];
 
   return (
-    <div className={`banner ${isTransitioning ? 'transitioning' : ''}`}>
+    <div className={`banner ${isTransitioning ? 'transitioning' : ''}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsHovered(true)}
+      onBlur={() => setIsHovered(false)}
+      tabIndex={0}
+      role="region"
+      aria-label="Carrusel de propiedades destacadas"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onKeyDown={handleKeyDown}
+    >
       <div className="banner-image-container">
         <img 
           src={currentProperty.imageurl ? (currentProperty.imageurl.startsWith('http') || currentProperty.imageurl.startsWith('/uploads') ? currentProperty.imageurl : `/uploads${currentProperty.imageurl}`) : defaultImage} 
-          alt={`Inmueble: ${currentProperty.name}`} 
+          alt={`Inmueble: ${currentProperty.name || 'Propiedad destacada'}`} 
           className="banner-image"
           onError={(e) => {
             e.target.src = defaultImage;
@@ -96,7 +147,7 @@ const Banner = ({
             ))}
           </div>
           
-          <h3>{currentProperty.name}</h3>
+          <h3>{currentProperty.name || 'Propiedad destacada'}</h3>
           
           {/* Ubicación */}
           {currentProperty.location && (
@@ -143,14 +194,14 @@ const Banner = ({
           </Link>
         </div>
       </div>
-      <div className="arrow left-arrow" onClick={goToPrev}>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+      <div className="arrow left-arrow" onClick={goToPrev} tabIndex={0} role="button" aria-label="Anterior" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { goToPrev(); e.preventDefault(); } }}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" role="img" aria-hidden="true">
           <path fillRule="evenodd" d="M7.28 7.72a.75.75 0 0 1 0 1.06l-2.47 2.47H21a.75.75 0 0 1 0 1.5H4.81l2.47 2.47a.75.75 0 1 1-1.06 1.06l-3.75-3.75a.75.75 0 0 1 0-1.06l3.75-3.75a.75.75 0 0 1 1.06 0Z" clipRule="evenodd" />
         </svg>
       </div>
       
-      <div className="arrow right-arrow" onClick={goToNext}>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+      <div className="arrow right-arrow" onClick={goToNext} tabIndex={0} role="button" aria-label="Siguiente" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { goToNext(); e.preventDefault(); } }}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" role="img" aria-hidden="true">
           <path fillRule="evenodd" d="M16.72 7.72a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06l-3.75 3.75a.75.75 0 1 1-1.06-1.06l2.47-2.47H3a.75.75 0 0 1 0-1.5h16.19l-2.47-2.47a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
         </svg>
       </div>

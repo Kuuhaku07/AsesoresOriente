@@ -37,7 +37,7 @@ const Home = () => {
       </div>
       <div className="featured-properties">
         <h2>Propiedades Destacadas</h2>
-        <PropertiesGrid properties={featuredProperties} />
+        <PropertiesGrid properties={featuredProperties} singleRow={true} />
       </div>
     </MangoTemplate>
   );

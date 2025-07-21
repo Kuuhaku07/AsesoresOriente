@@ -531,3 +531,23 @@ html, body, #root {
   margin-left: 6px;
   vertical-align: middle;
 }
+
+/* Remove black outline on mango-template container focus */
+.mango-template:focus {
+  outline: none;
+}
+
+/* Add subtle focus styles for keyboard accessibility on interactive elements */
+.sidebar-toggle:focus,
+.dropbtn:focus,
+.profile-button:focus,
+.mangomenu-item a:focus,
+.dropdown-link:focus,
+.icon-button:focus,
+.profile-link:focus,
+.dropdown-item:focus {
+  outline: 1px solid var(--primary-color);
+  outline-offset: 2px;
+  box-shadow: 0 0 2px var(--primary-color);
+  border-radius: 4px;
+}

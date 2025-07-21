@@ -50,97 +50,135 @@ const MangoTemplate = ({
   const userName = user ? user.name : 'Guest';
   const userPhoto = user ? user.pfp : null;
 
+  // Keyboard accessibility handlers
+  const handleKeyDownSidebarToggle = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleSidebar();
+    }
+  };
+
+  const handleKeyDownProfileButton = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleProfileDropdown();
+    }
+  };
+
+  const handleKeyDownNosotrosButton = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleNosotrosDropdown();
+    }
+  };
+
   return (
     <div className={`mango-template ${sidebarVisible ? 'sidebar-visible' : 'sidebar-hidden'}`}>
       
       <div className="body-container">
         
-        <aside className={`sidebar ${sidebarVisible ? 'visible' : 'hidden'}`}>
+        <aside className={`sidebar ${sidebarVisible ? 'visible' : 'hidden'}`} role="navigation" aria-label="Sidebar menu">
             <header className="header">
-              <Link to="/">
+              <Link to="/" aria-label="Inicio">
                 <img src={Logo} alt="Logo" className="logo" />
               </Link>
             </header>
           <div className="sidebar-header-menu-container">
 
-            <nav className="mangomenu">
+            <nav className="mangomenu" role="menubar" aria-label="Menú principal">
               <ul>
-                                {!user ? (
+                {!user ? (
                   <>
-                    <li className="mangomenu-item">
-                      <Link to="/vender">Vender</Link>
+                    <li className="mangomenu-item" role="none">
+                      <Link to="/vender" role="menuitem" tabIndex={0}>Vender</Link>
                     </li>
                   </>
                 ) : (
                   <>
-                    <li className="mangomenu-item">
-                      <Link to="/dashboard">Dashboard</Link>
+                    <li className="mangomenu-item" role="none">
+                      <Link to="/dashboard" role="menuitem" tabIndex={0}>Dashboard</Link>
                     </li>
-                    
                   </>
                 )}
                 <li 
                   className="mangomenu-item dropdown"
                   onMouseEnter={() => setShowNosotrosDropdown(true)}
                   onMouseLeave={() => setShowNosotrosDropdown(false)}
+                  role="none"
                 >
-                  <button className="dropbtn" onClick={toggleNosotrosDropdown}>
+                  <button 
+                    className="dropbtn" 
+                    onClick={toggleNosotrosDropdown}
+                    onKeyDown={handleKeyDownNosotrosButton}
+                    aria-haspopup="true"
+                    aria-expanded={showNosotrosDropdown}
+                    aria-controls="nosotros-dropdown"
+                    tabIndex={0}
+                  >
                     Nosotros
                   </button>
                   {(showNosotrosDropdown) && (
-                    <div className="dropdown-content"
+                    <div 
+                      className="dropdown-content"
+                      id="nosotros-dropdown"
                       onMouseEnter={() => setShowNosotrosDropdown(true)}
                       onMouseLeave={() => setShowNosotrosDropdown(false)}
+                      role="menu"
                     >
-                      <Link to="/about" className="dropdown-link">Quienes somos</Link>
-                      <Link to="/asesores" className="dropdown-link">Nuestros Asesores</Link>
-                      <Link to="/formar-parte" className="dropdown-link">Formar parte del equipo</Link>
+                      <Link to="/about" className="dropdown-link" role="menuitem" tabIndex={0}>Quienes somos</Link>
+                      <Link to="/asesores" className="dropdown-link" role="menuitem" tabIndex={0}>Nuestros Asesores</Link>
+                      <Link to="/formar-parte" className="dropdown-link" role="menuitem" tabIndex={0}>Formar parte del equipo</Link>
                     </div>
                   )}
                 </li>
-
-
               </ul>
             </nav>
           </div>
         </aside>
         <div className="main-container">
           <div className="top-bar">
-            <nav className="top-nav">
+            <nav className="top-nav" role="navigation" aria-label="Barra superior">
               <div className="left-controls">
-                <button className="sidebar-toggle" onClick={toggleSidebar} aria-label="Toggle sidebar">
+                <button 
+                  className="sidebar-toggle" 
+                  onClick={toggleSidebar} 
+                  onKeyDown={handleKeyDownSidebarToggle}
+                  aria-label="Toggle sidebar"
+                  aria-pressed={sidebarVisible}
+                  tabIndex={0}
+                >
                   <Icons.FiMenu />
                 </button>
               </div>
               <div className="right-controls">
-{showSearch && (
-  <div className="search-container">
-    <Icons.FiSearch className="search-icon" />
-    <input
-      type="text"
-      className="search-input"
-      placeholder="Search..."
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          const query = e.currentTarget.value.trim();
-          if (query) {
-            // Navigate to Buscar page with query param 'q'
-            window.location.href = `/buscar?q=${encodeURIComponent(query)}`;
-          }
-        }
-      }}
-    />
-  </div>
-)}
+                {showSearch && (
+                  <div className="search-container">
+                    <Icons.FiSearch className="search-icon" />
+                    <input
+                      type="text"
+                      className="search-input"
+                      placeholder="Search..."
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const query = e.currentTarget.value.trim();
+                          if (query) {
+                            window.location.href = `/buscar?q=${encodeURIComponent(query)}`;
+                          }
+                        }
+                      }}
+                      aria-label="Buscar"
+                    />
+                  </div>
+                )}
                 <div className="nav-icons">
                   {showMessages && (
-                    <button className="icon-button" aria-label="Messages">
+                    <button className="icon-button" aria-label="Messages" tabIndex={0}>
                       <Icons.FiMessageSquare />
                     </button>
                   )}
                   {showNotifications && (
-                    <button className="icon-button" aria-label="Notifications">
+                    <button className="icon-button" aria-label="Notifications" tabIndex={0}>
                       <Icons.FiBell />
                     </button>
                   )}
@@ -157,15 +195,29 @@ const MangoTemplate = ({
                 >
                   {!user ? (
                     <>
-                      <Link to="/login" className="profile-link">Iniciar Sesión</Link>
+                      <Link to="/login" className="profile-link" tabIndex={0}>Iniciar Sesión</Link>
                     </>
                   ) : (
                     <>
-                      <button className="profile-button" onClick={toggleProfileDropdown}>
+                      <button 
+                        className="profile-button" 
+                        onClick={toggleProfileDropdown}
+                        onKeyDown={handleKeyDownProfileButton}
+                        aria-haspopup="true"
+                        aria-expanded={profileDropdownVisible}
+                        aria-controls="profile-dropdown"
+                        tabIndex={0}
+                      >
                         {userPhoto ? (
-                          <img src={`/uploads/profile_pictures/${userPhoto}`} alt="Profile" className="profile-photo" />
+                          <img 
+                            src={`/uploads/profile_pictures/${userPhoto}`} 
+                            alt="Profile" 
+                            className="profile-photo" 
+                            loading="lazy"
+                            onError={(e) => { e.target.src = '/img/default-profile.png'; }}
+                          />
                         ) : (
-                          <div className="profile-photo-placeholder">
+                          <div className="profile-photo-placeholder" tabIndex={-1}>
                             <Icons.FiUser />
                           </div>
                         )}
@@ -173,19 +225,22 @@ const MangoTemplate = ({
                         <Icons.FiChevronDown className={`profile-chevron ${profileDropdownVisible ? 'open' : ''}`} />
                       </button>
                       {profileDropdownVisible && (
-                        <div className="profile-dropdown"
+                        <div 
+                          className="profile-dropdown"
+                          id="profile-dropdown"
                           onMouseEnter={() => setProfileDropdownVisible(true)}
                           onMouseLeave={() => {
                             if (!profileDropdownSticky) {
                               setProfileDropdownVisible(false);
                             }
                           }}
+                          role="menu"
                         >
-                          <Link to="/perfil" className="dropdown-item">Perfil</Link>
+                          <Link to="/perfil" className="dropdown-item" role="menuitem" tabIndex={0}>Perfil</Link>
                           {(user.role === 'GERENTE' || user.role === 'ADMINISTRADOR') && (
-                            <Link to="/register" className="dropdown-item">Registrar Usuario</Link>
+                            <Link to="/register" className="dropdown-item" role="menuitem" tabIndex={0}>Registrar Usuario</Link>
                           )}
-                          <button className="dropdown-item" onClick={handleLogout}>Cerrar sesión</button>
+                          <button className="dropdown-item" onClick={handleLogout} tabIndex={0}>Cerrar sesión</button>
                         </div>
                       )}
                     </>
@@ -194,7 +249,7 @@ const MangoTemplate = ({
               </div>
             </nav>
           </div>
-          <main className="content">
+          <main className="content" tabIndex={-1}>
             {children}
           </main>
         </div>
