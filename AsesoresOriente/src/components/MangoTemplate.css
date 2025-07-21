@@ -4,7 +4,7 @@ html, body, #root {
   padding: 0;
   width: 100%;
   overflow-x: hidden;
-  font-family: var(--font-family);
+  font-family: var(--font-family-primary);
   background-color: var(--background-color);
   color: var(--text-color);
 }
@@ -14,7 +14,7 @@ html, body, #root {
   flex-direction: column;
   height: 100vh;
   width: 100vw;
-  font-family: var(--font-family);
+  font-family: var(--font-family-primary);
   background-color: var(--background-color);
   color: var(--text-color);
   overflow: hidden;
@@ -83,7 +83,7 @@ html, body, #root {
   padding: 12px 25px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--text-color);
   gap: 12px;
   margin: 2px 0;
@@ -111,7 +111,7 @@ html, body, #root {
 .mangomenu button.active {
   background-color: rgba(255, 255, 255, 0.1);
   border-left: 3px solid var(--primary-color);
-  font-weight: 600;
+  font-weight: 400;
   color: var(--primary-color);
 }
 
@@ -183,7 +183,7 @@ html, body, #root {
   padding: 12px 25px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--text-color);
   gap: 12px;
   margin: 2px 0;
@@ -197,7 +197,7 @@ html, body, #root {
 .mangomenu-item.active {
   background-color: rgba(255, 255, 255, 0.1);
   border-left: 3px solid var(--primary-color);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .mangomenu-item.active .mangomenu-icon {
@@ -356,6 +356,26 @@ html, body, #root {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+.profile-link {
+  display: inline-block;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-color);
+  text-decoration: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.profile-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--primary-color);
+}
+
 .profile-email {
   max-width: 150px;
   overflow: hidden;
@@ -412,8 +432,6 @@ html, body, #root {
   min-width: 0;
 }
 
-
-
 .profile-photo {
   width: 32px;
   height: 32px;
@@ -460,19 +478,18 @@ html, body, #root {
   left: 0;
   background-color: var(--sidebar-color);
   min-width: 180px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 0 0 8px 8px;
+  box-shadow: none;
   z-index: 1000;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  margin-top: 5px;
-  background-color: rgba(30, 30, 30, 0.95);
-  padding: 8px 0;
+  margin-top: 0;
+  padding: 0;
 }
 
 .dropdown-link {
-  padding: 10px 25px;
+  padding: 12px 25px;
   color: var(--text-color);
   text-decoration: none;
   cursor: pointer;
@@ -483,7 +500,29 @@ html, body, #root {
 }
 
 .dropdown-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--background-color);
+  color: var(--primary-color);
+}
+
+.dropbtn {
+  padding: 12px 25px;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-color);
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.dropbtn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--primary-color);
 }
 
 .dropbtn::after {

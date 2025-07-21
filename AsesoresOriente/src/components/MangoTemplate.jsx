@@ -15,6 +15,7 @@ const MangoTemplate = ({
 }) => {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [profileDropdownVisible, setProfileDropdownVisible] = useState(false);
+  const [profileDropdownSticky, setProfileDropdownSticky] = useState(false);
   const [showNosotrosDropdown, setShowNosotrosDropdown] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -24,7 +25,13 @@ const MangoTemplate = ({
   };
 
   const toggleProfileDropdown = () => {
-    setProfileDropdownVisible(!profileDropdownVisible);
+    if (profileDropdownSticky) {
+      setProfileDropdownSticky(false);
+      setProfileDropdownVisible(false);
+    } else {
+      setProfileDropdownSticky(true);
+      setProfileDropdownVisible(true);
+    }
   };
 
   const toggleNosotrosDropdown = () => {
@@ -81,7 +88,10 @@ const MangoTemplate = ({
                     Nosotros
                   </button>
                   {(showNosotrosDropdown) && (
-                    <div className="dropdown-content">
+                    <div className="dropdown-content"
+                      onMouseEnter={() => setShowNosotrosDropdown(true)}
+                      onMouseLeave={() => setShowNosotrosDropdown(false)}
+                    >
                       <Link to="/about" className="dropdown-link">Quienes somos</Link>
                       <Link to="/asesores" className="dropdown-link">Nuestros Asesores</Link>
                       <Link to="/formar-parte" className="dropdown-link">Formar parte del equipo</Link>
@@ -136,8 +146,14 @@ const MangoTemplate = ({
                   )}
                 </div>
                 <div className="profile-menu"
-                  onMouseEnter={() => setProfileDropdownVisible(true)}
-                  onMouseLeave={() => setProfileDropdownVisible(false)}
+                  onMouseEnter={() => {
+                    setProfileDropdownVisible(true);
+                  }}
+                  onMouseLeave={() => {
+                    if (!profileDropdownSticky) {
+                      setProfileDropdownVisible(false);
+                    }
+                  }}
                 >
                   {!user ? (
                     <>
@@ -157,7 +173,14 @@ const MangoTemplate = ({
                         <Icons.FiChevronDown className={`profile-chevron ${profileDropdownVisible ? 'open' : ''}`} />
                       </button>
                       {profileDropdownVisible && (
-                        <div className="profile-dropdown">
+                        <div className="profile-dropdown"
+                          onMouseEnter={() => setProfileDropdownVisible(true)}
+                          onMouseLeave={() => {
+                            if (!profileDropdownSticky) {
+                              setProfileDropdownVisible(false);
+                            }
+                          }}
+                        >
                           <Link to="/perfil" className="dropdown-item">Perfil</Link>
                           {(user.role === 'GERENTE' || user.role === 'ADMINISTRADOR') && (
                             <Link to="/register" className="dropdown-item">Registrar Usuario</Link>
@@ -177,6 +200,7 @@ const MangoTemplate = ({
         </div>
       </div>
     </div>
-  );};
+  );
+};
 
-export default MangoTemplate
+export default MangoTemplate;
