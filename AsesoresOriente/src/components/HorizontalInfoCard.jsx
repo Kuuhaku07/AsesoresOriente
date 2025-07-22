@@ -2,7 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './HorizontalInfoCard.css';
 
-const HorizontalInfoCard = ({ icon, title, content, link, userInfo, onClick, color }) => {
+
+const HorizontalInfoCard = ({ icon, title, content, link, onClick, color }) => {
   const handleClick = (e) => {
     if (onClick) {
       e.preventDefault();
@@ -14,29 +15,39 @@ const HorizontalInfoCard = ({ icon, title, content, link, userInfo, onClick, col
 
   return (
     <Wrapper
-      className={`horizontal-info-card${link ? ' clickable' : ''}`}
+      className={`horizontal-info-card${link || onClick ? ' clickable' : ''}`}
       href={link}
       onClick={handleClick}
       target={link ? '_blank' : undefined}
       rel={link ? 'noopener noreferrer' : undefined}
-      style={color ? { borderColor: color } : undefined}
+      style={color ? { borderLeft: `4px solid ${color}` } : undefined}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onClick(e);
+          e.preventDefault();
+        }
+      } : undefined}
     >
-      {icon && <div className="card-icon" style={color ? { color: color } : undefined}>{icon}</div>}
+      {icon && (
+        <div className="card-image">
+          {typeof icon === 'string' ? <img src={icon} alt={title || ''} /> : icon}
+        </div>
+      )}
       <div className="card-content">
         {title && <div className="card-title">{title}</div>}
         {content && <div className="card-text">{content}</div>}
-        {userInfo && <div className="card-user-info">{userInfo}</div>}
       </div>
     </Wrapper>
   );
 };
 
 HorizontalInfoCard.propTypes = {
-  icon: PropTypes.node,
+  icon: PropTypes.oneOfType([PropTypes.node, PropTypes.string]),
   title: PropTypes.string,
-  content: PropTypes.node,
+  content: PropTypes.string,
   link: PropTypes.string,
-  userInfo: PropTypes.node,
   onClick: PropTypes.func,
   color: PropTypes.string,
 };
@@ -44,9 +55,8 @@ HorizontalInfoCard.propTypes = {
 HorizontalInfoCard.defaultProps = {
   icon: null,
   title: '',
-  content: null,
+  content: '',
   link: null,
-  userInfo: null,
   onClick: null,
   color: null,
 };

@@ -54,7 +54,19 @@ const Asesores = () => {
         ) : (
           <div className="asesores-list">
             {asesores.map((asesor) => (
-              <div key={asesor.id} className="asesor-card">
+              <div 
+                key={asesor.id} 
+                className="asesor-card"
+                role="button"
+                tabIndex={0}
+                onClick={() => handleViewProfile(asesor.user_id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleViewProfile(asesor.user_id);
+                    e.preventDefault();
+                  }
+                }}
+              >
                 <HorizontalInfoCard
                   icon={
                     asesor.foto_perfil ? (
@@ -68,12 +80,6 @@ const Asesores = () => {
                   title={`${asesor.nombre} ${asesor.apellido}`}
                   content={asesor.especialidad || 'Especialidad no especificada'}
                 />
-                <button
-                  className="view-profile-btn"
-                  onClick={() => handleViewProfile(asesor.user_id)}
-                >
-                  Ver Perfil
-                </button>
               </div>
             ))}
           </div>
