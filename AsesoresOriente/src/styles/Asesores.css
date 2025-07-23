@@ -23,7 +23,7 @@
 .asesor-avatar {
   width: 80px;
   height: 80px;
-  border-radius: 50%;
+  border-radius: 0; 
   object-fit: cover;
   margin-bottom: var(--spacing-md);
 }

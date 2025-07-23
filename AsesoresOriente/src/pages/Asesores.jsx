@@ -79,6 +79,7 @@ const Asesores = () => {
                   }
                   title={`${asesor.nombre} ${asesor.apellido}`}
                   content={asesor.especialidad || 'Especialidad no especificada'}
+                  fixedImageSize={true}
                 />
               </div>
             ))}

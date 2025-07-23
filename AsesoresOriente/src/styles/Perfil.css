@@ -84,6 +84,38 @@
     width: 100%;
 }
 
+@media (max-width: 600px) {
+  .profile-top-container {
+    flex-direction: column;
+    height: auto; /* Remove fixed height */
+  }
+
+  .profile-card.personal-info,
+  .profile-card.social-networks {
+    height: auto; /* Remove fixed height */
+    flex: none;
+    width: 100%;
+  }
+
+  .profile-card.properties-in-charge {
+    width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .profile-top-container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .profile-card.personal-info,
+  .profile-card.social-networks {
+    height: auto;
+    flex: none;
+    width: 100%;
+  }
+}
+
 .profile-card.personal-info,
 .profile-card.social-networks {
     flex: 1;
@@ -96,7 +128,7 @@
     background-color: var(--color-white);
     border-radius: var(--border-radius-md);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    padding: var(--spacing-lg);
+    padding: 0 var(--spacing-lg) var(--spacing-lg) var(--spacing-lg); /* Removed top padding */
 }
 
 /* Section headers */
@@ -109,7 +141,7 @@
     margin-bottom: var(--spacing-md);
     font-size: 1.3rem;
     border-bottom: 1px solid var(--color-gray-light);
-    padding: 10px 0 8px 0;
+    padding: 0 0 8px 0; /* Changed padding-top from 10px to 0 to remove top space */
 }
 
 /* List style for profile info */
@@ -180,16 +212,82 @@
     width: 100%;
     padding: 8px 10px;
     margin-top: 5px;
-    border: 1px solid var(--color-gray-light);
+    border: 1.5px solid var(--color-gray-medium);
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-normal);
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    background-color: var(--color-white);
 }
 
 .modal-content form input:focus,
 .modal-content form select:focus {
     border-color: var(--color-primary);
     outline: none;
+    box-shadow: 0 0 5px var(--color-primary);
+}
+
+/* Style for file input button */
+.modal-content form input[type="file"] {
+    border: none;
+    padding: 6px 12px;
+    background-color: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.modal-content form input[type="file"]:hover {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+/* General modal improvements */
+.modal-content {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    padding: 40px 30px;
+    border-radius: var(--border-radius-md);
+}
+
+/* Form layout improvements */
+.modal-content form {
+    gap: 25px 35px;
+}
+
+.modal-content form label {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+/* Buttons improvements */
+.modal-buttons button {
+    padding: 12px 25px;
+    font-size: 1rem;
+    border-radius: var(--border-radius-md);
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.modal-buttons button[type="submit"] {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+.modal-buttons button[type="submit"]:hover {
+    background-color: var(--color-primary-dark);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.modal-buttons button[type="button"] {
+    background-color: var(--color-gray-light);
+    color: var(--color-text-light);
+}
+
+.modal-buttons button[type="button"]:hover {
+    background-color: #bbb;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 /* Modal buttons container spans full width and placed below form */

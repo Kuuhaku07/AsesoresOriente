@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import './HorizontalInfoCard.css';
 
 
-const HorizontalInfoCard = ({ icon, title, content, link, onClick, color }) => {
+const HorizontalInfoCard = ({ icon, title, content, link, onClick, color, fixedImageSize }) => {
   const handleClick = (e) => {
     if (onClick) {
       e.preventDefault();
@@ -15,7 +15,7 @@ const HorizontalInfoCard = ({ icon, title, content, link, onClick, color }) => {
 
   return (
     <Wrapper
-      className={`horizontal-info-card${link || onClick ? ' clickable' : ''}`}
+      className={`horizontal-info-card${link || onClick ? ' clickable' : ''}${fixedImageSize ? ' fixed-image-size' : ''}`}
       href={link}
       onClick={handleClick}
       target={link ? '_blank' : undefined}
@@ -30,9 +30,9 @@ const HorizontalInfoCard = ({ icon, title, content, link, onClick, color }) => {
         }
       } : undefined}
     >
-      {icon && (
+      {(icon || fixedImageSize) && (
         <div className="card-image">
-          {typeof icon === 'string' ? <img src={icon} alt={title || ''} /> : icon}
+          {icon ? (typeof icon === 'string' ? <img src={icon} alt={title || ''} /> : icon) : null}
         </div>
       )}
       <div className="card-content">
@@ -50,6 +50,7 @@ HorizontalInfoCard.propTypes = {
   link: PropTypes.string,
   onClick: PropTypes.func,
   color: PropTypes.string,
+  fixedImageSize: PropTypes.bool,
 };
 
 HorizontalInfoCard.defaultProps = {
@@ -59,6 +60,7 @@ HorizontalInfoCard.defaultProps = {
   link: null,
   onClick: null,
   color: null,
+  fixedImageSize: true,
 };
 
 export default HorizontalInfoCard;

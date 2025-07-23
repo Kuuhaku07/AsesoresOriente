@@ -183,12 +183,14 @@ const Perfil = () => {
                   title="Teléfono"
                   content={user.Telefono}
                   color="#007bff"
+                  fixedImageSize={false}
                 />
                 <HorizontalInfoCard
                   icon={<FaEnvelope />}
                   title="Correo Electrónico"
                   content={user.Correo}
                   color="#28a745"
+                  fixedImageSize={false}
                 />
                 {user.redes && user.redes.length > 0 ? (
                   user.redes.map((red) => {
@@ -201,6 +203,7 @@ const Perfil = () => {
                         content={`${red.contenido || ''} ${red.url || ''}`.trim()}
                         link={red.url || null}
                         color={red.color || '#000'}
+                        fixedImageSize={false}
                       />
                     );
                   })
