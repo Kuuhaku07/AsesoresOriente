@@ -29,7 +29,8 @@ import {
   updateInmueble,
   getTipoCaracteristicas,
   getNewestInmueblesController,
-  searchInmuebles
+  searchInmuebles,
+  getPropertiesByAsesor
 } from '../controllers/inmuebleController.js';
 
 
@@ -97,6 +98,7 @@ router.post('/upload/document', uploadDocuments.array('documents', 10), uploadIn
 router.get('/tipos', getTipoInmuebles);
 router.get('/estados', getEstadoInmuebles);
 router.get('/asesores', getAsesores);
+router.get('/asesor/:id', getPropertiesByAsesor);
 router.get('/propietarios/persona', getPropietariosPersona);
 router.get('/propietarios/empresa', getPropietariosEmpresa);
 router.get('/ubicacion/estados', getEstados);

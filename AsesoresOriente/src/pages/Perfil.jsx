@@ -11,6 +11,7 @@ import SocialNetworksModal from '../components/SocialNetworksModal';
 import EditProfileModal from '../components/EditProfileModal';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 import ImageViewerModal from '../components/ImageViewerModal';
+import PropertiesGrid from '../components/PropertiesGrid';  // Added import
 
 // Import icons from react-icons
 import { FaPhone, FaEnvelope } from 'react-icons/fa';
@@ -24,6 +25,8 @@ const Perfil = () => {
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [advisorProperties, setAdvisorProperties] = useState([]);
+  const [propertiesLoading, setPropertiesLoading] = useState(true);
 
   // Modal states
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -57,6 +60,27 @@ const Perfil = () => {
     }
   };
 
+  const fetchAdvisorProperties = async () => {
+    if (!id) {
+      setAdvisorProperties([]);
+      setPropertiesLoading(false);
+      return;
+    }
+    setPropertiesLoading(true);
+    try {
+      const response = await fetch(`/api/inmueble/asesor/${id}`);
+      if (!response.ok) {
+        throw new Error('Error fetching advisor properties');
+      }
+      const data = await response.json();
+      setAdvisorProperties(data);
+    } catch (error) {
+      setAdvisorProperties([]);
+    } finally {
+      setPropertiesLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchUserDataFunc = async () => {
       try {
@@ -87,6 +111,7 @@ const Perfil = () => {
         setLoading(false);
         // Fetch redes after user data is set
         await fetchRedesAsesor();
+        await fetchAdvisorProperties();
       } catch (error) {
         setUser(null);
         setLoading(false);
@@ -218,9 +243,15 @@ const Perfil = () => {
               </div>
             </div>
 
-            <div className="profile-card properties-in-charge" style={{ width: '100%' }}>
+            <div className="profile-card properties-in-charge" style={{ width: '100%', padding: '1rem' }}>
               <h3>Inmuebles a cargo</h3>
-              <p>Esta sección será implementada próximamente.</p>
+              {propertiesLoading ? (
+                <p>Cargando propiedades...</p>
+              ) : advisorProperties.length === 0 ? (
+                <p>No hay propiedades asignadas.</p>
+              ) : (
+                <PropertiesGrid properties={advisorProperties} />
+              )}
             </div>
           </section>
 

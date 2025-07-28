@@ -1043,3 +1043,24 @@ export const getFeaturedInmuebles = async (limit = 10) => {
   // This can be customized to filter featured properties differently
   return getNewestInmuebles(limit);
 };
+export const getPropertiesByAsesor = async (asesorId) => {
+  const query = `
+    SELECT i.id, i.titulo AS name, ei.nombre AS status, 
+           ARRAY_AGG(tn.nombre) AS businesstypes,
+           CONCAT(up.direccion_exacta, ', ', z.nombre) AS location,
+           itn.precio AS price, i.area_construida AS size, i.habitaciones AS rooms, i.banos AS bathrooms,
+           (SELECT ruta FROM "ImagenInmueble" WHERE inmueble_id = i.id ORDER BY orden LIMIT 1) AS imageurl,
+           '/inmueble/' || i.id AS detailslink
+    FROM "Inmueble" i
+    LEFT JOIN "EstadoInmueble" ei ON i.estado_id = ei.id
+    LEFT JOIN "InmuebleTipoNegocio" itn ON i.id = itn.inmueble_id
+    LEFT JOIN "TipoNegocio" tn ON itn.tipo_negocio_id = tn.id
+    LEFT JOIN "UbicacionInmueble" up ON i.id = up.inmueble_id
+    LEFT JOIN "Zona" z ON up.zona_id = z.id
+    WHERE i.asesor_id = $1
+    GROUP BY i.id, ei.nombre, up.direccion_exacta, z.nombre, itn.precio, i.area_construida, i.habitaciones, i.banos
+    ORDER BY i.id DESC
+  `;
+  const result = await pool.query(query, [asesorId]);
+  return result.rows;
+};

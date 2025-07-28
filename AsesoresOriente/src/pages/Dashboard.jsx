@@ -1,15 +1,18 @@
-// src/pages/Dashboard.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import MangoTemplate from '../components/MangoTemplate';
 import PageTitle from '../components/PageTitle';
 import '../styles/Dashboard.css';
 import ImageViewerModal from '../components/ImageViewerModal';
+import PropertiesGrid from '../components/PropertiesGrid';
+
 
 const Dashboard = () => {
   const { user } = useAuth();
 
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
   const openImageViewer = () => {
@@ -20,23 +23,44 @@ const Dashboard = () => {
     setIsImageViewerOpen(false);
   };
 
-  // Show loading or null while user is being initialized
+  useEffect(() => {
+    const fetchProperties = async () => {
+      if (!user || !user.id) {
+        setProperties([]);
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/inmueble/asesor/${user.id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch properties');
+        }
+        const data = await response.json();
+        setProperties(data);
+      } catch (error) {
+        setProperties([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, [user]);
+
   if (user === null) {
     return null; // or a loading spinner
   }
 
-  // Redirect to home if user is not logged in
   if (!user) {
     return <Navigate to="/" />;
   }
 
   return (
     <MangoTemplate>
-
       <div className="dashboard-content">
         {/* User information section */}
         <section className="user-info">
-          {/* Use user.pfp for profile picture with fallback */}
           {user.pfp ? (
             <img
               src={`uploads/profile_pictures/${user.pfp}`}
@@ -51,10 +75,23 @@ const Dashboard = () => {
           <h2>Bienvenido, {user.name}</h2>
         </section>
 
-        {/* Placeholder for additional dashboard content */}
+
+        {/* Dashboard widgets section */}
         <section className="dashboard-widgets">
-          {/* Add widgets, stats, or other components here */}
-          <p>Aquí puedes agregar widgets, estadísticas u otros componentes del dashboard.</p>
+          <h3>Estadísticas y Gráficos</h3>
+
+        </section>
+        
+        {/* User properties section */}
+        <section className="user-properties">
+          <h3>Mis Inmuebles</h3>
+          {loading ? (
+            <p>Cargando propiedades...</p>
+          ) : properties.length === 0 ? (
+            <p>No tienes propiedades asignadas.</p>
+          ) : (
+            <PropertiesGrid properties={properties} />
+          )}
         </section>
       </div>
       <ImageViewerModal

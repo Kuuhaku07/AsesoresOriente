@@ -26,7 +26,8 @@ button {
 }
 
 button:hover {
-    background-color: var(--color-primary-light);
+    background-color: var(--color-primary-hover);
+    color: var(--color-white);
 }
 
 /* Estilos comunes para inputs */

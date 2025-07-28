@@ -1,7 +1,7 @@
 import * as inmuebleService from '../services/inmuebleService.js';
 import fs from 'fs';
 import path from 'path';
-
+import pool from '../db.js';
 /**
  * Función utilitaria para eliminar archivos de forma segura.
  * @param {Array} filePaths - Array de rutas de archivos a eliminar.
@@ -483,6 +483,50 @@ export const updateInmueble = async (req, res) => {
     }
 
     res.status(500).json({ error: 'Failed to update inmueble' });
+  }
+};
+
+/**
+ * Controlador para obtener propiedades asignadas a un asesor.
+ */
+
+
+export const getPropertiesByAsesor = async (req, res) => {
+  const usuarioId = req.params.id;
+  console.log('getPropertiesByAsesor called with usuarioId:', usuarioId);
+  if (!usuarioId) {
+    return res.status(400).json({ error: 'Usuario ID is required' });
+  }
+  try {
+    // Get asesor_id from Usuario table
+    const usuarioResult = await pool.query('SELECT asesor_id FROM "Usuario" WHERE id = $1', [usuarioId]);
+    if (usuarioResult.rowCount === 0) {
+      return res.status(404).json({ error: 'Usuario not found' });
+    }
+    const asesorId = usuarioResult.rows[0].asesor_id;
+    console.log(`Mapped usuarioId ${usuarioId} to asesorId ${asesorId}`);
+
+    const properties = await inmuebleService.getPropertiesByAsesor(asesorId);
+    console.log(`Found ${properties.length} properties for asesorId ${asesorId}`);
+
+    // Map properties to match the structure returned by searchInmuebles for consistency
+    const mappedProperties = properties.map(i => ({
+      id: i.id,
+      name: i.name,
+      status: i.status,
+      businesstypes: i.businesstypes || [],
+      location: i.location || '',
+      price: i.price || null,
+      size: i.size,
+      rooms: i.rooms,
+      bathrooms: i.bathrooms,
+      imageurl: i.imageurl || null,
+      detailslink: i.detailslink
+    }));
+    res.json(mappedProperties);
+  } catch (error) {
+    console.error('Error getting properties by asesor:', error);
+    res.status(500).json({ error: 'Failed to get properties by asesor' });
   }
 };
 

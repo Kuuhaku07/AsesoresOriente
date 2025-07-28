@@ -13,6 +13,7 @@ const EditProfileModal = ({ isOpen, onClose, user, token, onUpdate }) => {
   });
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const toastRef = useRef(null);
+  const [previewSrc, setPreviewSrc] = useState(user.Pfp ? `/uploads/profile_pictures/${user.Pfp}` : '');
 
   useEffect(() => {
     if (isOpen) {
@@ -21,13 +22,24 @@ const EditProfileModal = ({ isOpen, onClose, user, token, onUpdate }) => {
       }
       setSelectedFile(null);
       setShowCurrentPasswordInput(false);
+      setPreviewSrc(user.Pfp ? `/uploads/profile_pictures/${user.Pfp}` : '');
     }
-  }, [isOpen]);
+  }, [isOpen, user.Pfp]);
 
   if (!isOpen) return null;
 
   const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
+    const file = e.target.files[0];
+    setSelectedFile(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewSrc(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreviewSrc(user.Pfp ? `/uploads/profile_pictures/${user.Pfp}` : '');
+    }
   };
 
   const handleInputChange = (e) => {
@@ -204,10 +216,25 @@ const EditProfileModal = ({ isOpen, onClose, user, token, onUpdate }) => {
                 <input type="password" name="currentPassword" />
               </label>
             )}
-            <label>
-              Foto de Perfil:
-              <input type="file" accept="image/*" onChange={handleFileChange} />
-            </label>
+            <div className="profile-picture-upload-container">
+              <div className="profile-picture-preview">
+                {previewSrc ? (
+                  <img src={previewSrc} alt="Preview" />
+                ) : (
+                  <div className="profile-picture-placeholder">No hay imagen</div>
+                )}
+              </div>
+              <label htmlFor="profilePictureInput" className="custom-file-upload-button">
+                Cambiar Imagen
+              </label>
+              <input
+                id="profilePictureInput"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+            </div>
             <div className="modal-buttons">
               <button type="submit">Guardar</button>
               <button type="button" onClick={onClose}>Cancelar</button>
