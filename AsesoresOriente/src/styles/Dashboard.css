@@ -1,4 +1,4 @@
-.perfil {
+e p.perfil {
     flex-direction: column;
     min-height: 100vh;
     background-color: var(--color-background);
@@ -30,6 +30,47 @@
     border-radius: 8px;
     padding: var(--spacing-lg);
     min-height: 200px;
+}
+
+.dashboard-widgets h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--color-text);
+}
+
+.chart-container {
+    padding: var(--spacing-md);
+    background-color: var(--color-background);
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    height: 100%;
+}
+
+.chart-title {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    color: var(--color-text);
+}
+
+.quick-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.summary-card {
+    text-align: center;
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+}
+
+.summary-value {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.summary-label {
+    color: var(--color-text-light);
 }
 
 /* Edit profile button styles */

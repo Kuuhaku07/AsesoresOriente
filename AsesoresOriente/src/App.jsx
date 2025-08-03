@@ -40,7 +40,7 @@ export function App(){
                         <Route path="/devroom" element={<Devroom />} /> {/* Asesores route */}
                         <Route path="/nuevo" element={<CrearInmueble />} /> {/* Crear Inmueble route */}
                         <Route path="/modificar/:id" element={<ModificarInmueble />} /> {/* Modificar Inmueble route */}
-                        <Route path="/inmueble/:id" element={<Inmuebles />} /> {/* Inmuebles detail route */}
+                        <Route path="/inmueble/:id" element={<Inmuebles />} /> {/* Inmuebles detail route */}              
                     </Routes>
                 </div>
             </AuthProvider>
