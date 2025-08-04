@@ -1064,3 +1064,93 @@ export const getPropertiesByAsesor = async (asesorId) => {
   const result = await pool.query(query, [asesorId]);
   return result.rows;
 };
+
+/**
+ * Función para obtener estadísticas del dashboard
+ */
+export const getDashboardStats = async () => {
+  const client = await pool.connect();
+  try {
+    // 1. Total properties count
+    const totalPropertiesResult = await client.query('SELECT COUNT(*) AS count FROM "Inmueble"');
+    const totalProperties = parseInt(totalPropertiesResult.rows[0].count);
+
+    // 2. Properties by type
+    const propertiesByTypeResult = await client.query(`
+      SELECT ti.nombre AS type, COUNT(i.id) AS count
+      FROM "Inmueble" i
+      JOIN "TipoInmueble" ti ON i.tipo_inmueble_id = ti.id
+      GROUP BY ti.nombre
+      ORDER BY count DESC
+    `);
+    const propertiesByType = propertiesByTypeResult.rows;
+
+    // 3. Properties by status
+    const propertiesByStatusResult = await client.query(`
+      SELECT ei.nombre AS status, COUNT(i.id) AS count
+      FROM "Inmueble" i
+      JOIN "EstadoInmueble" ei ON i.estado_id = ei.id
+      GROUP BY ei.nombre
+      ORDER BY count DESC
+    `);
+    const propertiesByStatus = propertiesByStatusResult.rows;
+
+    // 4. Properties by business type
+    const propertiesByBusinessTypeResult = await client.query(`
+      SELECT tn.nombre AS businessType, COUNT(itn.inmueble_id) AS count
+      FROM "InmuebleTipoNegocio" itn
+      JOIN "TipoNegocio" tn ON itn.tipo_negocio_id = tn.id
+      GROUP BY tn.nombre
+      ORDER BY count DESC
+    `);
+    const propertiesByBusinessType = propertiesByBusinessTypeResult.rows;
+
+    // 5. Properties by agent
+    const propertiesByAgentResult = await client.query(`
+      SELECT CONCAT(a.nombre, ' ', a.apellido) AS agent, COUNT(i.id) AS count
+      FROM "Inmueble" i
+      JOIN "Asesor" a ON i.asesor_id = a.id
+      GROUP BY a.id, a.nombre, a.apellido
+      ORDER BY count DESC
+      LIMIT 5
+    `);
+    const propertiesByAgent = propertiesByAgentResult.rows;
+
+    // 6. Properties over time (last 12 months)
+    const propertiesOverTimeResult = await client.query(`
+      SELECT 
+        TO_CHAR(DATE_TRUNC('month', fecha_creacion), 'YYYY-MM') AS month,
+        COUNT(*) AS count
+      FROM "Inmueble"
+      WHERE fecha_creacion >= CURRENT_DATE - INTERVAL '12 months'
+      GROUP BY DATE_TRUNC('month', fecha_creacion)
+      ORDER BY month
+    `);
+    const propertiesOverTime = propertiesOverTimeResult.rows;
+
+    // 7. Average property prices by type
+    const avgPriceByTypeResult = await client.query(`
+      SELECT ti.nombre AS type, AVG(itn.precio) AS avgPrice
+      FROM "Inmueble" i
+      JOIN "TipoInmueble" ti ON i.tipo_inmueble_id = ti.id
+      JOIN "InmuebleTipoNegocio" itn ON i.id = itn.inmueble_id
+      GROUP BY ti.nombre
+      ORDER BY avgPrice DESC
+    `);
+    const avgPriceByType = avgPriceByTypeResult.rows;
+
+    return {
+      totalProperties,
+      propertiesByType,
+      propertiesByStatus,
+      propertiesByBusinessType,
+      propertiesByAgent,
+      propertiesOverTime,
+      avgPriceByType
+    };
+  } catch (error) {
+    throw error;
+  } finally {
+    client.release();
+  }
+};

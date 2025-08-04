@@ -30,7 +30,8 @@ import {
   getTipoCaracteristicas,
   getNewestInmueblesController,
   searchInmuebles,
-  getPropertiesByAsesor
+  getPropertiesByAsesor,
+  getDashboardStats
 } from '../controllers/inmuebleController.js';
 
 
@@ -120,5 +121,6 @@ router.get('/modificar/:id?', getModificarInmuebleData);
 router.get('/newest', getNewestInmueblesController);
 router.get('/featured', getNewestInmueblesController);
 router.get('/search', searchInmuebles);
+router.get('/dashboard/stats', getDashboardStats);
 router.put('/:id', updateInmueble);
 export default router;

@@ -530,3 +530,16 @@ export const getPropertiesByAsesor = async (req, res) => {
   }
 };
 
+/**
+ * Controlador para obtener estadísticas del dashboard
+ */
+export const getDashboardStats = async (req, res) => {
+  try {
+    const stats = await inmuebleService.getDashboardStats();
+    res.json(stats);
+  } catch (error) {
+    console.error('Error getting dashboard stats:', error);
+    res.status(500).json({ error: 'Failed to get dashboard stats' });
+  }
+};
+
