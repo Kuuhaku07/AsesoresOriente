@@ -3,11 +3,10 @@ import { useAuth } from '../context/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
 import MangoTemplate from '../components/MangoTemplate';
 import PageTitle from '../components/PageTitle';
-import StatsChart from '../components/StatsChart';
+import EnhancedStatsChart from '../components/EnhancedStatsChart';
 import '../styles/Dashboard.css';
 import ImageViewerModal from '../components/ImageViewerModal';
 import PropertiesGrid from '../components/PropertiesGrid';
-
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -18,6 +17,7 @@ const Dashboard = () => {
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
 
   const openImageViewer = () => {
     setIsImageViewerOpen(true);
@@ -28,23 +28,29 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchEnhancedStats = async () => {
       setStatsLoading(true);
       try {
-        const response = await fetch('/api/inmueble/dashboard/stats');
+        const response = await fetch('/api/inmueble/dashboard/enhanced-stats');
         if (!response.ok) {
-          throw new Error('Failed to fetch dashboard stats');
+          throw new Error('Failed to fetch enhanced dashboard stats');
         }
         const data = await response.json();
         setStats(data);
       } catch (error) {
-        console.error('Error fetching dashboard stats:', error);
+        console.error('Error fetching enhanced dashboard stats:', error);
+        // Fallback to basic stats if enhanced fails
+        const fallbackResponse = await fetch('/api/inmueble/dashboard/stats');
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json();
+          setStats(fallbackData);
+        }
       } finally {
         setStatsLoading(false);
       }
     };
 
-    fetchStats();
+    fetchEnhancedStats();
   }, []);
 
   useEffect(() => {
@@ -73,12 +79,143 @@ const Dashboard = () => {
   }, [user]);
 
   if (user === null) {
-    return null; // or a loading spinner
+    return null;
   }
 
   if (!user) {
     return <Navigate to="/" />;
   }
+
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const renderOverviewTab = () => {
+    if (!stats) return null;
+
+    return (
+      <>
+        {/* Enhanced Quick Summary Cards */}
+        <div className="chart-container">
+          <h4 className="chart-title">Resumen Ejecutivo</h4>
+          <div className="quick-summary" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+            <div className="summary-card" style={{ backgroundColor: 'rgba(76, 175, 80, 0.1)' }}>
+              <div className="summary-value" style={{ color: '#4CAF50' }}>{stats.totalProperties}</div>
+              <div className="summary-label">Total Propiedades</div>
+            </div>
+            <div className="summary-card" style={{ backgroundColor: 'rgba(33, 150, 243, 0.1)' }}>
+              <div className="summary-value" style={{ color: '#2196F3' }}>
+                {formatCurrency(stats.financialOverview?.total_potential_revenue || 0)}
+              </div>
+              <div className="summary-label">Ingresos Potenciales</div>
+            </div>
+            <div className="summary-card" style={{ backgroundColor: 'rgba(255, 152, 0, 0.1)' }}>
+              <div className="summary-value" style={{ color: '#FF9800' }}>
+                {formatCurrency(stats.financialOverview?.avg_price || 0)}
+              </div>
+              <div className="summary-label">Precio Promedio</div>
+            </div>
+            <div className="summary-card" style={{ backgroundColor: 'rgba(156, 39, 176, 0.1)' }}>
+              <div className="summary-value" style={{ color: '#9C27B0' }}>
+                {stats.propertiesByStatus?.find(s => s.status === 'DISPONIBLE')?.count || 0}
+              </div>
+              <div className="summary-label">Propiedades Activas</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Charts Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 'var(--spacing-lg)', marginTop: 'var(--spacing-md)' }}>
+          
+          {/* Properties by Type */}
+          {stats.propertiesByType && stats.propertiesByType.length > 0 && (
+            <EnhancedStatsChart
+              type="doughnut"
+              data={{
+                labels: stats.propertiesByType.map(item => item.type),
+                datasets: [{
+                  data: stats.propertiesByType.map(item => item.count),
+                  backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                    '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                  ],
+                  borderWidth: 2,
+                  borderColor: '#fff'
+                }]
+              }}
+              title="Distribución por Tipo"
+              height={300}
+            />
+          )}
+
+          {/* Properties by Status */}
+          {stats.propertiesByStatus && stats.propertiesByStatus.length > 0 && (
+            <EnhancedStatsChart
+              type="pie"
+              data={{
+                labels: stats.propertiesByStatus.map(item => item.status),
+                datasets: [{
+                  data: stats.propertiesByStatus.map(item => item.count),
+                  backgroundColor: stats.propertiesByStatus.map(item => item.color || '#ccc'),
+                  borderWidth: 2,
+                  borderColor: '#fff'
+                }]
+              }}
+              title="Estado de Propiedades"
+              height={300}
+            />
+          )}
+
+          {/* Monthly Trends */}
+          {stats.propertiesByMonth && stats.propertiesByMonth.length > 0 && (
+            <EnhancedStatsChart
+              type="line"
+              data={{
+                labels: stats.propertiesByMonth.map(item => {
+                  const date = new Date(item.month + '-01');
+                  return date.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+                }),
+                datasets: [{
+                  label: 'Propiedades Registradas',
+                  data: stats.propertiesByMonth.map(item => item.count),
+                  borderColor: '#4BC0C0',
+                  backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                  tension: 0.4,
+                  fill: true
+                }]
+              }}
+              title="Tendencia Mensual"
+              height={300}
+            />
+          )}
+
+          {/* Price Distribution */}
+          {stats.priceDistribution && stats.priceDistribution.length > 0 && (
+            <EnhancedStatsChart
+              type="bar"
+              data={{
+                labels: stats.priceDistribution.map(item => item.price_range),
+                datasets: [{
+                  label: 'Cantidad',
+                  data: stats.priceDistribution.map(item => item.count),
+                  backgroundColor: 'rgba(153, 102, 255, 0.8)',
+                  borderColor: 'rgba(153, 102, 255, 1)',
+                  borderWidth: 1
+                }]
+              }}
+              title="Distribución de Precios"
+              height={300}
+            />
+          )}
+        </div>
+      </>
+    );
+  };
 
   return (
     <MangoTemplate>
@@ -95,250 +232,55 @@ const Dashboard = () => {
             />
           ) : (
             <div className="user-avatar-fallback">{user.name.charAt(0)}</div>
-          )
-          }
+          )}
           <h2>Bienvenido, {user.name}</h2>
         </section>
 
-
-        {/* Dashboard widgets section */}
+        {/* Tab Navigation */}
         <section className="dashboard-widgets">
-          <h3>Estadísticas y Gráficos</h3>
+          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+            <div style={{ display: 'flex', gap: 'var(--spacing-sm)', borderBottom: '1px solid var(--color-border)', marginBottom: 'var(--spacing-md)', overflowX: 'auto' }}>
+              {[
+                { key: 'overview', label: 'Resumen' },
+                { key: 'financial', label: 'Finanzas' },
+                { key: 'performance', label: 'Desempeño' },
+                { key: 'geographic', label: 'Geografía' }
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  style={{
+                    padding: 'var(--spacing-sm) var(--spacing-md)',
+                    border: 'none',
+                    backgroundColor: activeTab === tab.key ? 'var(--color-primary)' : 'transparent',
+                    color: activeTab === tab.key ? 'white' : 'var(--color-text)',
+                    cursor: 'pointer',
+                    borderRadius: 'var(--border-radius-sm) var(--border-radius-sm) 0 0',
+                    fontWeight: activeTab === tab.key ? 'bold' : 'normal',
+                    whiteSpace: 'nowrap',
+                    minWidth: 'fit-content'
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {statsLoading ? (
-            <p>Cargando estadísticas...</p>
+            <p>Cargando estadísticas avanzadas...</p>
           ) : stats ? (
             <>
-              {/* Quick Summary */}
-              <div className="chart-container">
-                <h4 className="chart-title">Resumen Rápido</h4>
-                <div className="quick-summary">
-                  <div className="summary-card" style={{ backgroundColor: 'rgba(76, 175, 80, 0.1)' }}>
-                    <div className="summary-value" style={{ color: '#4CAF50' }}>{stats.totalProperties}</div>
-                    <div className="summary-label">Total Propiedades</div>
-                  </div>
-                  <div className="summary-card" style={{ backgroundColor: 'rgba(33, 150, 243, 0.1)' }}>
-                    <div className="summary-value" style={{ color: '#2196F3' }}>
-                      {stats.propertiesByType.length > 0 ? stats.propertiesByType[0].count : '0'}
-                    </div>
-                    <div className="summary-label">
-                      {stats.propertiesByType.length > 0 ? stats.propertiesByType[0].type : 'Tipo Principal'}
-                    </div>
-                  </div>
-                  <div className="summary-card" style={{ backgroundColor: 'rgba(255, 152, 0, 0.1)' }}>
-                    <div className="summary-value" style={{ color: '#FF9800' }}>
-                      {stats.propertiesByStatus.length > 0 ? stats.propertiesByStatus[0].count : '0'}
-                    </div>
-                    <div className="summary-label">
-                      {stats.propertiesByStatus.length > 0 ? stats.propertiesByStatus[0].status : 'Estado Principal'}
-                    </div>
-                  </div>
-                  <div className="summary-card" style={{ backgroundColor: 'rgba(156, 39, 176, 0.1)' }}>
-                    <div className="summary-value" style={{ color: '#9C27B0' }}>
-                      {stats.propertiesByAgent.length > 0 ? stats.propertiesByAgent[0].count : '0'}
-                    </div>
-                    <div className="summary-label">
-                      {stats.propertiesByAgent.length > 0 ? `Agente: ${stats.propertiesByAgent[0].agent.split(' ')[0]}` : 'Top Agente'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Charts section - 2x2 grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-lg)', marginTop: 'var(--spacing-md)' }}>
-                <div className="chart-container">
-                  <StatsChart 
-                    type="bar" 
-                    data={{
-                      labels: stats.propertiesByType.map(item => item.type),
-                      datasets: [{
-                        label: 'Cantidad de Propiedades',
-                        data: stats.propertiesByType.map(item => item.count),
-                        backgroundColor: [
-                          'rgba(255, 99, 132, 0.6)',
-                          'rgba(54, 162, 235, 0.6)',
-                          'rgba(255, 206, 86, 0.6)',
-                          'rgba(75, 192, 192, 0.6)',
-                          'rgba(153, 102, 255, 0.6)',
-                          'rgba(255, 159, 64, 0.6)'
-                        ],
-                        borderColor: [
-                          'rgba(255, 99, 132, 1)',
-                          'rgba(54, 162, 235, 1)',
-                          'rgba(255, 206, 86, 1)',
-                          'rgba(75, 192, 192, 1)',
-                          'rgba(153, 102, 255, 1)',
-                          'rgba(255, 159, 64, 1)'
-                        ],
-                        borderWidth: 1,
-                      }]
-                    }}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          position: 'top',
-                        },
-                        title: {
-                          display: true,
-                          text: 'Propiedades por Tipo'
-                        }
-                      }
-                    }}
-                    title="Propiedades por Tipo"
-                  />
-                </div>
-                
-                <div className="chart-container">
-                  <StatsChart 
-                    type="pie" 
-                    data={{
-                      labels: stats.propertiesByStatus.map(item => item.status),
-                      datasets: [{
-                        label: 'Cantidad de Propiedades',
-                        data: stats.propertiesByStatus.map(item => item.count),
-                        backgroundColor: [
-                          'rgba(255, 99, 132, 0.6)',
-                          'rgba(54, 162, 235, 0.6)',
-                          'rgba(255, 206, 86, 0.6)',
-                          'rgba(75, 192, 192, 0.6)',
-                          'rgba(153, 102, 255, 0.6)',
-                          'rgba(255, 159, 64, 0.6)',
-                        ],
-                        borderColor: [
-                          'rgba(255, 99, 132, 1)',
-                          'rgba(54, 162, 235, 1)',
-                          'rgba(255, 206, 86, 1)',
-                          'rgba(75, 192, 192, 1)',
-                          'rgba(153, 102, 255, 1)',
-                          'rgba(255, 159, 64, 1)',
-                        ],
-                        borderWidth: 1,
-                      }]
-                    }}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          position: 'top',
-                        },
-                        title: {
-                          display: true,
-                          text: 'Propiedades por Estado'
-                        }
-                      }
-                    }}
-                    title="Propiedades por Estado"
-                  />
-                </div>
-                
-                <div className="chart-container">
-                  {stats.propertiesOverTime.length > 0 && (
-                    <StatsChart 
-                      type="line" 
-                      data={{
-                        labels: stats.propertiesOverTime.map(item => item.month),
-                        datasets: [{
-                          label: 'Propiedades Registradas',
-                          data: stats.propertiesOverTime.map(item => item.count),
-                          fill: false,
-                          borderColor: 'rgb(75, 192, 192)',
-                          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                          tension: 0.1,
-                        }]
-                      }}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: 'top',
-                          },
-                          title: {
-                            display: true,
-                            text: 'Propiedades Registradas por Mes'
-                          }
-                        }
-                      }}
-                      title="Propiedades Registradas por Mes"
-                    />
-                  )}
-                </div>
-                
-                <div className="chart-container">
-                  {stats.propertiesByBusinessType.length > 0 && (
-                    <StatsChart 
-                      type="bar" 
-                      data={{
-                        labels: stats.propertiesByBusinessType.map(item => item.businessType),
-                        datasets: [{
-                          label: 'Cantidad de Propiedades',
-                          data: stats.propertiesByBusinessType.map(item => item.count),
-                          backgroundColor: 'rgba(255, 159, 64, 0.6)',
-                          borderColor: 'rgba(255, 159, 64, 1)',
-                          borderWidth: 1,
-                        }]
-                      }}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: 'top',
-                          },
-                          title: {
-                            display: true,
-                            text: 'Propiedades por Tipo de Negocio'
-                          }
-                        }
-                      }}
-                      title="Propiedades por Tipo de Negocio"
-                    />
-                  )}
-                </div>
-              </div>
-              
-              {/* Additional charts row */}
-              {stats.avgPriceByType.length > 0 && (
-                <div style={{ marginTop: 'var(--spacing-lg)' }}>
-                  <div className="chart-container">
-                    <StatsChart 
-                      type="bar" 
-                      data={{
-                        labels: stats.avgPriceByType.map(item => item.type),
-                        datasets: [{
-                          label: 'Precio Promedio (USD)',
-                          data: stats.avgPriceByType.map(item => item.avgPrice),
-                          backgroundColor: 'rgba(153, 102, 255, 0.6)',
-                          borderColor: 'rgba(153, 102, 255, 1)',
-                          borderWidth: 1,
-                        }]
-                      }}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: 'top',
-                          },
-                          title: {
-                            display: true,
-                            text: 'Precio Promedio por Tipo de Propiedad'
-                          }
-                        }
-                      }}
-                      title="Precio Promedio por Tipo de Propiedad"
-                    />
-                  </div>
-                </div>
-              )}
+              {activeTab === 'overview' && renderOverviewTab()}
+              {activeTab === 'financial' && renderFinancialTab()}
+              {activeTab === 'performance' && renderPerformanceTab()}
+              {activeTab === 'geographic' && renderGeographicTab()}
             </>
           ) : (
             <p>No se pudieron cargar las estadísticas</p>
           )}
         </section>
-        
+
         {/* User properties section */}
         <section className="user-properties">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
@@ -360,6 +302,7 @@ const Dashboard = () => {
           )}
         </section>
       </div>
+
       <ImageViewerModal
         isOpen={isImageViewerOpen}
         onClose={closeImageViewer}

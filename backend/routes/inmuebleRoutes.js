@@ -33,7 +33,7 @@ import {
   getPropertiesByAsesor,
   getDashboardStats
 } from '../controllers/inmuebleController.js';
-
+import { getEnhancedDashboardStats } from '../services/dashboardAnalyticsService.js';
 
 // Configuración de multer para subir imágenes de inmuebles
 const storageImages = multer.diskStorage({
@@ -121,6 +121,16 @@ router.get('/modificar/:id?', getModificarInmuebleData);
 router.get('/newest', getNewestInmueblesController);
 router.get('/featured', getNewestInmueblesController);
 router.get('/search', searchInmuebles);
+
 router.get('/dashboard/stats', getDashboardStats);
+router.get('/dashboard/enhanced-stats', async (req, res) => {
+  try {
+    const stats = await getEnhancedDashboardStats();
+    res.json(stats);
+  } catch (error) {
+    console.error('Error getting enhanced dashboard stats:', error);
+    res.status(500).json({ error: 'Failed to get enhanced dashboard stats' });
+  }
+});
 router.put('/:id', updateInmueble);
 export default router;

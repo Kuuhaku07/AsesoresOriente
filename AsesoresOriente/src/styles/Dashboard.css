@@ -30,6 +30,7 @@ e p.perfil {
     border-radius: 8px;
     padding: var(--spacing-lg);
     min-height: 200px;
+    margin-bottom: 50px; /* Agregado: espacio adicional debajo de estadísticas */
 }
 
 .dashboard-widgets h3 {
@@ -89,4 +90,11 @@ e p.perfil {
 
 .edit-profile-btn:hover {
     background-color: var(--color-primary-dark);
+}
+
+/* Agregado: estilos para la sección de propiedades */
+.user-properties {
+    margin-top: 40px; /* Espacio adicional arriba de la sección de propiedades */
+    padding-top: 30px; /* Padding superior para separación visual */
+    border-top: 1px solid var(--color-border); /* Línea divisoria opcional */
 }
