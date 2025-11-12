@@ -4,7 +4,6 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import MangoTemplate from '../components/MangoTemplate';
 import PageTitle from '../components/PageTitle';
 import EnhancedStatsChart from '../components/EnhancedStatsChart';
-import '../styles/Dashboard.css';
 import ImageViewerModal from '../components/ImageViewerModal';
 import PropertiesGrid from '../components/PropertiesGrid';
 
@@ -101,36 +100,36 @@ const Dashboard = () => {
     return (
       <>
         {/* Enhanced Quick Summary Cards */}
-        <div className="chart-container">
-          <h4 className="chart-title">Resumen Ejecutivo</h4>
-          <div className="quick-summary" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-            <div className="summary-card" style={{ backgroundColor: 'rgba(76, 175, 80, 0.1)' }}>
-              <div className="summary-value" style={{ color: '#4CAF50' }}>{stats.totalProperties}</div>
-              <div className="summary-label">Total Propiedades</div>
+        <div className="p-4 bg-background rounded-md shadow-md h-full">
+          <h4 className="text-center mb-4 text-text">Resumen Ejecutivo</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+            <div className="text-center p-2 rounded-sm bg-green-100">
+              <div className="text-4xl font-bold text-green-500">{stats.totalProperties}</div>
+              <div className="text-text-light">Total Propiedades</div>
             </div>
-            <div className="summary-card" style={{ backgroundColor: 'rgba(33, 150, 243, 0.1)' }}>
-              <div className="summary-value" style={{ color: '#2196F3' }}>
+            <div className="text-center p-2 rounded-sm bg-blue-100">
+              <div className="text-4xl font-bold text-blue-500">
                 {formatCurrency(stats.financialOverview?.total_potential_revenue || 0)}
               </div>
-              <div className="summary-label">Ingresos Potenciales</div>
+              <div className="text-text-light">Ingresos Potenciales</div>
             </div>
-            <div className="summary-card" style={{ backgroundColor: 'rgba(255, 152, 0, 0.1)' }}>
-              <div className="summary-value" style={{ color: '#FF9800' }}>
+            <div className="text-center p-2 rounded-sm bg-orange-100">
+              <div className="text-4xl font-bold text-orange-500">
                 {formatCurrency(stats.financialOverview?.avg_price || 0)}
               </div>
-              <div className="summary-label">Precio Promedio</div>
+              <div className="text-text-light">Precio Promedio</div>
             </div>
-            <div className="summary-card" style={{ backgroundColor: 'rgba(156, 39, 176, 0.1)' }}>
-              <div className="summary-value" style={{ color: '#9C27B0' }}>
+            <div className="text-center p-2 rounded-sm bg-purple-100">
+              <div className="text-4xl font-bold text-purple-500">
                 {stats.propertiesByStatus?.find(s => s.status === 'DISPONIBLE')?.count || 0}
               </div>
-              <div className="summary-label">Propiedades Activas</div>
+              <div className="text-text-light">Propiedades Activas</div>
             </div>
           </div>
         </div>
 
         {/* Charts Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 'var(--spacing-lg)', marginTop: 'var(--spacing-md)' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
           
           {/* Properties by Type */}
           {stats.propertiesByType && stats.propertiesByType.length > 0 && (
@@ -219,27 +218,26 @@ const Dashboard = () => {
 
   return (
     <MangoTemplate>
-      <div className="dashboard-content">
+      <div className="p-6">
         {/* User information section */}
-        <section className="user-info">
+        <section className="flex items-center gap-6 mb-12">
           {user.pfp ? (
             <img
               src={`uploads/profile_pictures/${user.pfp}`}
               alt={user.name}
-              className="user-avatar"
+              className="w-20 h-20 rounded-full object-cover cursor-pointer"
               onClick={openImageViewer}
-              style={{ cursor: 'pointer' }}
             />
           ) : (
-            <div className="user-avatar-fallback">{user.name.charAt(0)}</div>
+            <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-xl font-bold">{user.name.charAt(0)}</div>
           )}
           <h2>Bienvenido, {user.name}</h2>
         </section>
 
         {/* Tab Navigation */}
-        <section className="dashboard-widgets">
-          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-            <div style={{ display: 'flex', gap: 'var(--spacing-sm)', borderBottom: '1px solid var(--color-border)', marginBottom: 'var(--spacing-md)', overflowX: 'auto' }}>
+        <section className="bg-background-2 rounded-lg p-6 min-h-[200px] mb-12">
+          <div className="mb-6">
+            <div className="flex gap-2 border-b border-gray-300 mb-4 overflow-x-auto">
               {[
                 { key: 'overview', label: 'Resumen' },
                 { key: 'financial', label: 'Finanzas' },
@@ -249,17 +247,11 @@ const Dashboard = () => {
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  style={{
-                    padding: 'var(--spacing-sm) var(--spacing-md)',
-                    border: 'none',
-                    backgroundColor: activeTab === tab.key ? 'var(--color-primary)' : 'transparent',
-                    color: activeTab === tab.key ? 'white' : 'var(--color-text)',
-                    cursor: 'pointer',
-                    borderRadius: 'var(--border-radius-sm) var(--border-radius-sm) 0 0',
-                    fontWeight: activeTab === tab.key ? 'bold' : 'normal',
-                    whiteSpace: 'nowrap',
-                    minWidth: 'fit-content'
-                  }}
+                  className={`px-4 py-2 border-none cursor-pointer rounded-t-sm font-normal whitespace-nowrap min-w-fit transition-colors ${
+                    activeTab === tab.key
+                      ? 'bg-primary text-white font-bold'
+                      : 'bg-transparent text-text'
+                  }`}
                 >
                   {tab.label}
                 </button>
@@ -282,13 +274,12 @@ const Dashboard = () => {
         </section>
 
         {/* User properties section */}
-        <section className="user-properties">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
+        <section className="mt-10 pt-8 border-t border-gray-300">
+          <div className="flex justify-between items-center mb-4">
             <h3>Mis Inmuebles</h3>
-            <button 
-              className="edit-profile-btn" 
+            <button
+              className="mt-4 px-6 py-2 bg-primary text-white border-none rounded-sm text-base font-bold cursor-pointer transition-colors duration-300 hover:bg-primary-hover"
               onClick={() => navigate('/nuevo')}
-              style={{ margin: 0 }}
             >
               Crear Inmueble
             </button>

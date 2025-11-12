@@ -4,8 +4,6 @@ import SearchBar from '../components/SearchBar';
 import PropertiesGrid from '../components/PropertiesGrid';
 import MangoTemplate from '../components/MangoTemplate';
 
-import '../styles/Home.css';
-
 const Home = () => {
   const [newestProperties, setNewestProperties] = useState([]);
   const [featuredProperties, setFeaturedProperties] = useState([]);
@@ -32,11 +30,11 @@ const Home = () => {
         interval={7000}
         defaultImage="https://www.rawls-campbellagency.com/sites/default/files/styles/large/public/blogpost-1.jpg?itok=lDKT1OHZ" 
       />
-      <div className="search-section">
+      <div className="w-full mx-auto pt-4">
         <SearchBar />
       </div>
-      <div className="featured-properties">
-        <h2>Propiedades Destacadas</h2>
+      <div className="max-w-7xl w-full mx-auto p-6 md:p-4">
+        <h2 className="text-center mb-12 md:mb-6 text-text text-xlarge md:text-large">Propiedades Destacadas</h2>
         <PropertiesGrid properties={featuredProperties} singleRow={true} />
       </div>
     </MangoTemplate>

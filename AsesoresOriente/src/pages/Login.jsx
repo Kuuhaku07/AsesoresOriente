@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ToastContainer from '../components/ToastContainer.jsx';
 import { validateData } from '../utils/validationUtils.js';
-import '../styles/Login.css';
 import Logo from '../assets/Logo.png';
 
 const Login = () => {
@@ -105,17 +104,17 @@ const Login = () => {
   return (
     <>
       <ToastContainer ref={toastRef} />
-      <div className="login-container">
-        <div className="login-card">
-          <div className="login-header">
-            <img src={Logo} alt="Logo" className="login-logo" />
-            <h2>Iniciar Sesión</h2>
-            <p>Acceso exclusivo para los Agentes Asociados</p>
+      <div className="flex justify-center items-center min-h-screen bg-gray-100 p-5">
+        <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-10 text-center md:max-w-sm md:p-8">
+          <div className="mb-8">
+            <img src={Logo} alt="Logo" className="h-24 mb-5 mx-auto" />
+            <h2 className="m-0 mb-2 text-gray-800 text-2xl md:text-xl">Iniciar Sesión</h2>
+            <p className="m-0 text-gray-600 text-sm">Acceso exclusivo para los Agentes Asociados</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="login-form" noValidate>
-            <div className="form-group">
-              <label htmlFor="identificador">Usuario o Correo Electrónico</label>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
+            <div className="text-left">
+              <label htmlFor="identificador" className="block mb-2 text-sm text-gray-700 font-medium">Usuario o Correo Electrónico</label>
               <input
                 type="text"
                 id="identificador"
@@ -124,11 +123,12 @@ const Login = () => {
                 onChange={handleChange}
                 required
                 placeholder="usuario o correo"
+                className="w-full p-3 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="Contraseña">Contraseña</label>
+            <div className="text-left">
+              <label htmlFor="Contraseña" className="block mb-2 text-sm text-gray-700 font-medium">Contraseña</label>
               <input
                 type="password"
                 id="Contraseña"
@@ -137,20 +137,21 @@ const Login = () => {
                 onChange={handleChange}
                 required
                 placeholder="••••••••"
+                className="w-full p-3 border border-gray-300 rounded-lg text-base transition-colors focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
               />
             </div>
 
-            <button 
-              type="submit" 
-              className="login-button"
+            <button
+              type="submit"
+              className="bg-blue-500 text-white border-none rounded-lg p-3.5 text-base font-semibold cursor-pointer transition-colors mt-2.5 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
               disabled={isLoading}
             >
               {isLoading ? 'Ingresando...' : 'Ingresar'}
             </button>
           </form>
 
-          <div className="login-footer">
-            <p>¿Problemas para acceder? Contacta al administrador</p>
+          <div className="mt-8 text-xs text-gray-500">
+            <p className="m-0">¿Problemas para acceder? Contacta al administrador</p>
           </div>
         </div>
       </div>

@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import MangoTemplate from '../components/MangoTemplate';
-import '../styles/Register.css';
-
 import PageTitle from '../components/PageTitle';
 import { verifyPermissions } from '../utils/permissionUtils';
 import ToastContainer from '../components/ToastContainer';
@@ -271,17 +269,17 @@ const Register = () => {
       <ToastContainer ref={toastRef} />
       <div >
         <PageTitle>{selectedUsuarioId ? 'Actualizar Usuario y Asesor' : 'Registrar Usuario y Asesor'}</PageTitle>
-        <div className="register-content page-container">
-          <div className="form-container">
-            <div className="form-header">
+        <div className="flex gap-8 flex-wrap max-w-7xl mx-auto md:flex-col">
+          <div className="flex-1 min-w-[400px] p-6 rounded-lg bg-white shadow-md transition-shadow hover:shadow-lg md:min-w-full">
+            <div className="mb-4">
               {selectedUsuarioId && (
-                <button className="clear-button" onClick={clearForm} title="Agregar Nuevo Usuario">
+                <button className="bg-primary text-white border-none rounded-sm text-2xl font-bold cursor-pointer p-2 shadow-lg transition-all hover:bg-primary-light hover:shadow-xl" onClick={clearForm} title="Agregar Nuevo Usuario">
                   +
                 </button>
               )}
             </div>
-            <form onSubmit={handleSubmit} className="register-form" autoComplete="off">
-              <label htmlFor="Nombre">Nombre:</label>
+            <form onSubmit={handleSubmit} className="flex flex-col" autoComplete="off">
+              <label htmlFor="Nombre" className="block mt-4 font-bold text-text">Nombre:</label>
               <input
                 type="text"
                 id="Nombre"
@@ -290,9 +288,10 @@ const Register = () => {
                 onChange={handleChange}
                 required
                 autoComplete="off"
+                className="w-full p-3 mt-1 box-border border-2 border-selected rounded-sm font-primary text-normal transition-colors focus:border-primary focus:outline-none focus:shadow-[0_0_5px_var(--color-primary-light)]"
               />
 
-              <label htmlFor="Apellido">Apellido:</label>
+              <label htmlFor="Apellido" className="block mt-4 font-bold text-text">Apellido:</label>
               <input
                 type="text"
                 id="Apellido"
@@ -301,9 +300,10 @@ const Register = () => {
                 onChange={handleChange}
                 required
                 autoComplete="off"
+                className="w-full p-3 mt-1 box-border border-2 border-selected rounded-sm font-primary text-normal transition-colors focus:border-primary focus:outline-none focus:shadow-[0_0_5px_var(--color-primary-light)]"
               />
 
-              <label htmlFor="Cedula">Cédula:</label>
+              <label htmlFor="Cedula" className="block mt-4 font-bold text-text">Cédula:</label>
               <input
                 type="text"
                 id="Cedula"
@@ -311,9 +311,10 @@ const Register = () => {
                 value={formData.Cedula}
                 onChange={handleChange}
                 autoComplete="off"
+                className="w-full p-3 mt-1 box-border border-2 border-selected rounded-sm font-primary text-normal transition-colors focus:border-primary focus:outline-none focus:shadow-[0_0_5px_var(--color-primary-light)]"
               />
 
-              <label htmlFor="Telefono">Teléfono:</label>
+              <label htmlFor="Telefono" className="block mt-4 font-bold text-text">Teléfono:</label>
               <input
                 type="text"
                 id="Telefono"
@@ -321,11 +322,12 @@ const Register = () => {
                 value={formData.Telefono}
                 onChange={handleChange}
                 autoComplete="off"
+                className="w-full p-3 mt-1 box-border border-2 border-selected rounded-sm font-primary text-normal transition-colors focus:border-primary focus:outline-none focus:shadow-[0_0_5px_var(--color-primary-light)]"
               />
 
               {/* Removed Pfp field as user can change profile picture from their profile page */}
 
-              <label htmlFor="NombreUsuario">Nombre de Usuario:</label>
+              <label htmlFor="NombreUsuario" className="block mt-4 font-bold text-text">Nombre de Usuario:</label>
               <input
                 type="text"
                 id="NombreUsuario"
@@ -334,8 +336,9 @@ const Register = () => {
                 onChange={handleChange}
                 required
                 autoComplete="off"
+                className="w-full p-3 mt-1 box-border border-2 border-selected rounded-sm font-primary text-normal transition-colors focus:border-primary focus:outline-none focus:shadow-[0_0_5px_var(--color-primary-light)]"
               />
-              <label htmlFor="Correo">Correo:</label>
+              <label htmlFor="Correo" className="block mt-4 font-bold text-text">Correo:</label>
               <input
                 type="email"
                 id="Correo"
@@ -344,9 +347,10 @@ const Register = () => {
                 onChange={handleChange}
                 required
                 autoComplete="off"
+                className="w-full p-3 mt-1 box-border border-2 border-selected rounded-sm font-primary text-normal transition-colors focus:border-primary focus:outline-none focus:shadow-[0_0_5px_var(--color-primary-light)]"
               />
 
-              <label htmlFor="Contraseña">Contraseña:</label>
+              <label htmlFor="Contraseña" className="block mt-4 font-bold text-text">Contraseña:</label>
               <input
                 type="password"
                 id="Contraseña"
@@ -355,16 +359,17 @@ const Register = () => {
                 onChange={handleChange}
                 required={!selectedUsuarioId} // Contraseña requerida solo al crear
                 autoComplete="new-password"
+                className="w-full p-3 mt-1 box-border border-2 border-selected rounded-sm font-primary text-normal transition-colors focus:border-primary focus:outline-none focus:shadow-[0_0_5px_var(--color-primary-light)]"
               />
 
-              <label htmlFor="Rol">Rol:</label>
+              <label htmlFor="Rol" className="block mt-4 font-bold text-text">Rol:</label>
               <select
                 id="Rol"
                 name="Rol"
                 value={formData.Rol}
                 onChange={handleChange}
                 required
-                className="select-input"
+                className="w-full p-3 mt-1 box-border border-2 border-selected rounded-sm font-primary text-normal transition-colors focus:border-primary focus:outline-none focus:shadow-[0_0_5px_var(--color-primary-light)]"
               >
                 <option value="">Seleccione un rol</option>
                 <option value="Asesor">Asesor</option>
@@ -372,19 +377,19 @@ const Register = () => {
                 <option value="Administrador">Administrador</option>
               </select>
 
-              <button type="submit">{selectedUsuarioId ? 'Actualizar' : 'Registrar'}</button>
+              <button type="submit" className="mt-6 p-3 bg-primary text-white border-none rounded-sm cursor-pointer text-lg font-bold transition-colors hover:bg-selected">{selectedUsuarioId ? 'Actualizar' : 'Registrar'}</button>
             </form>
-            {success && <p className="success-message">{success}</p>}
-            {error && <p className="error-message">{error}</p>}
+            {success && <p className="mt-6 text-green-700 font-bold">{success}</p>}
+            {error && <p className="mt-6 text-red-700 font-bold">{error}</p>}
           </div>
-          <div className="list-container">
-            <h3>Usuarios Registrados</h3>
-            <ul className="user-list">
+          <div className="flex-1 min-w-[300px] max-h-[600px] overflow-y-auto p-4 rounded-lg bg-white shadow-md transition-shadow hover:shadow-lg md:min-w-full md:max-h-none">
+            <h3 className="mt-0 mb-4 font-bold text-xl text-text">Usuarios Registrados</h3>
+            <ul className="list-none p-0 m-0">
               {usuarios.map((usuario) => (
                 <li
                   key={usuario.usuario_id}
                   onClick={() => loadUsuario(usuario)}
-                  className={usuario.usuario_id === selectedUsuarioId ? 'selected' : ''}
+                  className={`cursor-pointer p-3 mb-2 bg-gray-light rounded-md transition-all shadow-none hover:bg-primary-light hover:shadow-[inset_2px_0_0_0_var(--color-primary)] ${usuario.usuario_id === selectedUsuarioId ? 'bg-blue-100 font-bold shadow-[inset_4px_0_0_0_var(--color-primary)]' : ''}`}
                 >
                   {usuario.Nombre} {usuario.Apellido} - {usuario.Correo}
                 </li>
